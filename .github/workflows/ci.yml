@@ -107,3 +107,19 @@ jobs:
       - name: Build React app
         run: npm run build
         working-directory: frontend
+
+  validate-pr-title:
+    name: Validate PR Title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Checking PR Title: $PR_TITLE"
+          if [[ ! "$PR_TITLE" =~ ^\[JET-[0-9]+\].* ]]; then
+            echo "ERROR: Invalid PR title format."
+            echo "Expected format: [JET-123]Your title or [JET-123] Your title"
+            exit 1
+          fi
+          echo "PR title format is valid!"
