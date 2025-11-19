@@ -1,4 +1,3 @@
-import React from 'react';
 import FormInput from '../partnership-request-form_common_components/FormInput';
 import FileUpload from '../partnership-request-form_common_components/FileUpload';
 
@@ -44,16 +43,29 @@ const AirlineFormFields = ({ formData, errors, handleChange, handleFileChange })
         required
       />
 
-      <FormInput
-        label="Manager Password"
-        name="managerPassword"
-        type="password"
-        value={formData.managerPassword}
-        onChange={handleChange}
-        error={errors.managerPassword}
-        placeholder="Enter manager password"
-        required
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormInput
+          label="Manager Password"
+          name="managerPassword"
+          type="password"
+          value={formData.managerPassword}
+          onChange={handleChange}
+          error={errors.managerPassword}
+          placeholder="Enter manager password"
+          required
+        />
+
+        <FormInput
+          label="Confirm Password"
+          name="confirmPassword"
+          type="password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          error={errors.confirmPassword}
+          placeholder="Confirm your password"
+          required
+        />
+      </div>
     </div>
   );
 };

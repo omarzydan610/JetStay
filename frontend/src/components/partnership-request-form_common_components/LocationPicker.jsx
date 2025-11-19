@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
-// Fix marker icon issue in Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -20,7 +19,7 @@ const LocationPicker = ({ latitude, longitude, onLocationChange }) => {
     lng: longitude || ''
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [activeMode, setActiveMode] = useState('manual'); // manual, geolocation, map
+  const [activeMode, setActiveMode] = useState('manual'); 
   const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.0060 }); // default
 
   useEffect(() => {

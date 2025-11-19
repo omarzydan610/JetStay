@@ -1,3 +1,4 @@
+// HotelForm.jsx (Fixed)
 import { useState } from 'react';
 import HotelFormFields from './HotelFormFields';
 import SubmitButton from '../partnership-request-form_common_components/SubmitButton';
@@ -11,6 +12,7 @@ const HotelForm = () => {
     country: '',
     managerEmail: '',
     managerPassword: '',
+    confirmPassword: '', // Added confirmPassword
   });
 
   const [errors, setErrors] = useState({});
@@ -28,6 +30,7 @@ const HotelForm = () => {
     if (!formData.country.trim()) newErrors.country = 'Country is required';
     if (!formData.managerEmail.trim()) newErrors.managerEmail = 'Manager email is required';
     if (!formData.managerPassword) newErrors.managerPassword = 'Manager password is required';
+    if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,12 +43,17 @@ const HotelForm = () => {
       newErrors.managerPassword = 'Password must be at least 6 characters long';
     }
 
-    // Coordinate validation
-    if (formData.latitude && (formData.latitude < -90 || formData.latitude > 90)) {
-      newErrors.latitude = 'Latitude must be between -90 and 90';
+    // Confirm password validation
+    if (formData.managerPassword && formData.confirmPassword && formData.managerPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
-    if (formData.longitude && (formData.longitude < -180 || formData.longitude > 180)) {
-      newErrors.longitude = 'Longitude must be between -180 and 180';
+
+    // Coordinate validation
+    if (formData.latitude && (isNaN(formData.latitude) || formData.latitude < -90 || formData.latitude > 90)) {
+      newErrors.latitude = 'Latitude must be a valid number between -90 and 90';
+    }
+    if (formData.longitude && (isNaN(formData.longitude) || formData.longitude < -180 || formData.longitude > 180)) {
+      newErrors.longitude = 'Longitude must be a valid number between -180 and 180';
     }
 
     setErrors(newErrors);
@@ -64,6 +72,16 @@ const HotelForm = () => {
       setErrors(prev => ({
         ...prev,
         [name]: ''
+      }));
+    }
+
+    // Clear confirm password error if passwords match
+    if ((name === 'managerPassword' || name === 'confirmPassword') && 
+        formData.managerPassword === formData.confirmPassword && 
+        errors.confirmPassword) {
+      setErrors(prev => ({
+        ...prev,
+        confirmPassword: ''
       }));
     }
   };
@@ -127,19 +145,19 @@ const HotelForm = () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Prepare data for database
-      const submissionData = {
-        ...formData,
-        latitude: parseFloat(formData.latitude),
-        longitude: parseFloat(formData.longitude),
-        // In a real app, you would upload the file and get a URL
-        hotelLogo: 'path/to/uploaded/logo.jpg'
-      };
+      // Prepare data for database (exclude confirmPassword from submission)
+      const { confirmPassword, ...submissionData } = formData;
+      submissionData.latitude = parseFloat(formData.latitude);
+      submissionData.longitude = parseFloat(formData.longitude);
+      // In a real app, you would upload the file and get a URL
+      submissionData.hotelLogo = 'path/to/uploaded/logo.jpg';
 
       console.log('Submitting hotel data:', submissionData);
       
       // Simulate successful submission
       setSubmitted(true);
+      
+      // Reset form data including confirmPassword
       setFormData({
         hotelName: '',
         latitude: '',
@@ -148,6 +166,7 @@ const HotelForm = () => {
         country: '',
         managerEmail: '',
         managerPassword: '',
+        confirmPassword: '',
       });
 
     } catch (error) {
@@ -159,10 +178,12 @@ const HotelForm = () => {
 
   if (submitted) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-        <div className="text-green-600 text-4xl mb-4">✓</div>
-        <h3 className="text-green-800 text-xl font-bold mb-2">Submission Successful!</h3>
-        <p className="text-green-700">
+      <div className="bg-gradient-to-br from-green-50 to-emerald-100 border border-green-200 rounded-2xl p-8 text-center shadow-lg">
+        <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="text-white text-3xl">✓</span>
+        </div>
+        <h3 className="text-green-800 text-2xl font-bold mb-4">Submission Successful!</h3>
+        <p className="text-green-700 text-lg">
           Your hotel registration is waiting for acceptance from the system admin.
           You will be notified once it's approved.
         </p>
@@ -171,9 +192,7 @@ const HotelForm = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Register New Hotel</h2>
-      
+    <form onSubmit={handleSubmit} className="space-y-6">
       <HotelFormFields
         formData={formData}
         errors={errors}
@@ -182,7 +201,7 @@ const HotelForm = () => {
         onLocationChange={handleLocationChange}
       />
 
-      <div className="mt-6">
+      <div className="mt-8">
         <SubmitButton loading={loading}>
           Register Hotel
         </SubmitButton>
