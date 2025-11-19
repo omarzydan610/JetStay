@@ -12,10 +12,13 @@ const PartnershipRequestPage = () => {
         {/* Enhanced Header with Logo */}
         <div className="text-center mb-12">
           <div className="flex justify-center items-center mb-6">
-            {/* Logo Placeholder - Replace with your actual logo */}
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg mr-4">
-              <span className="text-white font-bold text-2xl">J</span>
-            </div>
+          
+               <img 
+              src="/images/logo.jpg" 
+              alt="JetStay" 
+              className="w-16 h-16 mr-4 rounded-xl shadow-lg"
+            />
+            
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               JetStay
             </h1>
