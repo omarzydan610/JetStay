@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import Plane from '../Icons/Plane';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
@@ -10,7 +10,7 @@ import Hidepass from '../Icons/Hidepass';
 import './Login.css';
 
 function Login() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [form, setForm] = useState({
     email: '',
@@ -30,7 +30,7 @@ function Login() {
       case 'email':
         if (!value.trim()) {
           error = 'Email is required';
-        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
           error = 'Please enter a valid email address';
         }
         break;
@@ -89,7 +89,8 @@ function Login() {
     try {
 
       const res = await axios.post('http://localhost:8080/api/login', form);
-      const role = res.data.role;
+      console.log(res)
+      // const role = res.data.role;
 
     } catch (err) {
       setErrors({ general: 'Invalid email or password' });
@@ -134,7 +135,7 @@ function Login() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={`form-input ${touched.email && errors.email ? 'input-error' : ''}`}
-                  placeholder="your.email@example.com"
+                  placeholder="youremail@example.com"
                 />
               </div>
               {touched.email && errors.email && (

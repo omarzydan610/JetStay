@@ -55,7 +55,7 @@ function SignUp() {
       case 'email':
         if (!value.trim()) {
           error = 'Email is required';
-        } else if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
+        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
           error = 'Please enter a valid email address';
         }
         break;
@@ -156,6 +156,7 @@ function SignUp() {
       const res = await axios.post('http://localhost:8080/api/signup', newacc);
       setSuccess('Account created successfully! Redirecting to login...');
       console.log(newacc);
+      console.log(res);
     }
     catch (error) {
       console.log(newacc);
@@ -241,7 +242,7 @@ function SignUp() {
                   onChange={handleChange}
                   onBlur={handleBlur}
                   className={`form-input ${touched.email && errors.email ? 'input-error' : ''}`}
-                  placeholder="your.email@example.com"
+                  placeholder="youremail@example.com"
                 />
               </div>
               {touched.email && errors.email && (
