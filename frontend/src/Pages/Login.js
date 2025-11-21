@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-import Plane from '../Icons/Plane';
+import authService from '../Services/authService';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
 import GoogleIcon from '../Icons/GoogleIcon';
 import Showpass from '../Icons/Showpass';
 import Hidepass from '../Icons/Hidepass';
-import './Login.css';
+import Plane from '../Icons/Plane';
+
 
 function Login() {
-  // const navigate = useNavigate();
 
   const [form, setForm] = useState({
     email: '',
     password: '',
-    role: 'user'
   });
 
   const [errors, setErrors] = useState({});
@@ -25,33 +22,23 @@ function Login() {
 
   const validateField = (name, value) => {
     let error = '';
-
     switch (name) {
       case 'email':
-        if (!value.trim()) {
-          error = 'Email is required';
-        } else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) {
-          error = 'Please enter a valid email address';
-        }
+        if (!value.trim()) error = 'Email is required';
+        else if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(value)) error = 'Please enter a valid email address';
         break;
-
       case 'password':
-        if (!value) {
-          error = 'Password is required';
-        }
+        if (!value) error = 'Password is required';
         break;
-
       default:
         break;
     }
-
     return error;
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-
     if (touched[name]) {
       const error = validateField(name, value);
       setErrors({ ...errors, [name]: error });
@@ -61,155 +48,136 @@ function Login() {
   const handleBlur = (e) => {
     const { name, value } = e.target;
     setTouched({ ...touched, [name]: true });
-
     const error = validateField(name, value);
     setErrors({ ...errors, [name]: error });
   };
 
   const validateAll = () => {
     const newErrors = {};
-
     const emailError = validateField('email', form.email);
     if (emailError) newErrors.email = emailError;
-
     const passwordError = validateField('password', form.password);
     if (passwordError) newErrors.password = passwordError;
-
     setErrors(newErrors);
     setTouched({ email: true, password: true });
-
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
     if (!validateAll()) return;
-
     setIsLoading(true);
-
     try {
+      const response = await authService.login(form);
+      console.log('Login successful:', response);
 
-      const res = await axios.post('http://localhost:8080/api/login', form);
-      console.log(res)
-      // const role = res.data.role;
+      // Check if user is authenticated
+      if (authService.isAuthenticated()) {
+        // Redirect to dashboard or home page
+        // navigate('/home');
+        console.log('User authenticated successfully');
+      }
 
-    } catch (err) {
-      setErrors({ general: 'Invalid email or password' });
+    } catch (error) {
+      console.error('Login error:', error, form);
+
+      switch (error.code) {
+        case 'UNAUTHORIZED':
+          setErrors({ general: 'Invalid credentials. Please try again.' });
+          break;
+        case 'FORBIDDEN':
+          setErrors({ general: 'Your account has been blocked. Please contact support.' });
+          break;
+        case 'NETWORK_ERROR':
+          setErrors({ general: 'Network error. Please check your connection.' });
+          break;
+        default:
+          setErrors({ general: error.message || 'Login failed. Please try again.' });
+      }
     }
-
     setIsLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    console.log('Google Login clicked');
-  };
+  const handleGoogleLogin = () => console.log('Google Login clicked');
+
+  const inputBase = "w-full py-3 pl-11 pr-12 border-2 rounded-xl text-base outline-none transition-all duration-200";
+  const inputNormal = "border-gray-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10";
+  const inputError = "border-red-500 focus:border-red-500 focus:ring-4 focus:ring-red-500/10";
 
   return (
-    <div className="login-container">
-      {/* Right Side - Form */}
-      <div className="form-section">
-        <div className="login-wrapper">
+    <div className="min-h-screen flex">
+      {/* Form Section */}
+      <div className="flex-1 flex items-center justify-center p-10 overflow-y-auto">
+        <div className="w-full max-w-md">
           {/* Brand Section */}
-          <div className="brand-section">
-            <div className="brand-header">
-              <div className="logo-circle">
+          <div className="text-center mb-[30px]">
+            <div className="flex items-center justify-center gap-3 mb-[10px]">
+              <div className="w-[50px] h-[50px] bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-[0_4px_15px_rgba(37,99,235,0.3)]">
                 <Plane />
               </div>
-              <h1 className="brand-title">JetStay</h1>
+              <h1 className="text-[32px] font-bold text-gray-900">JetStay</h1>
             </div>
-            <p className="brand-subtitle">Welcome back! Sign in to continue</p>
+            <p className="text-gray-500 text-[15px]">Welcome back! Sign in to continue</p>
           </div>
-
           {/* Form Card */}
-          <div className="form-card">
-            {errors.general && <div className="alert alert-error">{errors.general}</div>}
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            {errors.general && (
+              <div className="p-3 rounded-xl text-sm mb-5 bg-red-50 text-red-600 border border-red-300">
+                {errors.general}
+              </div>
+            )}
 
             {/* Email */}
-            <div className="form-group">
-              <label className="form-label">Email Address</label>
-              <div className="input-wrapper">
-                <EmailIcon />
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Email Address</label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3 w-5 h-5 text-gray-400 z-10"><EmailIcon /></span>
                 <input
                   type="email"
                   name="email"
                   value={form.email}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`form-input ${touched.email && errors.email ? 'input-error' : ''}`}
-                  placeholder="youremail@example.com"
+                  className={`${inputBase} ${touched.email && errors.email ? inputError : inputNormal}`}
+                  placeholder="your.email@example.com"
                 />
               </div>
-              {touched.email && errors.email && (
-                <p className="error-message">{errors.email}</p>
-              )}
+              {touched.email && errors.email && <p className="text-red-600 text-xs mt-1">{errors.email}</p>}
             </div>
 
             {/* Password */}
-            <div className="form-group">
-              <label className="form-label">Password</label>
-              <div className="input-wrapper">
-                <PassIcon />
+            <div className="mb-5">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Password</label>
+              <div className="relative flex items-center">
+                <span className="absolute left-3 w-5 h-5 text-gray-400 z-10"><PassIcon /></span>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   value={form.password}
                   onChange={handleChange}
                   onBlur={handleBlur}
-                  className={`form-input ${touched.password && errors.password ? 'input-error' : ''}`}
+                  className={`${inputBase} ${touched.password && errors.password ? inputError : inputNormal}`}
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="password-toggle"
+                  className="absolute right-3 p-1 text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  {showPassword ? <Showpass /> : <Hidepass />}
+                  {showPassword ? (
+                    <Showpass className="w-5 h-5" />
+                  ) : (
+                    <Hidepass className="w-5 h-5" />
+                  )}
                 </button>
               </div>
-              {touched.password && errors.password && (
-                <p className="error-message">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Role Selection */}
-            <div className="form-group">
-              <label className="form-label">Login As</label>
-              <div className="role-selector">
-                <label className={`role-option ${form.role === 'user' ? 'role-active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="user"
-                    checked={form.role === 'user'}
-                    onChange={handleChange}
-                  />
-                  <span>User</span>
-                </label>
-                <label className={`role-option ${form.role === 'flight_admin' ? 'role-active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="flight_admin"
-                    checked={form.role === 'flight_admin'}
-                    onChange={handleChange}
-                  />
-                  <span>Flight Admin</span>
-                </label>
-                <label className={`role-option ${form.role === 'hotel_admin' ? 'role-active' : ''}`}>
-                  <input
-                    type="radio"
-                    name="role"
-                    value="hotel_admin"
-                    checked={form.role === 'hotel_admin'}
-                    onChange={handleChange}
-                  />
-                  <span>Hotel Admin</span>
-                </label>
-              </div>
+              {touched.password && errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
             </div>
 
             {/* Forgot Password */}
-            <div className="forgot-password">
-              <a href="/forgot-password">Forgot Password?</a>
+            <div className="text-right mb-5">
+              <a href="/forgot-password" className="text-blue-600 text-sm font-medium hover:text-blue-700 hover:underline">
+                Forgot Password?
+              </a>
             </div>
 
             {/* Submit Button */}
@@ -217,29 +185,31 @@ function Login() {
               type="button"
               onClick={handleSubmit}
               disabled={isLoading}
-              className="submit-button"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-base py-3.5 rounded-xl cursor-pointer transition-all duration-200 shadow-lg shadow-blue-600/30 hover:translate-y-[-2px] hover:shadow-xl hover:shadow-blue-600/40 disabled:opacity-60 disabled:cursor-not-allowed mb-5"
             >
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
 
             {/* Divider */}
-            <div className="divider">
-              <span>Or continue with</span>
+            <div className="relative text-center my-5">
+              <div className="absolute top-1/2 left-0 right-0 h-px bg-gray-200"></div>
+              <span className="relative bg-white px-4 text-gray-500 text-sm">Or continue with</span>
             </div>
 
             {/* Google Login */}
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="google-button"
+              className="w-full flex items-center justify-center gap-3 py-3 bg-white border-2 border-gray-200 rounded-xl text-base font-semibold text-gray-700 cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-300 mb-5"
             >
-              <GoogleIcon />
+              <span className="w-5 h-5"><GoogleIcon /></span>
               Sign in with Google
             </button>
 
             {/* Sign Up Link */}
-            <div className="footer-link">
-              Don't have an account? <a href="/">Sign Up</a>
+            <div className="text-center text-gray-500 text-sm">
+              Don't have an account?{' '}
+              <a href="/" className="text-blue-600 font-semibold hover:text-blue-700">Sign Up</a>
             </div>
           </div>
         </div>
