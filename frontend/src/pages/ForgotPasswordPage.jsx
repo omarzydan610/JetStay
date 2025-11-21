@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import apiClient from "../services/axiosConfig";
 import passwordService from "../services/passwordService";
 
 function ForgotPasswordPage() {
