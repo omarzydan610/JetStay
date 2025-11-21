@@ -1,20 +1,24 @@
-// AirlineForm.jsx (Fixed)
 import React, { useState } from 'react';
 import AirlineFormFields from './AirlineFormFields';
 import SubmitButton from '../partnership-request-form_common_components/SubmitButton';
+import partnershipService from '../../services/partnershipService';
 
 const AirlineForm = () => {
   const [formData, setFormData] = useState({
     airlineName: '',
     airlineNational: '',
+    adminFirstName: '', 
+    adminLastName: '', 
+    adminPhone: '',    
     managerEmail: '',
     managerPassword: '',
-    confirmPassword: '', // Added confirmPassword
+    confirmPassword: '',
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
 
   const validateForm = () => {
     const newErrors = {};
@@ -22,6 +26,9 @@ const AirlineForm = () => {
     // Required field validation
     if (!formData.airlineName.trim()) newErrors.airlineName = 'Airline name is required';
     if (!formData.airlineNational.trim()) newErrors.airlineNational = 'Airline nationality is required';
+    if (!formData.adminFirstName.trim()) newErrors.adminFirstName = 'Admin first name is required';
+    if (!formData.adminLastName.trim()) newErrors.adminLastName = 'Admin last name is required';
+    if (!formData.adminPhone.trim()) newErrors.adminPhone = 'Admin phone number is required';
     if (!formData.managerEmail.trim()) newErrors.managerEmail = 'Manager email is required';
     if (!formData.managerPassword) newErrors.managerPassword = 'Manager password is required';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
@@ -32,9 +39,30 @@ const AirlineForm = () => {
       newErrors.managerEmail = 'Please enter a valid email address';
     }
 
+    // Phone validation
+    const phoneRegex = /^[+]?[1-9][\d\s\-()]{8,}$/;
+    if (formData.adminPhone && !phoneRegex.test(formData.adminPhone.replace(/\s/g, ''))) {
+      newErrors.adminPhone = 'Phone number should start with +(country code) then a valid phone number';
+    }
+
+    // Name validation (only letters and spaces)
+    const nameRegex = /^[a-zA-Z\s']+$/;
+    if (formData.adminFirstName && !nameRegex.test(formData.adminFirstName)) {
+      newErrors.adminFirstName = 'First name can only contain letters and spaces';
+    }
+    if (formData.adminLastName && !nameRegex.test(formData.adminLastName)) {
+      newErrors.adminLastName = 'Last name can only contain letters and spaces';
+    }
+
     // Password validation
-    if (formData.managerPassword && formData.managerPassword.length < 6) {
-      newErrors.managerPassword = 'Password must be at least 6 characters long';
+    if (formData.managerPassword) {
+      const password = formData.managerPassword;
+      
+      if (password.length < 8) {
+        newErrors.managerPassword = 'Password must be at least 8 characters long';
+      } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+        newErrors.managerPassword = 'Password must contain both letters and numbers';
+      }
     }
 
     // Confirm password validation
@@ -107,30 +135,31 @@ const AirlineForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmissionError('');
     
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Prepare data for database (exclude confirmPassword from submission)
+      // Prepare data for submission (exclude confirmPassword)
       const { confirmPassword, ...submissionData } = formData;
       
-      // In a real app, you would upload the file and get a URL
-      submissionData.airlineLogo = 'path/to/uploaded/logo.jpg';
-
-      console.log('Submitting airline data:', submissionData);
+      // Submit to backend using the service
+      await partnershipService.submitAirlinePartnership(submissionData);
       
-      // Simulate successful submission
+      console.log('Submission successful');
+      
+      // Show success message
       setSubmitted(true);
       
-      // Reset form data including confirmPassword
+      // Reset form
       setFormData({
         airlineName: '',
         airlineNational: '',
+        adminFirstName: '',
+        adminLastName: '',
+        adminPhone: '',
         managerEmail: '',
         managerPassword: '',
         confirmPassword: '',
@@ -138,6 +167,7 @@ const AirlineForm = () => {
 
     } catch (error) {
       console.error('Error submitting form:', error);
+      setSubmissionError(error.message || 'Failed to submit partnership request. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -154,6 +184,26 @@ const AirlineForm = () => {
           Your airline registration is waiting for acceptance from the system admin.
           You will be notified once it's approved.
         </p>
+      </div>
+    );
+  }
+
+  if (submissionError) {
+    return (
+      <div className="bg-gradient-to-br from-red-50 to-pink-100 border border-red-200 rounded-2xl p-8 text-center shadow-lg">
+        <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="text-white text-3xl">⚠️</span>
+        </div>
+        <h3 className="text-red-800 text-2xl font-bold mb-4">Submission Failed</h3>
+        <p className="text-red-700 text-lg mb-6">
+          {submissionError}
+        </p>
+        <button
+          onClick={() => setSubmissionError('')}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

@@ -1,7 +1,33 @@
-// HotelForm.jsx (Fixed)
 import { useState } from 'react';
 import HotelFormFields from './HotelFormFields';
 import SubmitButton from '../partnership-request-form_common_components/SubmitButton';
+import partnershipService from '../../services/partnershipService';
+
+// Helper function to normalize longitude to [-180, 180] range
+const normalizeLongitude = (longitude) => {
+  let normalizedLng = parseFloat(longitude);
+  
+  // Normalize longitude to be within [-180, 180]
+  while (normalizedLng > 180) {
+    normalizedLng -= 360;
+  }
+  while (normalizedLng < -180) {
+    normalizedLng += 360;
+  }
+  
+  return normalizedLng;
+};
+
+// Helper function to normalize latitude to [-90, 90] range
+const normalizeLatitude = (latitude) => {
+  let normalizedLat = parseFloat(latitude);
+  
+  // Ensure latitude stays within valid range
+  if (normalizedLat > 90) normalizedLat = 90;
+  if (normalizedLat < -90) normalizedLat = -90;
+  
+  return normalizedLat;
+};
 
 const HotelForm = () => {
   const [formData, setFormData] = useState({
@@ -10,14 +36,18 @@ const HotelForm = () => {
     longitude: '',
     city: '',
     country: '',
+    adminFirstName: '',
+    adminLastName: '', 
+    adminPhone: '',
     managerEmail: '',
     managerPassword: '',
-    confirmPassword: '', // Added confirmPassword
+    confirmPassword: '',
   });
 
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState('');
 
   const validateForm = () => {
     const newErrors = {};
@@ -28,6 +58,9 @@ const HotelForm = () => {
     if (!formData.longitude) newErrors.longitude = 'Longitude is required';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.country.trim()) newErrors.country = 'Country is required';
+    if (!formData.adminFirstName.trim()) newErrors.adminFirstName = 'Admin first name is required';
+    if (!formData.adminLastName.trim()) newErrors.adminLastName = 'Admin last name is required';
+    if (!formData.adminPhone.trim()) newErrors.adminPhone = 'Admin phone number is required';
     if (!formData.managerEmail.trim()) newErrors.managerEmail = 'Manager email is required';
     if (!formData.managerPassword) newErrors.managerPassword = 'Manager password is required';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Please confirm your password';
@@ -38,22 +71,38 @@ const HotelForm = () => {
       newErrors.managerEmail = 'Please enter a valid email address';
     }
 
+    // Phone validation
+    const phoneRegex = /^[+]?[1-9][\d\s\-()]{8,}$/;
+    if (formData.adminPhone && !phoneRegex.test(formData.adminPhone.replace(/\s/g, ''))) {
+      newErrors.adminPhone = 'Phone number should start with +(country code) then a valid phone number';
+    }
+
+    // Name validation (only letters and spaces)
+    const nameRegex = /^[a-zA-Z\s']+$/;
+    if (formData.adminFirstName && !nameRegex.test(formData.adminFirstName)) {
+      newErrors.adminFirstName = 'First name can only contain letters and spaces';
+    }
+    if (formData.adminLastName && !nameRegex.test(formData.adminLastName)) {
+      newErrors.adminLastName = 'Last name can only contain letters and spaces';
+    }
+
     // Password validation
-    if (formData.managerPassword && formData.managerPassword.length < 6) {
-      newErrors.managerPassword = 'Password must be at least 6 characters long';
+    if (formData.managerPassword) {
+      const password = formData.managerPassword;
+      
+      if (password.length < 8) {
+        newErrors.managerPassword = 'Password must be at least 8 characters long';
+      } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+        newErrors.managerPassword = 'Password must contain both letters and numbers';
+      }
     }
 
-    // Confirm password validation
-    if (formData.managerPassword && formData.confirmPassword && formData.managerPassword !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
+    // Coordinate validation - now accepting wider ranges since we'll normalize
+    if (formData.latitude && isNaN(formData.latitude)) {
+      newErrors.latitude = 'Latitude must be a valid number';
     }
-
-    // Coordinate validation
-    if (formData.latitude && (isNaN(formData.latitude) || formData.latitude < -90 || formData.latitude > 90)) {
-      newErrors.latitude = 'Latitude must be a valid number between -90 and 90';
-    }
-    if (formData.longitude && (isNaN(formData.longitude) || formData.longitude < -180 || formData.longitude > 180)) {
-      newErrors.longitude = 'Longitude must be a valid number between -180 and 180';
+    if (formData.longitude && isNaN(formData.longitude)) {
+      newErrors.longitude = 'Longitude must be a valid number';
     }
 
     setErrors(newErrors);
@@ -87,10 +136,14 @@ const HotelForm = () => {
   };
 
   const handleLocationChange = (lat, lng) => {
+    // Normalize coordinates before storing
+    const normalizedLat = normalizeLatitude(lat);
+    const normalizedLng = normalizeLongitude(lng);
+    
     setFormData(prev => ({
       ...prev,
-      latitude: lat.toString(),
-      longitude: lng.toString()
+      latitude: normalizedLat.toString(),
+      longitude: normalizedLng.toString()
     }));
 
     // Clear coordinate errors
@@ -136,34 +189,45 @@ const HotelForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmissionError('');
     
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Prepare data for database (exclude confirmPassword from submission)
-      const { confirmPassword, ...submissionData } = formData;
-      submissionData.latitude = parseFloat(formData.latitude);
-      submissionData.longitude = parseFloat(formData.longitude);
-      // In a real app, you would upload the file and get a URL
-      submissionData.hotelLogo = 'path/to/uploaded/logo.jpg';
+      // Normalize coordinates before submission
+      const normalizedLat = normalizeLatitude(formData.latitude);
+      const normalizedLng = normalizeLongitude(formData.longitude);
 
-      console.log('Submitting hotel data:', submissionData);
+      // Prepare data for submission (exclude confirmPassword)
+      const { confirmPassword, ...submissionData } = formData;
+      submissionData.latitude = normalizedLat;
+      submissionData.longitude = normalizedLng;
+
+      console.log('Submitting coordinates:', {
+        original: { lat: formData.latitude, lng: formData.longitude },
+        normalized: { lat: normalizedLat, lng: normalizedLng }
+      });
+
+      // Submit to backend using the service
+      await partnershipService.submitHotelPartnership(submissionData);
       
-      // Simulate successful submission
+      console.log('Submission successful');
+      
+      // Show success message
       setSubmitted(true);
       
-      // Reset form data including confirmPassword
+      // Reset form
       setFormData({
         hotelName: '',
         latitude: '',
         longitude: '',
         city: '',
         country: '',
+        adminFirstName: '',
+        adminLastName: '',
+        adminPhone: '',
         managerEmail: '',
         managerPassword: '',
         confirmPassword: '',
@@ -171,6 +235,7 @@ const HotelForm = () => {
 
     } catch (error) {
       console.error('Error submitting form:', error);
+      setSubmissionError(error.message || 'Failed to submit partnership request. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -187,6 +252,26 @@ const HotelForm = () => {
           Your hotel registration is waiting for acceptance from the system admin.
           You will be notified once it's approved.
         </p>
+      </div>
+    );
+  }
+
+  if (submissionError) {
+    return (
+      <div className="bg-gradient-to-br from-red-50 to-pink-100 border border-red-200 rounded-2xl p-8 text-center shadow-lg">
+        <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="text-white text-3xl">⚠️</span>
+        </div>
+        <h3 className="text-red-800 text-2xl font-bold mb-4">Submission Failed</h3>
+        <p className="text-red-700 text-lg mb-6">
+          {submissionError}
+        </p>
+        <button
+          onClick={() => setSubmissionError('')}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 transform hover:scale-105"
+        >
+          Try Again
+        </button>
       </div>
     );
   }

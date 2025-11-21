@@ -54,10 +54,47 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
       </div>
 
       <FileUpload
-        label="Hotel Logo"
+        label={
+          <span>
+            Hotel Logo <span className="text-gray-500 text-sm font-normal">(optional)</span>
+          </span>
+        }
         name="hotelLogo"
         onChange={handleFileChange}
         error={errors.hotelLogo}
+      />
+
+      {/* New Admin Fields */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <FormInput
+          label="Manager First Name"
+          name="adminFirstName"
+          value={formData.adminFirstName}
+          onChange={handleChange}
+          error={errors.adminFirstName}
+          placeholder="Enter Manager first name"
+          required
+        />
+
+        <FormInput
+          label="ManagerLast Name"
+          name="adminLastName"
+          value={formData.adminLastName}
+          onChange={handleChange}
+          error={errors.adminLastName}
+          placeholder="Enter Manager last name"
+          required
+        />
+      </div>
+
+      <FormInput
+        label="Manager Phone Number"
+        name="adminPhone"
+        type="tel"
+        value={formData.adminPhone}
+        onChange={handleChange}
+        error={errors.adminPhone}
+        placeholder="Enter Manager phone number"
         required
       />
 

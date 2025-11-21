@@ -1,4 +1,3 @@
-// PartnershipRequestPage.jsx
 import React, { useState } from 'react';
 import AirlineForm from '../components/airline-partnership-request-form/AirlineForm';
 import HotelForm from '../components/hotel-partnership-request-form/HotelForm';
@@ -117,7 +116,7 @@ const PartnershipRequestPage = () => {
         {/* Footer */}
         <div className="text-center mt-12 pt-8 border-t border-gray-200">
           <p className="text-gray-500">
-            © 2024 JetStay. All rights reserved. 
+            © {new Date().getFullYear()} JetStay. All rights reserved.
             <span className="text-blue-600 font-medium ml-2">Partner with confidence.</span>
           </p>
         </div>
