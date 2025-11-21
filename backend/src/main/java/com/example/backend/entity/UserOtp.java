@@ -35,6 +35,6 @@ public class UserOtp {
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();
-    expireAt = createdAt.plusHours(1);
+    expireAt = createdAt.plusMinutes(5);
   }
 }

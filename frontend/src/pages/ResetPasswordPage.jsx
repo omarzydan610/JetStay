@@ -64,20 +64,35 @@ function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      await passwordService.verifyOtpAndResetPassword(email, otp, newPassword);
-      setSuccess("Password reset successfully! Redirecting...");
-      navigate("/", { state: { passwordChanged: true } });
+      const response = await passwordService.verifyOtpAndResetPassword(
+        email,
+        otp,
+        newPassword
+      );
+      if (response.success) {
+        setSuccess("Password reset successfully! Redirecting...");
+        navigate("/", { state: { passwordChanged: true } });
+      } else {
+        setError(response.message || "Failed to reset password");
+      }
     } catch (err) {
       if (err.response) {
+        const message = err.response.data?.message || err.response.data?.error;
         if (err.response.status === 400) {
-          setError(err.response.data.message || "Invalid OTP or request.");
+          setError(message || "Invalid OTP or request.");
         } else if (err.response.status === 404) {
-          setError("OTP not found or expired. Please request a new one.");
+          setError(
+            message || "OTP not found or expired. Please request a new one."
+          );
+        } else if (err.response.status === 500) {
+          setError(message || "Server error. Please try again later.");
         } else {
-          setError("An error occurred. Please try again later.");
+          setError(message || "An error occurred. Please try again later.");
         }
       } else if (err.request) {
         setError("Network error. Please check your connection and try again.");
+      } else {
+        setError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);

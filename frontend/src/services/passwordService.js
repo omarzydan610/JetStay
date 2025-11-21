@@ -1,15 +1,9 @@
-// import apiClient from './axiosConfig';
+import apiClient from './axiosConfig';
 
 class PasswordService {
   async sendOtpRequest(email) {
-    // Mock success response
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, message: "OTP sent successfully" });
-      }, 500);
-    });
-    // const response = await apiClient.post('/api/auth/forgot-password', { email });
-    // return response.data;
+    const response = await apiClient.post('/api/auth/forgot-password', { email });
+    return response.data;
   }
 
   async verifyOtpAndResetPassword(email, otp, newPassword) {

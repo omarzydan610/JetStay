@@ -16,17 +16,26 @@ function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await passwordService.sendOtpRequest(email);
-      navigate("/reset-password", { state: { email } });
+      const response = await passwordService.sendOtpRequest(email);
+      if (response.success) {
+        navigate("/reset-password", { state: { email } });
+      } else {
+        setError(response.message || "Failed to send OTP");
+      }
     } catch (err) {
       if (err.response) {
         // Server responded with error
+        const message = err.response.data?.message || err.response.data?.error;
         if (err.response.status === 404) {
-          setError("Email not found. Please check your email address.");
+          setError(
+            message || "Email not found. Please check your email address."
+          );
         } else if (err.response.status === 400) {
-          setError(err.response.data.message || "Invalid email address.");
+          setError(message || "Invalid email address.");
+        } else if (err.response.status === 500) {
+          setError(message || "Server error. Please try again later.");
         } else {
-          setError("An error occurred. Please try again later.");
+          setError(message || "An error occurred. Please try again later.");
         }
       } else if (err.request) {
         // Network error
