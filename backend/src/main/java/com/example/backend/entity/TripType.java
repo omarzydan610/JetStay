@@ -27,6 +27,13 @@ public class TripType {
     @Column(name = "price")
     private Integer price;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "type_name")
-    private String typeName;
+    private TripTypeName typeName;
+
+    public enum TripTypeName {
+        ECONOMY,
+        BUSINESS,
+        FIRST_CLASS
+    }
 }
