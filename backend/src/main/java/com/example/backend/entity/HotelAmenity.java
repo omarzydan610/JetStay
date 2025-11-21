@@ -18,12 +18,12 @@ public class HotelAmenity {
   private Integer amenityID;
 
   @ManyToOne
-  @JoinColumn(name = "hotel_id")
+  @JoinColumn(name = "hotel_id", nullable = false)
   private Hotel hotel;
 
-  @Column(name = "amenity_name")
+  @Column(name = "amenity_name", nullable = false)
   private String amenityName;
 
-  @Column(name = "price")
+  @Column(name = "price", nullable = false)
   private Float price;
 }

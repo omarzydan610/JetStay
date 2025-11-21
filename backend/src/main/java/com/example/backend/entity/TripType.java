@@ -18,15 +18,15 @@ public class TripType {
     private Integer typeID;
 
     @ManyToOne
-    @JoinColumn(name = "flightID")
+    @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
 
-    @Column(name = "quantity")
+    @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "price")
+    @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Column(name = "type_name")
+    @Column(name = "type_name", nullable = false)
     private String typeName;
 }

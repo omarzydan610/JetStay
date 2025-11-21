@@ -17,22 +17,22 @@ public class RoomType {
   @Column(name = "room_type_id")
   private Integer roomTypeID;
 
-  @Column(name = "room_type_name")
+  @Column(name = "room_type_name", nullable = false)
   private String roomTypeName;
 
-  @Column(name = "number_of_guests")
+  @Column(name = "number_of_guests", nullable = false)
   private Integer numberOfGuests;
 
   @ManyToOne
-  @JoinColumn(name = "hotel_id")
+  @JoinColumn(name = "hotel_id", nullable = false)
   private Hotel hotel;
 
-  @Column(name = "quantity")
+  @Column(name = "quantity", nullable = false)
   private Integer quantity;
 
   @Column(name = "description")
   private String description;
 
-  @Column(name = "price")
+  @Column(name = "price", nullable = false)
   private Float price;
 }
