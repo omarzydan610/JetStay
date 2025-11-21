@@ -20,5 +20,9 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
     List<FlightTicket> findByAirlineAirlineID(Integer airlineId);
 
     List<FlightTicket> findByAirlineAirlineIDAndIsPaidTrue(Integer airlineId);
+
+    List<FlightTicket> findByIsPaidTrue();
+
+    List<FlightTicket> findByAirlineAirlineNameAndIsPaidTrue(String airlineName);
 }
 

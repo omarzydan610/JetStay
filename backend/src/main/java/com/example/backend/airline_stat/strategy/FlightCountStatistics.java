@@ -17,16 +17,14 @@ public class FlightCountStatistics implements StatisticsStrategy {
     }
 
     @Override
-    public Long calculate(String airlineName) {
-
-        if (airlineName == null) return 0L;
+    public Double calculate(String airlineName) {
+        if (airlineName == null || airlineName.isBlank()) {
+            return (double) flightRepository.allFlightsIds().size();
+        }
 
         Integer airlineId = airlineRepository.findAirlineIDByAirlineName(airlineName);
-        System.out.println(airlineId);
-        if (airlineId == null) return 0L;
+        if (airlineId == null) return 0D;
 
-        int count = flightRepository.allFlightsId(airlineId).size();
-        return (long) count;
+        return (double) flightRepository.allFlightsIdsByAirlineId(airlineId).size();
     }
-
 }

@@ -3,9 +3,11 @@ package com.example.backend.airline_stat.strategy;
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightTicketRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class RevenueStatistics implements StatisticsStrategy {
 
     private final AirlineRepository airlineRepository;
@@ -18,21 +20,20 @@ public class RevenueStatistics implements StatisticsStrategy {
     }
 
     @Override
-    public Long calculate(String airlineName) {
+    public Double calculate(String airlineName) {
+        List<FlightTicket> tickets;
 
-        if (airlineName == null) return 0L;
+        if (airlineName == null || airlineName.isBlank()) {
+            tickets = ticketRepository.findByIsPaidTrue();
+        } else {
+            Integer airlineId = airlineRepository.findAirlineIDByAirlineName(airlineName);
+            if (airlineId == null) return 0D;
 
-        Integer airlineId = airlineRepository.findAirlineIDByAirlineName(airlineName);
-        if (airlineId == null) return 0L;
+            tickets = ticketRepository.findByAirlineAirlineIDAndIsPaidTrue(airlineId);
+        }
 
-        // Get all paid tickets for this airline
-        List<FlightTicket> tickets = ticketRepository.findByAirlineAirlineIDAndIsPaidTrue(airlineId);
-
-        // Sum prices
-        double revenue = tickets.stream()
+        return tickets.stream()
                 .mapToDouble(FlightTicket::getPrice)
                 .sum();
-
-        return (long) revenue;
     }
 }

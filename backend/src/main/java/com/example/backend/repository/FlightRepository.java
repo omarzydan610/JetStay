@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 @Repository
@@ -16,6 +17,12 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
 
     // Get only flight IDs for a specific airline
     @Query("SELECT f.flightID FROM Flight f WHERE f.airline.airlineID = :airlineId")
-    List<Integer> allFlightsId(@Param("airlineId") Integer airlineId);
+    List<Integer> allFlightsIdsByAirlineId(@Param("airlineId") Integer airlineId);
 
+    @Query("SELECT f.flightID FROM Flight f")
+    List<Integer> allFlightsIds();
+
+    long countByAirlineAirlineNameAndStatus(String airlineName, Flight.FlightStatus flightStatus);
+
+    long countByStatus(Flight.FlightStatus flightStatus);
 }
