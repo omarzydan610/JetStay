@@ -7,8 +7,8 @@ public class StatisticsContext {
         this.strategy = strategy;
     }
 
-    public void execute() {
-        strategy.calculate();
+    public void execute(String airlineName) {
+        strategy.calculate(airlineName);
     }
 }
 /*

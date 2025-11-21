@@ -1,0 +1,7 @@
+Get airline id
+Get flights of certain airline
+Get their tickets
+Calc revenue
+Show how many paid
+Show summary of reviews
+Show from trip-type how many economy and business

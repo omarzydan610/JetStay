@@ -55,6 +55,6 @@ public class User {
     }
 
     public enum UserRole {
-        SYSTEM_ADMIN, CLIENT, AILINE_ADMIN, HOTEL_ADMIN
+        SYSTEM_ADMIN, CLIENT, AIRLINE_ADMIN, HOTEL_ADMIN
     }
 }
