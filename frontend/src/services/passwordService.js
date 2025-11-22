@@ -7,16 +7,8 @@ class PasswordService {
   }
 
   async verifyOtpAndResetPassword(email, otp, newPassword) {
-    // Mock success response
-    console.log("holl");
-    
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ success: true, message: "Password reset successfully" });
-      }, 500);
-    });
-    // const response = await apiClient.post('/api/auth/verify-otp', { email, otp, newPassword });
-    // return response.data;
+    const response = await apiClient.post('/api/auth/change-password-with-otp', { email, otp, newPassword });
+    return response.data;
   }
 }
 

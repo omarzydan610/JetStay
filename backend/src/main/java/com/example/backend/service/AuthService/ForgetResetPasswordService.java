@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,24 +28,34 @@ public class ForgetResetPasswordService {
   @Autowired
   private UserOtpRepository userOtpRepository;
 
-  @Transactional
+  private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
   public void forgotPassword(String email) {
+    User user = getUserByEmail(email);
+
+    String otp = generateOtp();
+
+    String userName = user.getFirstName();
+
+    saveOTPAndSendEmail(email, otp, user, userName);
+  }
+
+  private User getUserByEmail(String email) {
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RuntimeException("User not found with this email"));
     if (user.getStatus() == User.UserStatus.DEACTIVATED) {
       throw new RuntimeException("User account is deactivated");
     }
+    return user;
+  }
 
-    String otp = generateOtp();
-    String userName = user.getFirstName();
-
+  @Transactional
+  private void saveOTPAndSendEmail(String email, String otp, User user, String userName) {
     // Save OTP to database first
     UserOtp userOtp = new UserOtp();
     userOtp.setUser(user);
     userOtp.setOtp(otp);
     userOtp = userOtpRepository.save(userOtp);
-
-    System.out.println("OTP saved to database: " + otp + " for user: " + email);
 
     try {
       String template = prepareTemplate(otp, userName);
@@ -75,5 +86,35 @@ public class ForgetResetPasswordService {
     Random random = new Random();
     int otp = 100000 + random.nextInt(900000);
     return String.valueOf(otp);
+  }
+
+  public void verifyOTPAndResetPassword(String email, String otp, String newPassword) {
+    System.out.println("Verifying OTP for email: " + email);
+    User user = verifyOtp(email, otp);
+    changePassword(user, newPassword);
+  }
+
+  private User verifyOtp(String email, String otp) {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with this email"));
+
+    UserOtp userOtp = userOtpRepository.findByUserAndOtp(user, otp)
+        .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+
+    // check if OTP is expired
+    if (userOtp.getExpireAt().isBefore(java.time.LocalDateTime.now())) {
+      // OTP is expired, delete it from database
+      userOtpRepository.delete(userOtp);
+      throw new RuntimeException("OTP has expired");
+    }
+
+    return user;
+
+  }
+
+  private void changePassword(User user, String newPassword) {
+    String hashedPassword = passwordEncoder.encode(newPassword);
+    user.setPassword(hashedPassword);
+    userRepository.save(user);
   }
 }

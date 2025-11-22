@@ -15,7 +15,7 @@ public class SecurityConfig {
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/api/auth/forgot-password", "/api/auth/verify-otp").permitAll()
+            .requestMatchers("/api/auth/forgot-password", "/api/auth/change-password-with-otp").permitAll()
             .anyRequest().authenticated());
 
     return http.build();
