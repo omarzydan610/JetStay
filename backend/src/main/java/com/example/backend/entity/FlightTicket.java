@@ -44,11 +44,4 @@ public class FlightTicket {
     @Column(name = "is_paid")
     private Boolean isPaid;
 
-    public double getPrice() {
-        return price;
-    }
-
-    public Integer getTicketId() {
-        return ticketId;
-    }
 }
