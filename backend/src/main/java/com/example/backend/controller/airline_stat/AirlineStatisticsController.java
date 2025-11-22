@@ -15,7 +15,6 @@ public class AirlineStatisticsController {
 
     @GetMapping("/{airlineName}")
     public AirlineStatsDTO getAirlineStatistics(@PathVariable String airlineName) {
-        System.out.println("Hi!!!");
 
         return new AirlineStatsDTO.Builder()
                 .airlineName(airlineName)
