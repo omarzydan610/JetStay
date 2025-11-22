@@ -19,19 +19,19 @@ public class Hotel {
   @Column(name = "hotel_id")
   private Integer hotelID;
 
-  @Column(name = "hotel_name")
+  @Column(name = "hotel_name", nullable = false)
   private String hotelName;
 
-  @Column(name = "latitude")
+  @Column(name = "latitude", nullable = false)
   private Double latitude;
 
-  @Column(name = "longitude")
+  @Column(name = "longitude", nullable = false)
   private Double longitude;
 
-  @Column(name = "city")
+  @Column(name = "city", nullable = false)
   private String city;
 
-  @Column(name = "country")
+  @Column(name = "country", nullable = false)
   private String country;
 
   @Column(name = "hotel_rate")
@@ -41,7 +41,7 @@ public class Hotel {
   private Integer numberOfRates;
 
   @ManyToOne
-  @JoinColumn(name = "admin_id")
+  @JoinColumn(name = "admin_id", nullable = false)
   private User admin;
 
   @Column(name = "created_at", nullable = false)

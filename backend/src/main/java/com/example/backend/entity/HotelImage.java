@@ -18,9 +18,9 @@ public class HotelImage {
   private Integer imageID;
 
   @ManyToOne
-  @JoinColumn(name = "hotel_id")
+  @JoinColumn(name = "hotel_id", nullable = false)
   private Hotel hotel;
 
-  @Column(name = "image_url")
+  @Column(name = "image_url", nullable = false)
   private String imageUrl;
 }

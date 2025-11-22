@@ -20,31 +20,31 @@ public class Flight {
   private Integer flightID;
 
   @ManyToOne
-  @JoinColumn(name = "airline_id")
+  @JoinColumn(name = "airline_id", nullable = false)
   private Airline airline;
 
   @ManyToOne
-  @JoinColumn(name = "departure_airport_id")
+  @JoinColumn(name = "departure_airport_id", nullable = false)
   private Airport departureAirport;
 
   @ManyToOne
-  @JoinColumn(name = "arrival_airport_id")
+  @JoinColumn(name = "arrival_airport_id", nullable = false)
   private Airport arrivalAirport;
 
-  @Column(name = "departure_date")
+  @Column(name = "departure_date", nullable = false)
   private LocalDateTime departureDate;
 
-  @Column(name = "arrival_date")
+  @Column(name = "arrival_date", nullable = false)
   private LocalDateTime arrivalDate;
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "status")
+  @Column(name = "status", nullable = false)
   private FlightStatus status;
 
   @Column(name = "description")
   private String description;
 
-  @Column(name = "planeType")
+  @Column(name = "plane_type")
   private String planeType;
 
     public Integer getFlightId() {

@@ -20,20 +20,21 @@ public class UserOtp {
   private Integer otpID;
 
   @ManyToOne
-  @JoinColumn(name = "user_id")
+  @JoinColumn(name = "user_id", nullable = false)
   private User user;
 
-  @Column(name = "otp")
+  @Column(name = "otp", nullable = false)
   private String otp;
 
-  @Column(name = "created_at")
+  @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
-  @Column(name = "expire_at")
+  @Column(name = "expire_at", nullable = false)
   private LocalDateTime expireAt;
 
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();
+    expireAt = createdAt.plusHours(1);
   }
 }

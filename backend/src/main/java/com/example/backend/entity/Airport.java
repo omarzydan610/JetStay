@@ -17,13 +17,13 @@ public class Airport {
   @Column(name = "airport_id")
   private Integer airportID;
 
-  @Column(name = "airport_name")
+  @Column(name = "airport_name", nullable = false)
   private String airportName;
 
-  @Column(name = "city")
+  @Column(name = "city", nullable = false)
   private String city;
 
-  @Column(name = "country")
+  @Column(name = "country", nullable = false)
   private String country;
 
 
