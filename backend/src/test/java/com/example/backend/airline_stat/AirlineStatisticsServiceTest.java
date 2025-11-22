@@ -1,6 +1,6 @@
 package com.example.backend.airline_stat;
 
-import com.example.backend.airline_stat.service.AirlineStatisticsService;
+import com.example.backend.airline_stat.service.AirlineStatService;
 import com.example.backend.dto.AirlineStatsDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AirlineStatisticsServiceTest {
 
     @Autowired
-    private AirlineStatisticsService airlineStatisticsService;
+    private AirlineStatService airlineStatisticsService;
 
     @Test
     public void testStatisticsForSpecificAirline() {

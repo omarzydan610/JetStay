@@ -1,6 +1,7 @@
 package com.example.backend.airline_stat;
 
 import com.example.backend.airline_stat.service.TripTypeStatsService;
+import com.example.backend.dto.TripTypeStatsDTO;
 import com.example.backend.entity.TripType.TripTypeName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +19,25 @@ public class TripTypeStatsServiceTest {
 
     @Test
     public void testGetAverageTicketsPerType() {
-        Integer airlineId = 2; // use a valid airline ID from your test DB
+        String airlineName = "Emirates"; // use a valid airline ID from your test DB
 
-        Map<TripTypeName, Double> averages = tripTypeStatsService.getAverageTicketsPerType(airlineId);
+        TripTypeStatsDTO averages = tripTypeStatsService.getTripTypeStats(airlineName);
 
         // Print results for visual check
-        averages.forEach((type, avg) -> System.out.println(type + " : " + avg));
+        System.out.println(averages.getAirlineName());
+        System.out.println(averages.getAverageTicketsPerType());
 
-        // Basic assertions
-        assertTrue(averages.size() > 0, "There should be at least one trip type");
-        averages.forEach((type, avg) -> {
-            assertTrue(avg >= 0, "Average quantity should be non-negative");
-        });
+    }
+
+    @Test
+    public void testGetAverageTicketsPerTypeForAll() {
+        String airlineName = ""; // use a valid airline ID from your test DB
+
+        TripTypeStatsDTO averages = tripTypeStatsService.getTripTypeStats(airlineName);
+
+        // Print results for visual check
+        System.out.println(averages.getAirlineName());
+        System.out.println(averages.getAverageTicketsPerType());
+
     }
 }

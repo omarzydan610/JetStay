@@ -20,28 +20,22 @@ public class TicketFlightServiceTest {
 
     @Test
     public void testGetTicketsAndFlightSummary_AllAirlines() {
-        Map<String, Object> result = service.getTicketsAndFlightSummary(null);
+        FlightStatusDTO result = service.getTicketsAndFlightSummary(null);
 
-        List<FlightTicket> tickets = (List<FlightTicket>) result.get("tickets");
-        FlightStatusDTO summary = (FlightStatusDTO) result.get("summary");
 
-        System.out.println("Total Tickets: " + tickets.size());
-        System.out.println("Pending Flights: " + summary.getPendingCount());
-        System.out.println("On-Time Flights: " + summary.getOnTimeCount());
+        System.out.println("Pending Flights: " + result.getPendingCount());
+        System.out.println("On-Time Flights: " + result.getOnTimeCount());
 
     }
 
     @Test
     public void testGetTicketsAndFlightSummary_SpecificAirline() {
         String airlineName = "Emirates"; // put a real airline name from your DB
-        Map<String, Object> result = service.getTicketsAndFlightSummary(airlineName);
+        FlightStatusDTO result = service.getTicketsAndFlightSummary(airlineName);
 
-        List<FlightTicket> tickets = (List<FlightTicket>) result.get("tickets");
-        FlightStatusDTO summary = (FlightStatusDTO) result.get("summary");
 
-        System.out.println("Tickets for " + airlineName + ": " + tickets.size());
-        System.out.println("Pending Flights: " + summary.getPendingCount());
-        System.out.println("On-Time Flights: " + summary.getOnTimeCount());
+        System.out.println("Pending Flights: " + result.getPendingCount());
+        System.out.println("On-Time Flights: " + result.getOnTimeCount());
 
     }
 }
