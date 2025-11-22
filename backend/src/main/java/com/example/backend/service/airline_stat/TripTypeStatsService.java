@@ -1,4 +1,4 @@
-package com.example.backend.airline_stat.service;
+package com.example.backend.service.airline_stat;
 
 
 import com.example.backend.dto.TripTypeStatsDTO;

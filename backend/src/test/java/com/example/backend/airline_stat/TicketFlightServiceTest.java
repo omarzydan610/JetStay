@@ -1,6 +1,6 @@
 package com.example.backend.airline_stat;
 
-import com.example.backend.airline_stat.service.FlightStatusService;
+import com.example.backend.service.airline_stat.FlightStatusService;
 import com.example.backend.dto.FlightStatusDTO;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;

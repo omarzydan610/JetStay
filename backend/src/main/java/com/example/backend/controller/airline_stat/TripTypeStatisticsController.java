@@ -1,6 +1,6 @@
-package com.example.backend.airline_stat.controllers;
+package com.example.backend.controller.airline_stat;
 
-import com.example.backend.airline_stat.service.TripTypeStatsService;
+import com.example.backend.service.airline_stat.TripTypeStatsService;
 import com.example.backend.dto.TripTypeStatsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

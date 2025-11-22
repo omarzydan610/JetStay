@@ -1,10 +1,9 @@
-package com.example.backend.airline_stat.strategy;
+package com.example.backend.strategy.airline_stat;
 
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightTicketRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

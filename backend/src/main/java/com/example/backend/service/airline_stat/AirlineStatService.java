@@ -1,13 +1,11 @@
-package com.example.backend.airline_stat.service;
+package com.example.backend.service.airline_stat;
 
-import com.example.backend.airline_stat.strategy.FlightCountStatistics;
-import com.example.backend.airline_stat.strategy.RatingStatistics;
-import com.example.backend.airline_stat.strategy.RevenueStatistics;
-import com.example.backend.airline_stat.strategy.StatisticsContext;
+import com.example.backend.strategy.airline_stat.FlightCountStatistics;
+import com.example.backend.strategy.airline_stat.RatingStatistics;
+import com.example.backend.strategy.airline_stat.RevenueStatistics;
+import com.example.backend.strategy.airline_stat.StatisticsContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 
 @Service
 public class AirlineStatService {

@@ -1,4 +1,4 @@
-package com.example.backend.airline_stat.service;
+package com.example.backend.service.airline_stat;
 
 import com.example.backend.dto.FlightStatusDTO;
 import com.example.backend.entity.Flight;
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class FlightStatusService {

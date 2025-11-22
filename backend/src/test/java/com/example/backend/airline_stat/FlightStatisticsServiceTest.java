@@ -1,8 +1,8 @@
 package com.example.backend.airline_stat;
 
-import com.example.backend.airline_stat.strategy.FlightCountStatistics;
-import com.example.backend.airline_stat.strategy.RatingStatistics;
-import com.example.backend.airline_stat.strategy.RevenueStatistics;
+import com.example.backend.strategy.airline_stat.FlightCountStatistics;
+import com.example.backend.strategy.airline_stat.RatingStatistics;
+import com.example.backend.strategy.airline_stat.RevenueStatistics;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.FlightReviewRepository;

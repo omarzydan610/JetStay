@@ -1,9 +1,8 @@
-package com.example.backend.airline_stat.strategy;
+package com.example.backend.strategy.airline_stat;
 
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightRepository;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 @Component
 public class FlightCountStatistics implements StatisticsStrategy {

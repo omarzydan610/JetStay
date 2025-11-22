@@ -1,4 +1,4 @@
-package com.example.backend.airline_stat.strategy;
+package com.example.backend.strategy.airline_stat;
 
 import org.springframework.stereotype.Component;
 
