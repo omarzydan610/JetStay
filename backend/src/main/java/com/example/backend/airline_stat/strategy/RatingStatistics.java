@@ -3,11 +3,12 @@ package com.example.backend.airline_stat.strategy;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.FlightReviewRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Component
 public class RatingStatistics implements StatisticsStrategy {
 
     private final AirlineRepository airlineRepository;

@@ -1,5 +1,8 @@
 package com.example.backend.airline_stat.strategy;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class StatisticsContext {
     private StatisticsStrategy strategy;
 
@@ -7,8 +10,8 @@ public class StatisticsContext {
         this.strategy = strategy;
     }
 
-    public void execute(String airlineName) {
-        strategy.calculate(airlineName);
+    public Double execute(String airlineName) {
+        return strategy.calculate(airlineName);
     }
 }
 /*

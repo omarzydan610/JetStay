@@ -1,5 +1,9 @@
 package com.example.backend.airline_stat.service;
 
+import com.example.backend.airline_stat.strategy.FlightCountStatistics;
+import com.example.backend.airline_stat.strategy.RatingStatistics;
+import com.example.backend.airline_stat.strategy.RevenueStatistics;
+import com.example.backend.airline_stat.strategy.StatisticsContext;
 import com.example.backend.dto.AirlineStatsDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.repository.AirlineRepository;
@@ -15,33 +19,32 @@ import java.math.BigDecimal;
 public class AirlineStatisticsService {
 
     @Autowired
-    private FlightRepository flightRepository;
+    private StatisticsContext statisticsContext;
 
     @Autowired
-    private FlightTicketRepository flightTicketRepository;
+    private FlightCountStatistics flightCountStatistics;
 
     @Autowired
-    private FlightReviewRepository flightReviewRepository;
+    private RevenueStatistics revenueStatistics;
 
     @Autowired
-    private AirlineRepository airlineRepository;
-/*
-    public AirlineStatsDTO getAirlineStats(int airlineId) {
-        AirlineStatsDTO stats = new AirlineStatsDTO();
-        // 1. Count flights
-        long totalFlights = flightRepository.countByAirlineAirlineID(airlineId);
-        stats.setTotalFlights(totalFlights);
+    private RatingStatistics ratingStatistics;
 
-        // 2. Calculate average rating
-        Double avgRating = flightReviewRepository.averageRatingByAirlineId(airlineId);
-        stats.setAverageRating(avgRating != null ? avgRating : 0.0);
 
-        // 3. Calculate revenue from paid tickets
-        BigDecimal revenue = flightTicketRepository.sumPaidTicketsRevenueByAirlineId(airlineId);
-        stats.setTotalRevenue(revenue != null ? revenue : BigDecimal.ZERO);
-
-        return stats;
+    public Double getAirlinecount(String airlineName) {
+        statisticsContext.setStrategy(flightCountStatistics);
+        return statisticsContext.execute(airlineName);
     }
 
- */
+    public Double getAirlineAvgRating(String airlineName) {
+        statisticsContext.setStrategy(ratingStatistics);
+        return statisticsContext.execute(airlineName);
+    }
+
+    public Double getAirlineRevenue(String airlineName) {
+        statisticsContext.setStrategy(revenueStatistics);
+        return statisticsContext.execute(airlineName);
+    }
+
+
 }

@@ -3,11 +3,12 @@ package com.example.backend.airline_stat.strategy;
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightTicketRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+@Component
 public class RevenueStatistics implements StatisticsStrategy {
 
     private final AirlineRepository airlineRepository;
