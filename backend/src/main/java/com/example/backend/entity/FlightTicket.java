@@ -47,4 +47,8 @@ public class FlightTicket {
     public double getPrice() {
         return price;
     }
+
+    public Integer getTicketId() {
+        return ticketId;
+    }
 }
