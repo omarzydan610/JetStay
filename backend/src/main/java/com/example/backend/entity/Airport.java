@@ -25,4 +25,6 @@ public class Airport {
 
   @Column(name = "country", nullable = false)
   private String country;
+
+
 }
