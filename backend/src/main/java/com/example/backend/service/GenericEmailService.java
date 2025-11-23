@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import com.example.backend.exception.InternalServerErrorException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -25,10 +26,10 @@ public class GenericEmailService {
       helper.setText(htmlContent, true);
       helper.setFrom("jetstay.help@gmail.com");
       mailSender.send(message);
-      
+
     } catch (Exception e) {
       e.printStackTrace();
-      throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
+      throw new InternalServerErrorException("Failed to send email: " + e.getMessage(), e);
     }
   }
 }

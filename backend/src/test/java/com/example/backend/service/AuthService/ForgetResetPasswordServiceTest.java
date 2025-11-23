@@ -118,7 +118,7 @@ class ForgetResetPasswordServiceTest {
     // Act & Assert
     RuntimeException exception = assertThrows(RuntimeException.class,
         () -> forgetResetPasswordService.forgotPassword("nonexistent@example.com"));
-    assertEquals("User not found with this email", exception.getMessage());
+    assertEquals("User not found with email: nonexistent@example.com", exception.getMessage());
   }
 
   @Test

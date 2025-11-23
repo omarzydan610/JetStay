@@ -6,6 +6,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.example.backend.exception.BadRequestException;
+
 import javax.crypto.SecretKey;
 import java.util.Date;
 
@@ -41,7 +43,7 @@ public class JwtService {
           .parseSignedClaims(token)
           .getPayload();
     } catch (Exception e) {
-      throw new RuntimeException("Invalid or expired reset token");
+      throw new BadRequestException("Invalid or expired reset token");
     }
   }
 

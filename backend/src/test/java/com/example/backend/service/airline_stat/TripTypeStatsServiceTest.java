@@ -1,9 +1,9 @@
 package com.example.backend.service.airline_stat;
 
+import com.example.backend.dto.AirlineDTO.TripTypeStatsDTO;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import com.example.backend.service.airline_stat.TripTypeStatsService;
-import com.example.backend.dto.TripTypeStatsDTO;
 import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.entity.Flight.FlightStatus;
 import org.junit.jupiter.api.BeforeEach;

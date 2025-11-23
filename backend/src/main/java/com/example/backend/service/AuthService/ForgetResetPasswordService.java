@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.entity.User;
 import com.example.backend.entity.UserOtp;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.UserOtpRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.GenericEmailService;
@@ -42,7 +45,7 @@ public class ForgetResetPasswordService {
   public void forgotPassword(String email) {
     // Validate input
     if (email == null || email.trim().isEmpty()) {
-      throw new RuntimeException("Email is required");
+      throw new BadRequestException("Email is required");
     }
 
     User user = getUserByEmail(email);
@@ -56,9 +59,9 @@ public class ForgetResetPasswordService {
 
   private User getUserByEmail(String email) {
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("User not found with this email"));
+        .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
     if (user.getStatus() == User.UserStatus.DEACTIVATED) {
-      throw new RuntimeException("User account is deactivated");
+      throw new BadRequestException("User account is deactivated");
     }
     return user;
   }
@@ -77,7 +80,7 @@ public class ForgetResetPasswordService {
     } catch (Exception e) {
       // If email sending fails, delete the OTP from database
       userOtpRepository.delete(userOtp);
-      throw new RuntimeException("Failed to send OTP email: " + e.getMessage(), e);
+      throw new InternalServerErrorException("Failed to send OTP email: " + e.getMessage(), e);
     }
   }
 
@@ -102,23 +105,23 @@ public class ForgetResetPasswordService {
   public String verifyOtp(String email, String otp) {
     // Validate inputs
     if (email == null || email.trim().isEmpty()) {
-      throw new RuntimeException("Email is required");
+      throw new BadRequestException("Email is required");
     }
     if (otp == null || otp.trim().isEmpty()) {
-      throw new RuntimeException("OTP is required");
+      throw new BadRequestException("OTP is required");
     }
 
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("User not found with this email"));
+        .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
     UserOtp userOtp = userOtpRepository.findByUserAndOtp(user, otp)
-        .orElseThrow(() -> new RuntimeException("Invalid OTP"));
+        .orElseThrow(() -> new BadRequestException("Invalid OTP"));
 
     // check if OTP is expired
     if (userOtp.getExpireAt().isBefore(java.time.LocalDateTime.now())) {
       // OTP is expired, delete it from database
       userOtpRepository.delete(userOtp);
-      throw new RuntimeException("OTP has expired");
+      throw new BadRequestException("OTP has expired");
     }
 
     // Delete the used OTP after successful verification
@@ -131,22 +134,22 @@ public class ForgetResetPasswordService {
   public void changePassword(String email, String resetToken, String newPassword) {
     // Validate inputs
     if (email == null || email.trim().isEmpty()) {
-      throw new RuntimeException("Email is required");
+      throw new BadRequestException("Email is required");
     }
     if (resetToken == null || resetToken.trim().isEmpty()) {
-      throw new RuntimeException("Reset token is required");
+      throw new BadRequestException("Reset token is required");
     }
     if (newPassword == null || newPassword.trim().isEmpty()) {
-      throw new RuntimeException("New password is required");
+      throw new BadRequestException("New password is required");
     }
 
     // Validate JWT token
     if (!jwtPasswordResetService.isTokenValid(resetToken, email)) {
-      throw new RuntimeException("Invalid or expired reset token");
+      throw new BadRequestException("Invalid or expired reset token");
     }
 
     User user = userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("User not found with this email"));
+        .orElseThrow(() -> new ResourceNotFoundException("User", "email", email));
 
     String hashedPassword = passwordEncoder.encode(newPassword);
     user.setPassword(hashedPassword);

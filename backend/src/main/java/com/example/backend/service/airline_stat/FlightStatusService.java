@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.FlightStatusDTO;
+import com.example.backend.dto.AirlineDTO.FlightStatusDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.repository.FlightRepository;
