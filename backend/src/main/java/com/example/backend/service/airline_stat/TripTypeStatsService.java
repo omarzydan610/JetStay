@@ -1,8 +1,9 @@
 package com.example.backend.service.airline_stat;
 
-
 import com.example.backend.dto.AirlineDTO.TripTypeStatsDTO;
 import com.example.backend.entity.TripType.TripTypeName;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.TripTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,12 @@ public class TripTypeStatsService {
     @Autowired
     private TripTypeRepository tripTypeRepository;
 
+    @Autowired
+    private AirlineRepository airlineRepository;
+
     public TripTypeStatsDTO getTripTypeStats(String airlineName) {
+        validateAirlineExists(airlineName);
+
         List<Object[]> results;
 
         if (airlineName == null || airlineName.isBlank()) {
@@ -40,6 +46,13 @@ public class TripTypeStatsService {
         return new TripTypeStatsDTO(name, avgMap);
     }
 
-
+    private void validateAirlineExists(String airlineName) {
+        if (airlineName != null && !airlineName.isBlank()) {
+            Integer airlineId = airlineRepository.findAirlineIDByAirlineName(airlineName);
+            if (airlineId == null) {
+                throw new ResourceNotFoundException("Airline", "name", airlineName);
+            }
+        }
+    }
 
 }
