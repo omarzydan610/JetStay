@@ -1,4 +1,4 @@
-package com.example.backend.dto;
+package com.example.backend.dto.AirlineDTO;
 
 import com.example.backend.entity.TripType.TripTypeName;
 import java.util.Map;

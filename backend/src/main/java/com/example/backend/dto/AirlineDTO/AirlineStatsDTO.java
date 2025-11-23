@@ -1,7 +1,6 @@
-package com.example.backend.dto;
+package com.example.backend.dto.AirlineDTO;
 
 
-import java.time.LocalDate;
 
 public class AirlineStatsDTO {
     private final String airlineName;
