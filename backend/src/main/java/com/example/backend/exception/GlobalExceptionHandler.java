@@ -2,6 +2,9 @@ package com.example.backend.exception;
 
 import com.example.backend.dto.response.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,11 +17,25 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-  // Handle custom base exceptions
+  private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+  @Value("${spring.profiles.active:dev}")
+  private String activeProfile;
+
+  private boolean isProduction() {
+    return "prod".equals(activeProfile) || "production".equals(activeProfile);
+  }
+
+  // Handle custom base exceptions (covers all BaseException subclasses)
   @ExceptionHandler(BaseException.class)
   public ResponseEntity<ErrorResponse> handleBaseException(
       BaseException ex,
       HttpServletRequest request) {
+
+    logger.warn("BaseException occurred: {} - {} at {}", 
+        ex.getClass().getSimpleName(), 
+        ex.getMessage(), 
+        request.getRequestURI());
 
     ErrorResponse errorResponse = ErrorResponse.of(
         ex.getStatus().getReasonPhrase(),
@@ -40,6 +57,8 @@ public class GlobalExceptionHandler {
         .map(error -> error.getField() + ": " + error.getDefaultMessage())
         .collect(Collectors.toList());
 
+    logger.debug("Validation failed for {}: {}", request.getRequestURI(), validationErrors);
+
     ErrorResponse errorResponse = ErrorResponse.of(
         "Validation Failed",
         "Invalid input data",
@@ -55,33 +74,7 @@ public class GlobalExceptionHandler {
       IllegalArgumentException ex,
       HttpServletRequest request) {
 
-    ErrorResponse errorResponse = ErrorResponse.of(
-        "Bad Request",
-        ex.getMessage(),
-        request.getRequestURI());
-
-    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-  }
-
-  // Handle resource not found exception
-  @ExceptionHandler(ResourceNotFoundException.class)
-  public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
-      ResourceNotFoundException ex,
-      HttpServletRequest request) {
-
-    ErrorResponse errorResponse = ErrorResponse.of(
-        "Not Found",
-        ex.getMessage(),
-        request.getRequestURI());
-
-    return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
-  }
-
-  // Handle bad request exception
-  @ExceptionHandler(BadRequestException.class)
-  public ResponseEntity<ErrorResponse> handleBadRequestException(
-      BadRequestException ex,
-      HttpServletRequest request) {
+    logger.warn("IllegalArgumentException at {}: {}", request.getRequestURI(), ex.getMessage());
 
     ErrorResponse errorResponse = ErrorResponse.of(
         "Bad Request",
@@ -89,34 +82,6 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
 
     return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-  }
-
-  // Handle unauthorized exception
-  @ExceptionHandler(UnauthorizedException.class)
-  public ResponseEntity<ErrorResponse> handleUnauthorizedException(
-      UnauthorizedException ex,
-      HttpServletRequest request) {
-
-    ErrorResponse errorResponse = ErrorResponse.of(
-        "Unauthorized",
-        ex.getMessage(),
-        request.getRequestURI());
-
-    return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-  }
-
-  // Handle internal server error exception
-  @ExceptionHandler(InternalServerErrorException.class)
-  public ResponseEntity<ErrorResponse> handleInternalServerErrorException(
-      InternalServerErrorException ex,
-      HttpServletRequest request) {
-
-    ErrorResponse errorResponse = ErrorResponse.of(
-        "Internal Server Error",
-        ex.getMessage(),
-        request.getRequestURI());
-
-    return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   // Handle all other runtime exceptions
@@ -125,9 +90,20 @@ public class GlobalExceptionHandler {
       RuntimeException ex,
       HttpServletRequest request) {
 
+    // Log the full exception with stack trace for debugging
+    logger.error("RuntimeException occurred at {}: {}", 
+        request.getRequestURI(), 
+        ex.getMessage(), 
+        ex);
+
+    // Don't expose internal error details in production
+    String errorMessage = isProduction() 
+        ? "An unexpected error occurred. Please try again later."
+        : (ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred");
+
     ErrorResponse errorResponse = ErrorResponse.of(
         "Internal Server Error",
-        ex.getMessage() != null ? ex.getMessage() : "An unexpected error occurred",
+        errorMessage,
         request.getRequestURI());
 
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -139,9 +115,20 @@ public class GlobalExceptionHandler {
       Exception ex,
       HttpServletRequest request) {
 
+    // Log the full exception with stack trace for debugging
+    logger.error("Unexpected exception occurred at {}: {}", 
+        request.getRequestURI(), 
+        ex.getMessage(), 
+        ex);
+
+    // Never expose internal error details in production
+    String errorMessage = isProduction() 
+        ? "An unexpected error occurred. Please try again later."
+        : "An unexpected error occurred";
+
     ErrorResponse errorResponse = ErrorResponse.of(
         "Internal Server Error",
-        "An unexpected error occurred",
+        errorMessage,
         request.getRequestURI());
 
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
