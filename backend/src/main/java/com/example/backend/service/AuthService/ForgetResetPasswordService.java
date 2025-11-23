@@ -6,9 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,16 +20,31 @@ import com.example.backend.service.GenericEmailService;
 @Service
 public class ForgetResetPasswordService {
 
-  @Autowired
-  private GenericEmailService emailService;
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private UserOtpRepository userOtpRepository;
+  private final GenericEmailService emailService;
+  private final UserRepository userRepository;
+  private final UserOtpRepository userOtpRepository;
+  private final PasswordEncoder passwordEncoder;
+  private final JwtService jwtPasswordResetService;
 
-  private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+  public ForgetResetPasswordService(
+      GenericEmailService emailService,
+      UserRepository userRepository,
+      UserOtpRepository userOtpRepository,
+      PasswordEncoder passwordEncoder,
+      JwtService jwtPasswordResetService) {
+    this.emailService = emailService;
+    this.userRepository = userRepository;
+    this.userOtpRepository = userOtpRepository;
+    this.passwordEncoder = passwordEncoder;
+    this.jwtPasswordResetService = jwtPasswordResetService;
+  }
 
   public void forgotPassword(String email) {
+    // Validate input
+    if (email == null || email.trim().isEmpty()) {
+      throw new RuntimeException("Email is required");
+    }
+
     User user = getUserByEmail(email);
 
     String otp = generateOtp();
@@ -88,13 +102,16 @@ public class ForgetResetPasswordService {
     return String.valueOf(otp);
   }
 
-  public void verifyOTPAndResetPassword(String email, String otp, String newPassword) {
-    System.out.println("Verifying OTP for email: " + email);
-    User user = verifyOtp(email, otp);
-    changePassword(user, newPassword);
-  }
+  public String verifyOtp(String email, String otp) {
+    // Validate inputs
+    if (email == null || email.trim().isEmpty()) {
+      throw new RuntimeException("Email is required");
+    }
+    if (otp == null || otp.trim().isEmpty()) {
+      throw new RuntimeException("OTP is required");
+    }
 
-  private User verifyOtp(String email, String otp) {
+    System.out.println("Verifying OTP for email: " + email);
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RuntimeException("User not found with this email"));
 
@@ -108,11 +125,33 @@ public class ForgetResetPasswordService {
       throw new RuntimeException("OTP has expired");
     }
 
-    return user;
+    // Delete the used OTP after successful verification
+    userOtpRepository.delete(userOtp);
 
+    // Generate and return JWT token
+    return jwtPasswordResetService.generatePasswordResetToken(email, otp);
   }
 
-  private void changePassword(User user, String newPassword) {
+  public void changePassword(String email, String resetToken, String newPassword) {
+    // Validate inputs
+    if (email == null || email.trim().isEmpty()) {
+      throw new RuntimeException("Email is required");
+    }
+    if (resetToken == null || resetToken.trim().isEmpty()) {
+      throw new RuntimeException("Reset token is required");
+    }
+    if (newPassword == null || newPassword.trim().isEmpty()) {
+      throw new RuntimeException("New password is required");
+    }
+
+    // Validate JWT token
+    if (!jwtPasswordResetService.isTokenValid(resetToken, email)) {
+      throw new RuntimeException("Invalid or expired reset token");
+    }
+
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with this email"));
+
     String hashedPassword = passwordEncoder.encode(newPassword);
     user.setPassword(hashedPassword);
     userRepository.save(user);

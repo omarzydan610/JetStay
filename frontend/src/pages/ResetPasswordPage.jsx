@@ -13,6 +13,9 @@ function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [resetToken, setResetToken] = useState(null);
 
   const validatePassword = (password) => {
     if (password.length < 8) {
@@ -36,15 +39,62 @@ function ResetPasswordPage() {
     return null;
   };
 
+  const handleVerifyOtp = async () => {
+    // Validate OTP
+    const otpError = validateOtp(otp);
+    if (otpError) {
+      setError(otpError);
+      setSuccess("");
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await passwordService.verifyOtp(email, otp);
+      // Backend returns { resetToken: "...", message: "..." }
+      if (response.resetToken) {
+        setResetToken(response.resetToken);
+        // Store token in localStorage
+        localStorage.setItem("passwordResetToken", response.resetToken);
+        setOtpVerified(true);
+        setError(""); // Explicitly clear any errors
+        // Success message will be shown via otpVerified state below the OTP field
+      } else {
+        setError(response.message || "Failed to verify OTP");
+      }
+    } catch (err) {
+      if (err.response) {
+        const message = err.response.data?.message || err.response.data?.error;
+        if (err.response.status === 400) {
+          setError(message || "Invalid OTP.");
+        } else if (err.response.status === 404) {
+          setError(
+            message || "OTP not found or expired. Please request a new one."
+          );
+        } else {
+          setError(message || "An error occurred. Please try again.");
+        }
+      } else if (err.request) {
+        setError("Network error. Please check your connection and try again.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    // Validate OTP
-    const otpError = validateOtp(otp);
-    if (otpError) {
-      setError(otpError);
+    // Check if OTP is verified
+    if (!otpVerified || !resetToken) {
+      setError("Please verify OTP first.");
       return;
     }
 
@@ -64,13 +114,15 @@ function ResetPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await passwordService.verifyOtpAndResetPassword(
+      const token = resetToken || localStorage.getItem("passwordResetToken");
+      const response = await passwordService.changePasswordWithToken(
         email,
-        otp,
-        newPassword
+        newPassword,
+        token
       );
       if (response.success) {
-        setSuccess("Password reset successfully! Redirecting...");
+        // Clear the token from localStorage
+        localStorage.removeItem("passwordResetToken");
         navigate("/", { state: { passwordChanged: true } });
       } else {
         setError(response.message || "Failed to reset password");
@@ -79,11 +131,15 @@ function ResetPasswordPage() {
       if (err.response) {
         const message = err.response.data?.message || err.response.data?.error;
         if (err.response.status === 400) {
-          setError(message || "Invalid OTP or request.");
-        } else if (err.response.status === 404) {
+          setError(message || "Invalid token or request.");
+        } else if (err.response.status === 401) {
           setError(
-            message || "OTP not found or expired. Please request a new one."
+            message || "Invalid or expired token. Please verify OTP again."
           );
+          // Clear invalid token
+          localStorage.removeItem("passwordResetToken");
+          setOtpVerified(false);
+          setResetToken(null);
         } else if (err.response.status === 500) {
           setError(message || "Server error. Please try again later.");
         } else {
@@ -151,7 +207,7 @@ function ResetPasswordPage() {
               value={otp}
               onChange={handleOtpChange}
               required
-              disabled={loading}
+              disabled={loading || verifyingOtp || otpVerified}
               maxLength={6}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 text-center text-2xl tracking-widest"
               placeholder="000000"
@@ -213,13 +269,54 @@ function ResetPasswordPage() {
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
-          >
-            {loading ? "Resetting..." : "Reset Password"}
-          </button>
+          {otpVerified && (
+            <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg">
+              ✓ OTP verified successfully! You can now reset your password.
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={handleVerifyOtp}
+              disabled={verifyingOtp || otpVerified || otp.length !== 6}
+              className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                otpVerified
+                  ? "bg-green-600 text-white cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+              }`}
+            >
+              {verifyingOtp ? (
+                "Verifying..."
+              ) : otpVerified ? (
+                <span className="flex items-center justify-center gap-1">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Verified
+                </span>
+              ) : (
+                "Verify OTP"
+              )}
+            </button>
+            <button
+              type="submit"
+              disabled={loading || !otpVerified}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+            >
+              {loading ? "Resetting..." : "Reset Password"}
+            </button>
+          </div>
         </form>
 
         <div className="mt-6 text-center">

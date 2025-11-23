@@ -6,8 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.ApiResponse;
-import com.example.backend.dto.AuthDTO.ChangePasswordWithOtpRequest;
+import com.example.backend.dto.AuthDTO.ChangePasswordRequest;
 import com.example.backend.dto.AuthDTO.ForgotPasswordRequest;
+import com.example.backend.dto.AuthDTO.VerifyOtpRequest;
+import com.example.backend.dto.AuthDTO.VerifyOtpResponse;
 import com.example.backend.service.AuthService.ForgetResetPasswordService;
 
 @RestController
@@ -20,55 +22,37 @@ public class ForgotPasswordController {
 
   @PostMapping("/forgot-password")
   public ResponseEntity<ApiResponse> sendOtp(@RequestBody ForgotPasswordRequest request) {
-    System.out.println("Received forgot password request: " + request);
-
     try {
-      String email = request.getEmail();
-
-      if (email == null || email.trim().isEmpty()) {
-        return ResponseEntity.badRequest().body(ApiResponse.error("Email is required"));
-      }
-
-      // Send OTP email
-      forgotPasswordService.forgotPassword(email);
-
+      forgotPasswordService.forgotPassword(request.getEmail());
       return ResponseEntity.ok(ApiResponse.success("OTP has been sent to your email"));
-
     } catch (Exception e) {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(ApiResponse.error("Failed to send OTP: " + e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.error(e.getMessage()));
     }
   }
 
-  @PostMapping("/change-password-with-otp")
-  public ResponseEntity<ApiResponse> changePasswordWithOTP(@RequestBody ChangePasswordWithOtpRequest request) {
-    System.out.println("Received change password with OTP request: " + request);
+  @PostMapping("/verify-otp")
+  public ResponseEntity<?> verifyOtp(@RequestBody VerifyOtpRequest request) {
     try {
-      String email = request.getEmail();
-      String otp = request.getOtp();
-      String newPassword = request.getNewPassword();
-
-      if (email == null || email.trim().isEmpty()) {
-        return ResponseEntity.badRequest().body(ApiResponse.error("Email is required"));
-      }
-
-      if (otp == null || otp.trim().isEmpty()) {
-        return ResponseEntity.badRequest().body(ApiResponse.error("OTP is required"));
-      }
-
-      if (newPassword == null || newPassword.trim().isEmpty()) {
-        return ResponseEntity.badRequest().body(ApiResponse.error("New password is required"));
-      }
-
-      // Verify OTP and change password
-      forgotPasswordService.verifyOTPAndResetPassword(email, otp, newPassword);
-
-      return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
-
+      String resetToken = forgotPasswordService.verifyOtp(request.getEmail(), request.getOtp());
+      VerifyOtpResponse response = new VerifyOtpResponse(resetToken, "OTP verified successfully");
+      return ResponseEntity.ok(response);
     } catch (Exception e) {
-      System.err.println("Error changing password: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(ApiResponse.error("Failed to change password: " + e.getMessage()));
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.error(e.getMessage()));
+    }
+  }
+
+  @PostMapping("/change-password")
+  public ResponseEntity<ApiResponse> changePasswordWithToken(
+      @RequestBody ChangePasswordRequest request,
+      @RequestHeader("Reset-Token") String resetToken) {
+    try {
+      forgotPasswordService.changePassword(request.getEmail(), resetToken, request.getNewPassword());
+      return ResponseEntity.ok(ApiResponse.success("Password changed successfully"));
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(ApiResponse.error(e.getMessage()));
     }
   }
 

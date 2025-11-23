@@ -1,13 +1,27 @@
-import apiClient from './axiosConfig';
+import apiClient from "./axiosConfig";
 
 class PasswordService {
   async sendOtpRequest(email) {
-    const response = await apiClient.post('/api/auth/forgot-password', { email });
+    const response = await apiClient.post("/api/auth/forgot-password", {
+      email,
+    });
     return response.data;
   }
 
-  async verifyOtpAndResetPassword(email, otp, newPassword) {
-    const response = await apiClient.post('/api/auth/change-password-with-otp', { email, otp, newPassword });
+  async verifyOtp(email, otp) {
+    const response = await apiClient.post("/api/auth/verify-otp", {
+      email,
+      otp,
+    });
+    return response.data;
+  }
+
+  async changePasswordWithToken(email, newPassword, resetToken) {
+    const response = await apiClient.post(
+      "/api/auth/change-password",
+      { email, newPassword },
+      { headers: { "Reset-Token": resetToken } }
+    );
     return response.data;
   }
 }
