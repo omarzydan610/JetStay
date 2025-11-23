@@ -216,7 +216,6 @@ class ForgetResetPasswordServiceTest {
     entityManager.flush();
     entityManager.clear();
 
-    System.out.println("Created expired OTP with ID: " + expiredOtp.getOtpID());
 
     // Act & Assert
     RuntimeException exception = assertThrows(RuntimeException.class,

@@ -74,10 +74,8 @@ public class ForgetResetPasswordService {
     try {
       String template = prepareTemplate(otp, userName);
       emailService.sendEmail(email, "Your OTP Code", template);
-      System.out.println("OTP email sent successfully to: " + email);
     } catch (Exception e) {
       // If email sending fails, delete the OTP from database
-      System.err.println("Failed to send OTP email, removing OTP from database");
       userOtpRepository.delete(userOtp);
       throw new RuntimeException("Failed to send OTP email: " + e.getMessage(), e);
     }
@@ -85,7 +83,6 @@ public class ForgetResetPasswordService {
 
   private String prepareTemplate(String otp, String userName) throws Exception {
     ClassPathResource resource = new ClassPathResource("template/otp_template.html");
-    System.out.println(resource.exists() ? "Template found" : "Template not found");
     String template;
     try (BufferedReader reader = new BufferedReader(
         new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
@@ -111,7 +108,6 @@ public class ForgetResetPasswordService {
       throw new RuntimeException("OTP is required");
     }
 
-    System.out.println("Verifying OTP for email: " + email);
     User user = userRepository.findByEmail(email)
         .orElseThrow(() -> new RuntimeException("User not found with this email"));
 
