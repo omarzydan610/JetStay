@@ -1,5 +1,7 @@
 package com.example.backend.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +25,9 @@ public class Airline {
   @Column(name = "airline_rate")
   private Float airlineRate;
 
+  @Column(name = "number_of_rates")
+  private Integer numberOfRates;
+
   @Column(name = "airline_nationality", nullable = false)
   private String airlineNationality;
 
@@ -33,4 +38,11 @@ public class Airline {
   @Column(name = "logo_url")
   private String logoUrl;
 
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
+
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
+  }
 }

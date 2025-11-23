@@ -76,9 +76,11 @@ public class TicketFlightServiceTest {
 
                 // 3. Airlines (with non-null admin)
                 Airline emirates = airlineRepository.save(
-                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png"));
+                                new Airline(null, "Emirates", 4.5f, 50, "UAE", admin1, "emirates.png",
+                                                LocalDateTime.now()));
                 Airline qatar = airlineRepository.save(
-                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png"));
+                                new Airline(null, "Qatar Airways", 4.7f, 60, "Qatar", admin2, "qatar.png",
+                                                LocalDateTime.now()));
 
                 // 4. Flights
                 Flight emiratesFlight = flightRepository.save(new Flight(
