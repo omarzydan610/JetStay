@@ -32,4 +32,5 @@ public class Airline {
 
   @Column(name = "logo_url")
   private String logoUrl;
+
 }

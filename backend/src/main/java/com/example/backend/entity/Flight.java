@@ -47,7 +47,8 @@ public class Flight {
   @Column(name = "plane_type")
   private String planeType;
 
-  public enum FlightStatus {
+    public enum FlightStatus {
     PENDING, ON_TIME, CANCELLED
   }
+
 }
