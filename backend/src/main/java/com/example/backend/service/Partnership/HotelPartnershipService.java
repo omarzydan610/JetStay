@@ -27,7 +27,7 @@ public class HotelPartnershipService {
     private FileStorageService fileStorageService;
 
 
-    public HotelPartnershipResponse submitHotelPartnership(HotelPartnershipRequest request) throws IOException {
+    public String submitHotelPartnership(HotelPartnershipRequest request) throws IOException {
         // Check if user email already exists
         if (userRepository.existsByEmail(request.getManagerEmail())) {
             throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
@@ -68,17 +68,7 @@ public class HotelPartnershipService {
         Hotel savedHotel = hotelRepository.save(hotel);
 
         // Prepare response
-        HotelPartnershipResponse response = new HotelPartnershipResponse();
-        // response.setHotelID(savedHotel.getHotelID());
-        response.setHotelName(savedHotel.getHotelName());
-        response.setLatitude(savedHotel.getLatitude());
-        response.setLongitude(savedHotel.getLongitude());
-        response.setCity(savedHotel.getCity());
-        response.setCountry(savedHotel.getCountry());
-        response.setManagerEmail(savedAdmin.getEmail());
-        response.setHotelLogoPath(logoPath);
-        response.setCreatedAt(savedHotel.getCreatedAt());
-        response.setStatus(savedAdmin.getStatus().toString());
+        String response = "Hotel partnership request submitted successfully with ID: " + savedHotel.getHotelID();
 
         return response;
     }

@@ -1,4 +1,3 @@
-// service/PartnershipService.java
 package com.example.backend.service.Partnership;
 
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
@@ -28,7 +27,7 @@ public class AirlinePartnershipService {
     private FileStorageService fileStorageService;
 
 
-    public AirlinePartnershipResponse submitAirlinePartnership(AirlinePartnershipRequest request) throws IOException {
+    public String submitAirlinePartnership(AirlinePartnershipRequest request) throws IOException {
         // Check if user email already exists
         if (userRepository.existsByEmail(request.getManagerEmail())) {
             throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
@@ -70,16 +69,7 @@ public class AirlinePartnershipService {
 
         Airline savedAirline = airlineRepository.save(airline);
 
-        // Prepare response
-        AirlinePartnershipResponse response = new AirlinePartnershipResponse();
-        // response.setAirlineID(savedAirline.getAirlineID());
-        response.setAirlineName(savedAirline.getAirlineName());
-        response.setAirlineNationality(savedAirline.getAirlineNationality());
-        response.setManagerEmail(savedAdmin.getEmail());
-        response.setAirlineLogoPath(savedAirline.getLogoUrl());
-        response.setNumberOfRates(savedAirline.getNumberOfRates());
-        response.setCreatedAt(savedAirline.getCreatedAt());
-        response.setStatus(savedAirline.getStatus().toString());
+        String response = "Airline partnership request submitted successfully with ID: " + savedAirline.getAirlineID();
 
         return response;
     }

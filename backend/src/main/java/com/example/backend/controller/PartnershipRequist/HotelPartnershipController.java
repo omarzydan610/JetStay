@@ -23,7 +23,7 @@ public class HotelPartnershipController {
     public ResponseEntity<?> submitHotelPartnership(
             @Valid @ModelAttribute HotelPartnershipRequest request) {
         try {
-            HotelPartnershipResponse response = partnershipService.submitHotelPartnership(request);
+            String response = partnershipService.submitHotelPartnership(request);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

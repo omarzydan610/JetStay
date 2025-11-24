@@ -7,6 +7,7 @@ class PartnershipService {
         'Content-Type': 'multipart/form-data',
       },
     });
+    console.log(response.data);
     return response.data;
   }
 
@@ -16,6 +17,7 @@ class PartnershipService {
         'Content-Type': 'multipart/form-data',
       },
     });
+    console.log(response.data);
     return response.data;
   }
 }
