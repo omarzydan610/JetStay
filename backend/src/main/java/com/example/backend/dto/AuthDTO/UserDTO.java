@@ -1,6 +1,4 @@
-package com.example.backend.dto;
-
-import jakarta.persistence.Column;
+package com.example.backend.dto.AuthDTO;
 
 public class UserDTO {
 

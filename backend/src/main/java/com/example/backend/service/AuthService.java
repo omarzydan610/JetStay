@@ -1,7 +1,8 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.SignupResponseDTO;
-import com.example.backend.dto.UserDTO;
+import com.example.backend.dto.AuthDTO.UserDTO;
+import com.example.backend.dto.response.ErrorResponse;
+import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.User;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
@@ -22,31 +23,32 @@ public class AuthService {
         this.userMapper = userMapper;
     }
 
-    public SignupResponseDTO SignUp(UserDTO newuser){
+    public Object SignUp(UserDTO newuser, User.UserStatus userStatus, User.UserRole userRole){
 
-        SignupResponseDTO response = new SignupResponseDTO();
         Optional<User> existingUser = userRepository.findByEmail(newuser.getEmail());
 
-        if(existingUser.isPresent()){
-            response.setStatus(false);
-            response.setMessage("Email already registered");
-            return response;
+        if (existingUser.isPresent()) {
+            return ErrorResponse.of(
+                    "Email Already Exists",
+                    "Email is already registered",
+                    "/api/auth/signup"
+            );
         }
 
         try {
-
             newuser.setPassword(encoder.encode(newuser.getPassword()));
             User user = userMapper.signupToUser(newuser);
             userRepository.save(user);
-            response.setStatus(true);
-            response.setMessage("Signed up successfully");
+            return SuccessResponse.of(
+                    "Signed up successfully"
+            );
 
-            return response;
         } catch (Exception e) {
-
-            response.setStatus(false);
-            response.setMessage("Sign up Failed");
-            return response;
+            return ErrorResponse.of(
+                    "Signup Failed",
+                    "An unexpected error occurred",
+                    "/api/auth/signup"
+            );
         }
 
     }

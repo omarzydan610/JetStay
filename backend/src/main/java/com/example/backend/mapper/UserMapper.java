@@ -1,5 +1,5 @@
 package com.example.backend.mapper;
-import com.example.backend.dto.UserDTO;
+import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.entity.User;
 import org.mapstruct.Mapper;
 

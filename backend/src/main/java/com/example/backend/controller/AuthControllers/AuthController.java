@@ -1,7 +1,6 @@
-package com.example.backend.controller;
+package com.example.backend.controller.AuthControllers;
 
-import com.example.backend.dto.SignupResponseDTO;
-import com.example.backend.dto.UserDTO;
+import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.service.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 
 public class AuthController {
 
@@ -20,9 +19,11 @@ public class AuthController {
         this.authService = authService;
     }
 
+
     @PostMapping("/signup")
-    public ResponseEntity<SignupResponseDTO> createUser(@RequestBody UserDTO user) {
-        return ResponseEntity.ok(authService.SignUp(user));
+    public ResponseEntity<?> createUser(@RequestBody UserDTO user) {
+        Object response = authService.SignUp(user, null, null);
+        return ResponseEntity.ok(response);
     }
 
 }
