@@ -21,18 +21,27 @@ public class RoomTypeService {
 
     public RoomType getRoomTypeById(int roomTypeId) {
         try {
-            return roomTypeRepository.findById(roomTypeId).orElse(null);
+            RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
+            if (roomType == null) {
+                throw new BadRequestException("Room type not found with ID: " + roomTypeId);
+            }
+            return roomType;
         } catch (Exception e) {
-            throw new BadRequestException("Error retrieving room type with ID: " + roomTypeId);
+            throw e;
         }
     }
 
     public java.util.List<RoomTypeData> getRoomTypesByHotelId(Integer hotelId) {
-        
+
         try {
-            return roomTypeRepository.findByHotelId(hotelId);
+            Hotel hotel = hotelRepository.findById(hotelId).orElse(null);
+            if (hotel == null) {
+                throw new BadRequestException("Hotel not found with ID: " + hotelId);
+            }
+            java.util.List<RoomTypeData> roomTypes = roomTypeRepository.findByHotelId(hotelId);
+            return roomTypes;
         } catch (Exception e) {
-            throw new BadRequestException("Error retrieving room types for hotel with ID: " + hotelId);
+            throw e;
         }
     }
 
@@ -75,10 +84,14 @@ public class RoomTypeService {
     }
 
     public void deleteRoomType(int roomTypeId) {
-       try {
-         roomTypeRepository.deleteById(roomTypeId);
-       } catch (Exception e) {
-            throw new BadRequestException("Error deleting room type with ID: " + roomTypeId);
-       }
+        try {
+            RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
+            if (roomType == null) {
+                throw new BadRequestException("Room type not found with ID: " + roomTypeId);
+            }
+            roomTypeRepository.deleteById(roomTypeId);
+        } catch (Exception e) {
+            throw e;
+        }
     }
 }
