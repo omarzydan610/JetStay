@@ -13,6 +13,7 @@ const AirlineForm = () => {
     managerEmail: '',
     managerPassword: '',
     confirmPassword: '',
+    airlineLogo: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -128,8 +129,11 @@ const AirlineForm = () => {
         airlineLogo: ''
       }));
 
-      // Here you would handle the file upload or store it in formData
-      console.log('Selected file:', file);
+      // Store the file in formData
+      setFormData(prev => ({
+        ...prev,
+        airlineLogo: file
+      }));
     }
   };
 
@@ -142,11 +146,27 @@ const AirlineForm = () => {
     setLoading(true);
 
     try {
-      // Prepare data for submission (exclude confirmPassword)
-      const { confirmPassword, ...submissionData } = formData;
+      // Create FormData object for file upload
+      const submissionFormData = new FormData();
       
+      // Append all form fields
+      submissionFormData.append('airlineName', formData.airlineName);
+      submissionFormData.append('airlineNational', formData.airlineNational);
+      submissionFormData.append('adminFirstName', formData.adminFirstName);
+      submissionFormData.append('adminLastName', formData.adminLastName);
+      submissionFormData.append('adminPhone', formData.adminPhone);
+      submissionFormData.append('managerEmail', formData.managerEmail);
+      submissionFormData.append('managerPassword', formData.managerPassword);
+      
+      // Append the logo file if it exists
+      if (formData.airlineLogo) {
+        submissionFormData.append('airlineLogo', formData.airlineLogo);
+      }
+
+      console.log('Submitting form with file:', formData.airlineLogo);
+
       // Submit to backend using the service
-      await partnershipService.submitAirlinePartnership(submissionData);
+      await partnershipService.submitAirlinePartnership(submissionFormData);
       
       console.log('Submission successful');
       
@@ -163,6 +183,7 @@ const AirlineForm = () => {
         managerEmail: '',
         managerPassword: '',
         confirmPassword: '',
+        airlineLogo: null,
       });
 
     } catch (error) {
