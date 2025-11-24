@@ -24,6 +24,5 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
     Integer findAirlineIDByAirlineName(@Param("airlineName") String airlineName);
 
 
-
-    
+    Airline findByAirlineName(String airlineName);
 }
