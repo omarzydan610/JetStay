@@ -4,6 +4,7 @@ import com.example.backend.dto.RoomTypeDTO;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
@@ -133,7 +134,7 @@ public class RoomTypeServiceTest {
         RoomTypeDTO dto = new RoomTypeDTO();
         dto.setRoomTypeName("Fail");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(BadRequestException.class,
                 () -> roomTypeService.updateRoomType(dto, -1));
     }
 
@@ -156,7 +157,7 @@ public class RoomTypeServiceTest {
         dto.setHotelId(999999);
         dto.setRoomTypeName("Test");
 
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(BadRequestException.class,
                 () -> roomTypeService.addRoomType(dto));
     }
 }
