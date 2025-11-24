@@ -7,6 +7,7 @@ import com.example.backend.dto.RoomTypeDTO;
 import com.example.backend.dto.RoomTypeData;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
+import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 
@@ -19,19 +20,27 @@ public class RoomTypeService {
     private HotelRepository hotelRepository;
 
     public RoomType getRoomTypeById(int roomTypeId) {
-        return roomTypeRepository.findById(roomTypeId).orElse(null);
+        try {
+            return roomTypeRepository.findById(roomTypeId).orElse(null);
+        } catch (Exception e) {
+            throw new BadRequestException("Error retrieving room type with ID: " + roomTypeId);
+        }
     }
 
     public java.util.List<RoomTypeData> getRoomTypesByHotelId(Integer hotelId) {
         
-        return roomTypeRepository.findByHotelId(hotelId);
+        try {
+            return roomTypeRepository.findByHotelId(hotelId);
+        } catch (Exception e) {
+            throw new BadRequestException("Error retrieving room types for hotel with ID: " + hotelId);
+        }
     }
 
     public RoomType addRoomType(RoomTypeDTO roomTypeDTO) {
         try {
             Hotel hotel = hotelRepository.findById(roomTypeDTO.getHotelId()).orElse(null);
             if (hotel == null) {
-                throw new IllegalArgumentException("Hotel not found with ID: " + roomTypeDTO.getHotelId());
+                throw new BadRequestException("Hotel not found with ID: " + roomTypeDTO.getHotelId());
             }
             RoomType roomType = new RoomType();
             roomType.setRoomTypeName(roomTypeDTO.getRoomTypeName());
@@ -51,7 +60,7 @@ public class RoomTypeService {
 
             RoomType existingRoomType = roomTypeRepository.findById(roomTypeId).orElse(null);
             if (existingRoomType == null) {
-                throw new IllegalArgumentException("Room type not found with ID: " + roomTypeId);
+                throw new BadRequestException("Room type not found with ID: " + roomTypeId);
             }
             existingRoomType.setRoomTypeName(roomTypeDTO.getRoomTypeName());
             existingRoomType.setPrice(roomTypeDTO.getPrice());
@@ -66,6 +75,10 @@ public class RoomTypeService {
     }
 
     public void deleteRoomType(int roomTypeId) {
-        roomTypeRepository.deleteById(roomTypeId);
+       try {
+         roomTypeRepository.deleteById(roomTypeId);
+       } catch (Exception e) {
+            throw new BadRequestException("Error deleting room type with ID: " + roomTypeId);
+       }
     }
 }
