@@ -72,7 +72,7 @@ public class AirlinePartnershipService {
 
         // Prepare response
         AirlinePartnershipResponse response = new AirlinePartnershipResponse();
-        response.setAirlineID(savedAirline.getAirlineID());
+        // response.setAirlineID(savedAirline.getAirlineID());
         response.setAirlineName(savedAirline.getAirlineName());
         response.setAirlineNationality(savedAirline.getAirlineNationality());
         response.setManagerEmail(savedAdmin.getEmail());

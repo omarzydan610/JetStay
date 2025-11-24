@@ -11,7 +11,7 @@ class PartnershipService {
   }
 
   async submitHotelPartnership(formData) {
-    const response = await apiClient.post('/partnership/hotel', formData, {
+    const response = await apiClient.post('/api/partnership/hotel', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

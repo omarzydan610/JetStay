@@ -1,59 +1,93 @@
 package com.example.backend.service.Partnership;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class FileStorageService {
     
-    @Value("${file.upload.directory:./uploads/logos}")
-    private String uploadDirectory;
+    @Autowired
+    private Cloudinary cloudinary;
     
     public String storeFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             return null;
         }
         
-        // Validate file type
         String contentType = file.getContentType();
         if (!isValidImageType(contentType)) {
             throw new IllegalArgumentException("Invalid file type. Only JPEG, PNG, and GIF images are allowed.");
         }
         
-        // Create upload directory if it doesn't exist
-        Path uploadPath = Paths.get(uploadDirectory);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        String publicId = "partnership-" + UUID.randomUUID().toString();
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadParams = ObjectUtils.asMap(
+            "folder", "jetstay/partnerships",
+            "public_id", publicId,
+            "overwrite", false,
+            "resource_type", "image"
+        );
+        
+        @SuppressWarnings("unchecked")
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(), uploadParams);
+        
+        return uploadResult.get("secure_url").toString();
+    }
+    
+    public boolean deleteFile(String imageUrl) throws IOException {
+        if (imageUrl == null || imageUrl.isEmpty()) {
+            return false;
         }
         
-        // Generate unique filename
-        String originalFileName = file.getOriginalFilename();
-        String fileExtension = getFileExtension(originalFileName);
-        String uniqueFileName = UUID.randomUUID().toString() + fileExtension;
-        
-        // Save file
-        Path filePath = uploadPath.resolve(uniqueFileName);
-        Files.copy(file.getInputStream(), filePath);
-        
-        return uniqueFileName;
+        try {
+            String publicId = extractPublicIdFromUrl(imageUrl);
+            
+            if (publicId != null) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> result = cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+                return "ok".equals(result.get("result"));
+            }
+        } catch (Exception e) {
+            System.err.println("Error deleting file from Cloudinary: " + e.getMessage());
+        }
+        return false;
+    }
+    
+    private String extractPublicIdFromUrl(String imageUrl) {
+        try {
+            
+            String[] parts = imageUrl.split("/upload/");
+            if (parts.length > 1) {
+                String pathPart = parts[1];
+                if (pathPart.contains("/v")) {
+                    pathPart = pathPart.substring(pathPart.indexOf("/") + 1);
+                }
+                int lastDotIndex = pathPart.lastIndexOf(".");
+                if (lastDotIndex > 0) {
+                    pathPart = pathPart.substring(0, lastDotIndex);
+                }
+                return pathPart;
+            }
+        } catch (Exception e) {
+            System.err.println("Error extracting public ID from URL: " + e.getMessage());
+        }
+        return null;
     }
     
     private boolean isValidImageType(String contentType) {
         return contentType != null && 
                (contentType.equals("image/jpeg") || 
                 contentType.equals("image/png") || 
-                contentType.equals("image/gif"));
-    }
-    
-    private String getFileExtension(String fileName) {
-        if (fileName == null) return "";
-        int lastDotIndex = fileName.lastIndexOf(".");
-        return lastDotIndex > 0 ? fileName.substring(lastDotIndex) : "";
+                contentType.equals("image/gif") ||
+                contentType.equals("image/webp") ||
+                contentType.equals("image/svg+xml"));
     }
 }
