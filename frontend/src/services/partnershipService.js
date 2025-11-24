@@ -2,7 +2,7 @@ import apiClient from './axiosConfig';
 
 class PartnershipService {
   async submitAirlinePartnership(formData) {
-    const response = await apiClient.post('/partnership/airline', formData, {
+    const response = await apiClient.post('/api/partnership/airline', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

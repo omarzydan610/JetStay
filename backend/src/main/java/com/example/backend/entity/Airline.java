@@ -1,5 +1,7 @@
 package com.example.backend.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,4 +35,18 @@ public class Airline {
   @Column(name = "logo_url")
   private String logoUrl;
 
+  @Column(name = "number_of_rates")
+  private Integer numberOfRates = 0;
+
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  private Status status = Status.INACTIVE;
+
+  public enum Status {
+    ACTIVE,
+    INACTIVE
+  }
 }

@@ -151,7 +151,7 @@ const AirlineForm = () => {
       
       // Append all form fields
       submissionFormData.append('airlineName', formData.airlineName);
-      submissionFormData.append('airlineNational', formData.airlineNational);
+      submissionFormData.append('airlineNationality', formData.airlineNational);
       submissionFormData.append('adminFirstName', formData.adminFirstName);
       submissionFormData.append('adminLastName', formData.adminLastName);
       submissionFormData.append('adminPhone', formData.adminPhone);
