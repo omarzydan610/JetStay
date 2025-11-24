@@ -14,32 +14,32 @@ import java.time.LocalDateTime;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SuccessResponse<T> {
-    @Builder.Default
-    private boolean success = true;
+  @Builder.Default
+  private boolean success = true;
 
-    private String message;
+  private String message;
 
-    private T data;
+  private T data;
 
-    @Builder.Default
-    private LocalDateTime timestamp = LocalDateTime.now();
+  @Builder.Default
+  private LocalDateTime timestamp = LocalDateTime.now();
 
-    // Success response with data
-    public static <T> SuccessResponse<T> of(String message, T data) {
-        return SuccessResponse.<T>builder()
-                .success(true)
-                .message(message)
-                .data(data)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
+  // Success response with data
+  public static <T> SuccessResponse<T> of(String message, T data) {
+    return SuccessResponse.<T>builder()
+        .success(true)
+        .message(message)
+        .data(data)
+        .timestamp(LocalDateTime.now())
+        .build();
+  }
 
-    // Success response without data
-    public static <T> SuccessResponse<T> of(String message) {
-        return SuccessResponse.<T>builder()
-                .success(true)
-                .message(message)
-                .timestamp(LocalDateTime.now())
-                .build();
-    }
+  // Success response without data
+  public static <T> SuccessResponse<T> of(String message) {
+    return SuccessResponse.<T>builder()
+        .success(true)
+        .message(message)
+        .timestamp(LocalDateTime.now())
+        .build();
+  }
 }
