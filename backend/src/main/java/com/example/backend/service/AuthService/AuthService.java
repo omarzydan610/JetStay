@@ -1,4 +1,4 @@
-package com.example.backend.service;
+package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.response.ErrorResponse;
@@ -15,12 +15,12 @@ public class AuthService {
 
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
+    private UserMapper userMapper;
 
-    public AuthService(PasswordEncoder encoder, UserRepository userRepository, UserMapper userMapper) {
+    public AuthService(PasswordEncoder encoder, UserRepository userRepository) {
         this.encoder = encoder;
         this.userRepository = userRepository;
-        this.userMapper = userMapper;
+        this.userMapper = new UserMapper();
     }
 
     public Object SignUp(UserDTO newuser, User.UserStatus userStatus, User.UserRole userRole){
@@ -37,7 +37,7 @@ public class AuthService {
 
         try {
             newuser.setPassword(encoder.encode(newuser.getPassword()));
-            User user = userMapper.signupToUser(newuser);
+            User user = userMapper.signupToUser(newuser, userStatus, userRole);
             userRepository.save(user);
             return SuccessResponse.of(
                     "Signed up successfully"

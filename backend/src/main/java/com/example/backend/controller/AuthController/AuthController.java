@@ -1,7 +1,7 @@
-package com.example.backend.controller.AuthControllers;
+package com.example.backend.controller.AuthController;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
-import com.example.backend.service.AuthService;
+import com.example.backend.service.AuthService.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

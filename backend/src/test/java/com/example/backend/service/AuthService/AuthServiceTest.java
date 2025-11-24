@@ -1,4 +1,4 @@
-package com.example.backend.service;
+package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.response.ErrorResponse;
@@ -53,7 +53,7 @@ class AuthServiceTest {
     void testSignupSuccess() {
         when(userRepository.findByEmail(userDTO.getEmail())).thenReturn(Optional.empty());
         when(encoder.encode(anyString())).thenReturn("encoded");
-        when(userMapper.signupToUser(any())).thenReturn(user);
+        when(userMapper.signupToUser(any(),eq(null),eq(null))).thenReturn(user);
 
         Object response = authService.SignUp(userDTO, null, null);
 
