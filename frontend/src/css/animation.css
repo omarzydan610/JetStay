@@ -1,0 +1,30 @@
+@keyframes flyAcrossUp {
+  0% {
+    transform: translate(800%, 500%);   /* far right + below screen */
+  }
+  100% {
+    transform: translate(-200%, -200%);  /* far left + above screen */
+  }
+}
+
+.animate-fly-up {
+  animation: flyAcrossUp 5s linear infinite;
+}
+
+/* Animated blue <-> dark blue sweeping diagonally */
+
+.animated-bg {
+  background: linear-gradient(135deg, #03164b, #005df3);
+  background-size: 200% 200%;
+  animation: sweepBlue 6s ease-in-out infinite alternate;
+}
+
+@keyframes sweepBlue {
+  0% {
+    background-position: 100% 100%; /* bottom-right */
+  }
+  100% {
+    background-position: 0% 0%; /* top-left */
+  }
+}
+

@@ -37,6 +37,17 @@ const airlineStatService = {
       throw err;
     }
   },
+
+    getAirlineDetails: async (airlineName) => {
+    try {
+      const url = `/api/airline/details/${airlineName}`
+      const res = await apiClient.get(url);
+      return res.data.data;
+    } catch (err) {
+      console.error("Error fetching trip type stats:", err);
+      throw err;
+    }
+  },
 };
 
 export default airlineStatService;
