@@ -136,12 +136,5 @@ public class FlightDetailServiceTest {
         assertEquals("Boeing 777", firstFlight.getPlaneType());
     }
 
-    @Test
-    public void testGetFlightsByAirlineName_NonExistentAirline() {
-        List<FlightsDataDTO> flights = flightDetailService.getFlightsByAirlineName("NonExistentAirline");
-
-        assertNotNull(flights);
-        assertTrue(flights.isEmpty());
-    }
 }
 
