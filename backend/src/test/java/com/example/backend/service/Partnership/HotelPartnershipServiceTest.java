@@ -1,10 +1,13 @@
 package com.example.backend.service.Partnership;
 
+import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.HotelPartnershipRequest;
+import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AuthService.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,11 +33,15 @@ public class HotelPartnershipServiceTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private AuthService authService;
+
     @InjectMocks
     private PartnershipService partnershipService;
 
     @Test
     public void testSubmitHotelPartnership_Success() throws IOException {
+        // Given
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setHotelName("TestHotel");
         request.setLatitude(10.0);
@@ -50,10 +57,15 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        // Mock AuthService signup success
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(11);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Hotel savedHotel = new Hotel();
         savedHotel.setHotelID(21);
@@ -61,46 +73,108 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hotel.png");
 
+        // When
         String response = partnershipService.submitHotelPartnership(request);
 
+        // Then
         assertNotNull(response);
         assertTrue(response.contains("21"));
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
-        verify(userRepository).save(any(User.class));
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(userRepository).findByEmail(request.getManagerEmail());
         verify(hotelRepository).save(any(Hotel.class));
         verify(fileStorageService).storeFile(any());
     }
 
     @Test
     public void testSubmitHotelPartnership_ManagerEmailExists_Throws() {
+        // Given
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setManagerEmail("exists@hotel.com");
         request.setHotelName("TestHotel");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
+        // When & Then
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
-        verifyNoInteractions(hotelRepository);
+        verifyNoInteractions(authService);
+        verify(hotelRepository, never()).save(any());
+    }
+
+    @Test
+    public void testSubmitHotelPartnership_AuthServiceFails_Throws() throws IOException {
+        // Given
+        HotelPartnershipRequest request = new HotelPartnershipRequest();
+        request.setHotelName("TestHotel");
+        request.setManagerEmail("manager@hotel.com");
+        request.setManagerPassword("pwd");
+
+        when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        // Mock AuthService signup failure
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(com.example.backend.dto.response.ErrorResponse.of("Signup Failed", "Email already exists", "/api/auth/signup"));
+
+        // When & Then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> partnershipService.submitHotelPartnership(request));
+
+        assertTrue(ex.getMessage().contains("Failed to create admin user"));
+
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(hotelRepository, never()).save(any());
+    }
+
+    @Test
+    public void testSubmitHotelPartnership_UserNotFoundAfterSignup_Throws() throws IOException {
+        // Given
+        HotelPartnershipRequest request = new HotelPartnershipRequest();
+        request.setHotelName("TestHotel");
+        request.setManagerEmail("manager@hotel.com");
+        request.setManagerPassword("pwd");
+
+        when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        // Mock AuthService signup success but user not found in repository
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
+
+        // When & Then
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> partnershipService.submitHotelPartnership(request));
+
+        assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
+
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(userRepository).findByEmail(request.getManagerEmail());
+        verify(hotelRepository, never()).save(any());
     }
 
     @Test
     public void testSubmitHotelPartnership_NoLogo_Success() throws IOException {
+        // Given
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setHotelName("NoLogoHotel");
         request.setManagerEmail("nologo@hotel.com");
         request.setManagerPassword("pwd");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(60);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Hotel savedHotel = new Hotel();
         savedHotel.setHotelID(61);
@@ -108,8 +182,10 @@ public class HotelPartnershipServiceTest {
 
         request.setHotelLogo(null);
 
+        // When
         String response = partnershipService.submitHotelPartnership(request);
 
+        // Then
         assertNotNull(response);
         assertTrue(response.contains("61"));
 
@@ -119,6 +195,7 @@ public class HotelPartnershipServiceTest {
 
     @Test
     public void testSubmitHotelPartnership_FileStorageThrows_ThrowsIOException() throws IOException {
+        // Given
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setHotelName("FailHotel");
         request.setManagerEmail("fail@hotel.com");
@@ -127,13 +204,18 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(70);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
+        // When & Then
         IOException ex = assertThrows(IOException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
@@ -144,6 +226,7 @@ public class HotelPartnershipServiceTest {
 
     @Test
     public void testSubmitHotelPartnership_VerifySavedHotelFields() throws IOException {
+        // Given
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setHotelName("CaptureHotel");
         request.setLatitude(12.34);
@@ -159,10 +242,14 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(80);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Hotel savedHotel = new Hotel();
         savedHotel.setHotelID(81);
@@ -170,8 +257,10 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hcap.png");
 
+        // When
         String response = partnershipService.submitHotelPartnership(request);
 
+        // Then
         assertNotNull(response);
 
         org.mockito.ArgumentCaptor<Hotel> captor = org.mockito.ArgumentCaptor.forClass(Hotel.class);
@@ -188,5 +277,6 @@ public class HotelPartnershipServiceTest {
         assertEquals(0, captured.getNumberOfRates());
         assertEquals(Hotel.Status.INACTIVE, captured.getStatus());
         assertEquals("http://example.com/hcap.png", captured.getLogoUrl());
+        assertNotNull(captured.getCreatedAt());
     }
 }

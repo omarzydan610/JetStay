@@ -1,10 +1,13 @@
 package com.example.backend.service.Partnership;
 
+import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
+import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AuthService.AuthService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,11 +33,15 @@ public class AirlinePartnershipServiceTest {
     @Mock
     private FileStorageService fileStorageService;
 
+    @Mock
+    private AuthService authService;
+
     @InjectMocks
     private PartnershipService partnershipService;
 
     @Test
     public void testSubmitAirlinePartnership_Success() throws IOException {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setAirlineName("TestAir");
         request.setAirlineNationality("TestLand");
@@ -48,10 +55,15 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        // Mock AuthService signup success
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(10);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Airline savedAirline = new Airline();
         savedAirline.setAirlineID(20);
@@ -59,37 +71,45 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/logo.png");
 
+        // When
         String response = partnershipService.submitAirlinePartnership(request);
 
+        // Then
         assertNotNull(response);
         assertTrue(response.contains("20"));
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
         verify(airlineRepository).existsByAirlineName(request.getAirlineName());
-        verify(userRepository).save(any(User.class));
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(userRepository).findByEmail(request.getManagerEmail());
         verify(airlineRepository).save(any(Airline.class));
         verify(fileStorageService).storeFile(any());
     }
 
     @Test
     public void testSubmitAirlinePartnership_ManagerEmailExists_Throws() {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setManagerEmail("existing@test.com");
         request.setAirlineName("TestAirline");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
+        // When & Then
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
-        verifyNoInteractions(airlineRepository);
+        verify(airlineRepository, never()).existsByAirlineName(anyString());
+        verifyNoInteractions(authService);
+        verify(airlineRepository, never()).save(any());
     }
 
     @Test
     public void testSubmitAirlinePartnership_AirlineNameExists_Throws() {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setManagerEmail("new@test.com");
         request.setAirlineName("ExistingAir");
@@ -97,6 +117,7 @@ public class AirlinePartnershipServiceTest {
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(true);
 
+        // When & Then
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
@@ -104,11 +125,66 @@ public class AirlinePartnershipServiceTest {
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
         verify(airlineRepository).existsByAirlineName(request.getAirlineName());
-        verify(userRepository, never()).save(any());
+        verifyNoInteractions(authService);
+        verify(airlineRepository, never()).save(any());
+    }
+
+    @Test
+    public void testSubmitAirlinePartnership_AuthServiceFails_Throws() throws IOException {
+        // Given
+        AirlinePartnershipRequest request = new AirlinePartnershipRequest();
+        request.setAirlineName("TestAir");
+        request.setManagerEmail("manager@test.com");
+        request.setManagerPassword("secret");
+
+        when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        // Mock AuthService signup failure
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(com.example.backend.dto.response.ErrorResponse.of("Signup Failed", "Email already exists", "/api/auth/signup"));
+
+        // When & Then
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+                () -> partnershipService.submitAirlinePartnership(request));
+
+        assertTrue(ex.getMessage().contains("Failed to create admin user"));
+
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(userRepository, never()).findByEmail(anyString());
+        verify(airlineRepository, never()).save(any());
+    }
+
+    @Test
+    public void testSubmitAirlinePartnership_UserNotFoundAfterSignup_Throws() throws IOException {
+        // Given
+        AirlinePartnershipRequest request = new AirlinePartnershipRequest();
+        request.setAirlineName("TestAir");
+        request.setManagerEmail("manager@test.com");
+        request.setManagerPassword("secret");
+
+        when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
+        when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        // Mock AuthService signup success but user not found in repository
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
+
+        // When & Then
+        IllegalStateException ex = assertThrows(IllegalStateException.class,
+                () -> partnershipService.submitAirlinePartnership(request));
+
+        assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
+
+        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(userRepository).findByEmail(request.getManagerEmail());
+        verify(airlineRepository, never()).save(any());
     }
 
     @Test
     public void testSubmitAirlinePartnership_NoLogo_Success() throws IOException {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setAirlineName("NoLogoAir");
         request.setManagerEmail("nologo@test.com");
@@ -116,10 +192,14 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(30);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Airline savedAirline = new Airline();
         savedAirline.setAirlineID(31);
@@ -128,8 +208,10 @@ public class AirlinePartnershipServiceTest {
         // No logo provided
         request.setAirlineLogo(null);
 
+        // When
         String response = partnershipService.submitAirlinePartnership(request);
 
+        // Then
         assertNotNull(response);
         assertTrue(response.contains("31"));
 
@@ -139,6 +221,7 @@ public class AirlinePartnershipServiceTest {
 
     @Test
     public void testSubmitAirlinePartnership_FileStorageThrows_ThrowsIOException() throws IOException {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setAirlineName("FailAir");
         request.setManagerEmail("fail@test.com");
@@ -148,13 +231,18 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(40);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
+        // When & Then
         IOException ex = assertThrows(IOException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
@@ -166,6 +254,7 @@ public class AirlinePartnershipServiceTest {
 
     @Test
     public void testSubmitAirlinePartnership_VerifySavedAirlineFields() throws IOException {
+        // Given
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setAirlineName("CaptureAir");
         request.setAirlineNationality("CapLand");
@@ -179,10 +268,14 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
+        
+        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
+            .thenReturn(SuccessResponse.of("Signed up successfully"));
 
         User savedUser = new User();
         savedUser.setUserID(50);
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        savedUser.setEmail(request.getManagerEmail());
+        when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.of(savedUser));
 
         Airline savedAirline = new Airline();
         savedAirline.setAirlineID(51);
@@ -190,8 +283,10 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/cap.png");
 
+        // When
         String response = partnershipService.submitAirlinePartnership(request);
 
+        // Then
         assertNotNull(response);
 
         // capture the airline passed to save
@@ -206,5 +301,6 @@ public class AirlinePartnershipServiceTest {
         assertEquals(0, captured.getNumberOfRates());
         assertEquals(Airline.Status.INACTIVE, captured.getStatus());
         assertEquals("http://example.com/cap.png", captured.getLogoUrl());
+        assertNotNull(captured.getCreatedAt());
     }
 }
