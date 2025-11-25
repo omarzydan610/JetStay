@@ -35,11 +35,11 @@ public class User {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", length = 20)
     private UserStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", length = 20)
     private UserRole role;
 
     @Column(name = "created_at", nullable = false)
@@ -47,7 +47,16 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+
         createdAt = LocalDateTime.now();
+        // Set defaults only if null
+        if (status == null) {
+            status = UserStatus.ACTIVE;
+        }
+        if (role == null) {
+            role = UserRole.CLIENT;
+        }
+
     }
 
     public enum UserStatus {

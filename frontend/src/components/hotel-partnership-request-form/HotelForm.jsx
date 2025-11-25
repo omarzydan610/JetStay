@@ -42,6 +42,7 @@ const HotelForm = () => {
     managerEmail: '',
     managerPassword: '',
     confirmPassword: '',
+    hotelLogo: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -95,6 +96,11 @@ const HotelForm = () => {
       } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
         newErrors.managerPassword = 'Password must contain both letters and numbers';
       }
+    }
+
+    // Confirm password validation
+    if (formData.managerPassword && formData.confirmPassword && formData.managerPassword !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
     }
 
     // Coordinate validation - now accepting wider ranges since we'll normalize
@@ -182,8 +188,11 @@ const HotelForm = () => {
         hotelLogo: ''
       }));
 
-      // Here you would handle the file upload or store it in formData
-      console.log('Selected file:', file);
+      // Store the file in formData
+      setFormData(prev => ({
+        ...prev,
+        hotelLogo: file
+      }));
     }
   };
 
@@ -196,22 +205,30 @@ const HotelForm = () => {
     setLoading(true);
 
     try {
-      // Normalize coordinates before submission
-      const normalizedLat = normalizeLatitude(formData.latitude);
-      const normalizedLng = normalizeLongitude(formData.longitude);
+      // Create FormData object for file upload
+      const submissionFormData = new FormData();
+      
+      // Append all form fields
+      submissionFormData.append('hotelName', formData.hotelName);
+      submissionFormData.append('latitude', normalizeLatitude(formData.latitude));
+      submissionFormData.append('longitude', normalizeLongitude(formData.longitude));
+      submissionFormData.append('city', formData.city);
+      submissionFormData.append('country', formData.country);
+      submissionFormData.append('adminFirstName', formData.adminFirstName);
+      submissionFormData.append('adminLastName', formData.adminLastName);
+      submissionFormData.append('adminPhone', formData.adminPhone);
+      submissionFormData.append('managerEmail', formData.managerEmail);
+      submissionFormData.append('managerPassword', formData.managerPassword);
+      
+      // Append the logo file if it exists
+      if (formData.hotelLogo) {
+        submissionFormData.append('hotelLogo', formData.hotelLogo);
+      }
 
-      // Prepare data for submission (exclude confirmPassword)
-      const { confirmPassword, ...submissionData } = formData;
-      submissionData.latitude = normalizedLat;
-      submissionData.longitude = normalizedLng;
-
-      console.log('Submitting coordinates:', {
-        original: { lat: formData.latitude, lng: formData.longitude },
-        normalized: { lat: normalizedLat, lng: normalizedLng }
-      });
+      console.log('Submitting form with file:', formData.hotelLogo);
 
       // Submit to backend using the service
-      await partnershipService.submitHotelPartnership(submissionData);
+      await partnershipService.submitHotelPartnership(submissionFormData);
       
       console.log('Submission successful');
       
@@ -231,6 +248,7 @@ const HotelForm = () => {
         managerEmail: '',
         managerPassword: '',
         confirmPassword: '',
+        hotelLogo: null,
       });
 
     } catch (error) {
