@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import authService from '../Services/authService';
+import authService from '../services/authService';
 import PhoneIcon from '../Icons/PhoneIcon';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
@@ -97,27 +97,33 @@ function SignUp() {
 
   const handleSubmit = async () => {
     if (!validateAll()) return;
-    const newacc = {
+
+    const newAccount = {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
       password: form.password,
       phoneNumber: '+20' + form.phoneNumber
     };
-    setIsLoading(true);
-    try {
 
-      const response = await authService.signup(newacc);
-      setSuccess('Account created successfully! Redirecting to login...');
-      console.log('Signup successful:', response);
-      navigate("/login")
+    setIsLoading(true);
+
+    try {
+      const response = await authService.signup(newAccount);
+
+      if (response.success) {
+        setSuccess("Account created successfully! Redirecting to login...");
+        console.log("Signup successful:", response);
+
+        navigate("/login");
+      }
 
     } catch (error) {
-      console.error('Signup error:', error, newacc);
+      console.error("Signup error:", error, newAccount);
 
+      // Handle known errors
       switch (error.code) {
-        case 'VALIDATION_ERROR':
-          // Handle field-specific validation errors
+        case "VALIDATION_ERROR":
           if (error.errors) {
             const fieldErrors = {};
             error.errors.forEach(err => {
@@ -128,12 +134,21 @@ function SignUp() {
             setErrors({ general: error.message });
           }
           break;
+
+        case "SERVER_ERROR":
+        case "UNAUTHORIZED":
+        case "FORBIDDEN":
+        case "NETWORK_ERROR":
         default:
-          setErrors({ general: error.message || 'Registration failed. Please try again.' });
+          setErrors({
+            general: error.message || "Registration failed. Please try again."
+          });
       }
     }
+
     setIsLoading(false);
   };
+
 
   const handleGoogleSignUp = () => console.log('Google Sign Up clicked');
 

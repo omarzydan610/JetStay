@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import authService from '../Services/authService';
+import { useNavigate } from "react-router-dom";
+import authService from '../services/authService';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
 import GoogleIcon from '../Icons/GoogleIcon';
@@ -9,6 +10,8 @@ import Plane from '../Icons/Plane';
 
 
 function Login() {
+
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     email: '',
@@ -72,8 +75,7 @@ function Login() {
 
       // Check if user is authenticated
       if (authService.isAuthenticated()) {
-        // Redirect to dashboard or home page
-        // navigate('/home');
+        navigate("/");
         console.log('User authenticated successfully');
       }
 
@@ -209,7 +211,7 @@ function Login() {
             {/* Sign Up Link */}
             <div className="text-center text-gray-500 text-sm">
               Don't have an account?{' '}
-              <a href="/" className="text-blue-600 font-semibold hover:text-blue-700">Sign Up</a>
+              <a href="/signup" className="text-blue-600 font-semibold hover:text-blue-700">Sign Up</a>
             </div>
           </div>
         </div>
