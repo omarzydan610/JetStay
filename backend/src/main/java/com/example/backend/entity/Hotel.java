@@ -47,8 +47,21 @@ public class Hotel {
   @Column(name = "created_at", nullable = false)
   private LocalDateTime createdAt;
 
+  @Column(name = "logo_url")
+  private String logoUrl;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  private Status status;
+
+  public enum Status {
+    ACTIVE,
+    INACTIVE
+  }
+
   @PrePersist
   protected void onCreate() {
-    createdAt = LocalDateTime.now();
+    this.status = Status.INACTIVE;
+    this.createdAt = LocalDateTime.now();
   }
 }

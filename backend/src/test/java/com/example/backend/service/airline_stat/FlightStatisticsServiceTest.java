@@ -73,10 +73,10 @@ class FlightStatisticsServiceTest {
 
         // 3. Airlines (with non-null admin)
         Airline emirates = airlineRepository.save(
-                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png")
+                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(), Airline.Status.ACTIVE)
         );
         Airline qatar = airlineRepository.save(
-                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png")
+                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(), Airline.Status.INACTIVE  )
         );
 
         // 4. Flights

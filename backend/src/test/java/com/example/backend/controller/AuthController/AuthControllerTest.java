@@ -1,7 +1,5 @@
 package com.example.backend.controller.AuthController;
 
-import com.example.backend.dto.response.ErrorResponse;
-import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.AuthService.AuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,39 +29,33 @@ class AuthControllerTest {
 
     @Test
     void testSignupSuccess() throws Exception {
-        SuccessResponse<String> success = SuccessResponse.of("Signed up successfully", "User");
-
-        when(authService.SignUp(any(), any(), any())).thenReturn(success);
+        doNothing().when(authService).SignUp(any());
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
-                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Signed up successfully"));
+                .andExpect(jsonPath("$.message").value("User created successfully"));
     }
 
     @Test
     void testSignupError() throws Exception {
-        ErrorResponse error = ErrorResponse.of(
-                "Email Already Exists",
-                "Email is already registered",
-                "/api/auth/signup"
-        );
-
-        when(authService.SignUp(any(), any(), any())).thenReturn(error);
+        doThrow(new com.example.backend.exception.BadRequestException("Email Already Exists")).when(authService)
+                .SignUp(any());
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
-                """))
-                .andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
+                                """))
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("Email Already Exists"))
-                .andExpect(jsonPath("$.message").value("Email is already registered"));
+                .andExpect(jsonPath("$.message").value("Email Already Exists"));
     }
 }
 
