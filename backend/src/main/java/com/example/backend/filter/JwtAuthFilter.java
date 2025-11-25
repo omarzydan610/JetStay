@@ -1,7 +1,6 @@
 package com.example.backend.filter;
 
 import com.example.backend.service.AuthService.JwtAuthService;
-import com.example.backend.service.AuthService.JwtPassResetService;
 import java.io.IOException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
