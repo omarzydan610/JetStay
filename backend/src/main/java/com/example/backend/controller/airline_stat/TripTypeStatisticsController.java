@@ -1,7 +1,7 @@
 package com.example.backend.controller.airline_stat;
 
 import com.example.backend.service.airline_stat.TripTypeStatsService;
-import com.example.backend.dto.AirlineDTO.TripTypeStatsDTO;
+import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +18,15 @@ public class TripTypeStatisticsController {
     private TripTypeStatsService tripTypeStatsService;
 
     @GetMapping("/{airlineName}")
-    public ResponseEntity<SuccessResponse<TripTypeStatsDTO>> getTripTypes(
+    public ResponseEntity<SuccessResponse<TripTypeStatsRequestDTO>> getTripTypes(
             @PathVariable(required = false) String airlineName) {
-        TripTypeStatsDTO data = tripTypeStatsService.getTripTypeStats(airlineName);
+        TripTypeStatsRequestDTO data = tripTypeStatsService.getTripTypeStats(airlineName);
         return ResponseEntity.ok(SuccessResponse.of("Trip type statistics retrieved successfully", data));
     }
 
     @GetMapping
-    public ResponseEntity<SuccessResponse<TripTypeStatsDTO>> getAllTripTypes() {
-        TripTypeStatsDTO data = tripTypeStatsService.getTripTypeStats(null);
+    public ResponseEntity<SuccessResponse<TripTypeStatsRequestDTO>> getAllTripTypes() {
+        TripTypeStatsRequestDTO data = tripTypeStatsService.getTripTypeStats(null);
         return ResponseEntity.ok(SuccessResponse.of("Trip type statistics retrieved successfully", data));
     }
 }

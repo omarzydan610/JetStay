@@ -2,13 +2,13 @@ package com.example.backend.dto.AirlineDTO;
 
 
 
-public class AirlineStatsDTO {
+public class AirlineStatsRequestDTO {
     private final String airlineName;
     private final double totalFlights;
     private final double totalRevenue;
     private final double avgRating;
 
-    private AirlineStatsDTO(Builder builder) {
+    private AirlineStatsRequestDTO(Builder builder) {
         this.airlineName = builder.airlineName;
         this.totalFlights = builder.totalFlights;
         this.totalRevenue = builder.totalRevenue;
@@ -26,7 +26,7 @@ public class AirlineStatsDTO {
         public Builder totalFlights(double totalFlights) { this.totalFlights = totalFlights; return this; }
         public Builder totalRevenue(double revenue) { this.totalRevenue = revenue; return this; }
         public Builder avgRating(double avgRating) { this.avgRating = avgRating; return this; }
-        public AirlineStatsDTO build() { return new AirlineStatsDTO(this); }
+        public AirlineStatsRequestDTO build() { return new AirlineStatsRequestDTO(this); }
     }
 
     // getters

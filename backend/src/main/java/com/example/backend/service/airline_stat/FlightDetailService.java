@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.FlightsDataDTO;
+import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Flight;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -22,7 +22,7 @@ public class FlightDetailService {
         this.airlineRepository = airlineRepository;
     }
 
-    public List<FlightsDataDTO> getFlightsByAirlineName(String airlineName) {
+    public List<FlightsDataRequestDTO> getFlightsByAirlineName(String airlineName) {
         validateAirlineExists(airlineName);
         Airline airline = airlineRepository.findByAirlineName(airlineName);
 
@@ -34,7 +34,7 @@ public class FlightDetailService {
         List<Flight> flights = flightRepository.findByAirline_AirlineID(airline.getAirlineID());
 
         return flights.stream()
-                .map(flight -> new FlightsDataDTO.Builder()
+                .map(flight -> new FlightsDataRequestDTO.Builder()
                         .flightId(flight.getFlightID())
                         .airlineId(flight.getAirline().getAirlineID())
                         .departureAirport(flight.getDepartureAirport().getAirportName())

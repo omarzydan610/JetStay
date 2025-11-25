@@ -1,7 +1,7 @@
 package com.example.backend.controller.airline_stat;
 
 import com.example.backend.service.airline_stat.AirlineStatService;
-import com.example.backend.dto.AirlineDTO.AirlineStatsDTO;
+import com.example.backend.dto.AirlineDTO.AirlineStatsRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +15,8 @@ public class AirlineStatisticsController {
     private AirlineStatService airlineStatisticsService;
 
     @GetMapping("/{airlineName}")
-    public ResponseEntity<SuccessResponse<AirlineStatsDTO>> getAirlineStatistics(@PathVariable String airlineName) {
-        AirlineStatsDTO stats = new AirlineStatsDTO.Builder()
+    public ResponseEntity<SuccessResponse<AirlineStatsRequestDTO>> getAirlineStatistics(@PathVariable String airlineName) {
+        AirlineStatsRequestDTO stats = new AirlineStatsRequestDTO.Builder()
                 .airlineName(airlineName)
                 .totalFlights(airlineStatisticsService.getAirlinecount(airlineName))
                 .totalRevenue(airlineStatisticsService.getAirlineRevenue(airlineName)) // placeholder

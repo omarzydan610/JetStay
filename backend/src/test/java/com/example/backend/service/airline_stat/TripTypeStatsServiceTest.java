@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.TripTypeStatsDTO;
+import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.*;
@@ -130,7 +130,7 @@ public class TripTypeStatsServiceTest {
         public void testGetAverageTicketsPerType() {
                 String airlineName = "Emirates";
 
-                TripTypeStatsDTO averages = tripTypeStatsService.getTripTypeStats(airlineName);
+                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(airlineName);
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());
@@ -140,7 +140,7 @@ public class TripTypeStatsServiceTest {
 
         @Test
         public void testGetAverageTicketsPerTypeForAll() {
-                TripTypeStatsDTO averages = tripTypeStatsService.getTripTypeStats("");
+                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats("");
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());

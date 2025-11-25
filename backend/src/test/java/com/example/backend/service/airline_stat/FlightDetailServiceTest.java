@@ -1,7 +1,7 @@
 package com.example.backend.service.airline_stat;
 
 
-import com.example.backend.dto.AirlineDTO.FlightsDataDTO;
+import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.entity.*;
 import com.example.backend.entity.Flight.FlightStatus;
 import com.example.backend.repository.*;
@@ -126,12 +126,12 @@ public class FlightDetailServiceTest {
 
     @Test
     public void testGetFlightsByAirlineName_ExistingAirline() {
-        List<FlightsDataDTO> flights = flightDetailService.getFlightsByAirlineName("Emirates");
+        List<FlightsDataRequestDTO> flights = flightDetailService.getFlightsByAirlineName("Emirates");
 
         assertNotNull(flights);
         assertEquals(1, flights.size());
 
-        FlightsDataDTO firstFlight = flights.get(0);
+        FlightsDataRequestDTO firstFlight = flights.get(0);
         assertEquals("DXB → CAI", firstFlight.getDescription());
         assertEquals("Boeing 777", firstFlight.getPlaneType());
     }

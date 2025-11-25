@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.TripTypeStatsDTO;
+import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.AirlineRepository;
@@ -21,7 +21,7 @@ public class TripTypeStatsService {
     @Autowired
     private AirlineRepository airlineRepository;
 
-    public TripTypeStatsDTO getTripTypeStats(String airlineName) {
+    public TripTypeStatsRequestDTO getTripTypeStats(String airlineName) {
         validateAirlineExists(airlineName);
 
         List<Object[]> results;
@@ -43,7 +43,7 @@ public class TripTypeStatsService {
 
         // If airlineName is blank, you can set a generic name
         String name = (airlineName == null || airlineName.isBlank()) ? "All Airlines" : airlineName;
-        return new TripTypeStatsDTO(name, avgMap);
+        return new TripTypeStatsRequestDTO(name, avgMap);
     }
 
     private void validateAirlineExists(String airlineName) {

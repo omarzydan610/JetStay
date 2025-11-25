@@ -1,9 +1,6 @@
 package com.example.backend.controller.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.FlightStatusDTO;
-import com.example.backend.dto.AirlineDTO.FlightsDataDTO;
-import com.example.backend.service.airline_stat.AirlineStatService;
-import com.example.backend.dto.AirlineDTO.AirlineStatsDTO;
+import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.airline_stat.FlightDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +17,8 @@ public class AirlineDetailedFlightsController {
     private FlightDetailService flightDetailService;
 
     @GetMapping("/{airlineName}")
-    public ResponseEntity<SuccessResponse<List<FlightsDataDTO>>> getAirlineFlights(@PathVariable String airlineName) {
-        List<FlightsDataDTO> flights = flightDetailService.getFlightsByAirlineName(airlineName);
+    public ResponseEntity<SuccessResponse<List<FlightsDataRequestDTO>>> getAirlineFlights(@PathVariable String airlineName) {
+        List<FlightsDataRequestDTO> flights = flightDetailService.getFlightsByAirlineName(airlineName);
         return ResponseEntity.ok(SuccessResponse.of("Airline statistics retrieved successfully", flights));
     }
 

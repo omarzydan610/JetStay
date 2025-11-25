@@ -2,7 +2,7 @@ package com.example.backend.dto.AirlineDTO;
 
 import java.time.LocalDateTime;
 
-public class FlightsDataDTO {
+public class FlightsDataRequestDTO {
     private final Integer flightId;
     private final Integer airlineId;
     private final String departureAirport;
@@ -13,7 +13,7 @@ public class FlightsDataDTO {
     private final String description;
     private final String planeType;
 
-    private FlightsDataDTO(Builder builder) {
+    private FlightsDataRequestDTO(Builder builder) {
         this.flightId = builder.flightId;
         this.airlineId = builder.airlineId;
         this.departureAirport = builder.departureAirport;
@@ -46,7 +46,7 @@ public class FlightsDataDTO {
         public Builder description(String description) { this.description = description; return this; }
         public Builder planeType(String planeType) { this.planeType = planeType; return this; }
 
-        public FlightsDataDTO build() { return new FlightsDataDTO(this); }
+        public FlightsDataRequestDTO build() { return new FlightsDataRequestDTO(this); }
     }
 
     public Integer getFlightId() { return flightId; }
