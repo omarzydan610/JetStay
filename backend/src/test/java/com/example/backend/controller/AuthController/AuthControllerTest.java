@@ -3,6 +3,7 @@ package com.example.backend.controller.AuthController;
 import com.example.backend.dto.response.ErrorResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.AuthService.AuthService;
+import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -28,6 +29,9 @@ class AuthControllerTest {
 
     @MockBean
     public AuthService authService;
+
+    @MockBean
+    private JwtAuthService jwtAuthService;
 
     @Test
     void testSignupSuccess() throws Exception {
