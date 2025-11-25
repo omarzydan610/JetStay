@@ -4,6 +4,8 @@ import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.HotelPartnershipRequest;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.AuthService;
@@ -90,7 +92,7 @@ public class HotelPartnershipServiceTest {
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
         // When & Then
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
@@ -111,11 +113,11 @@ public class HotelPartnershipServiceTest {
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
 
         // Mock AuthService signup failure
-        doThrow(new IllegalArgumentException("Failed to create admin user")).when(authService)
+        doThrow(new BadRequestException("Failed to create admin user")).when(authService)
                 .SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         // When & Then
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains("Failed to create admin user"));
@@ -140,7 +142,7 @@ public class HotelPartnershipServiceTest {
         when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
 
         // When & Then
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
+        InternalServerErrorException ex = assertThrows(InternalServerErrorException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
@@ -201,10 +203,10 @@ public class HotelPartnershipServiceTest {
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
         // When & Then
-        IOException ex = assertThrows(IOException.class,
+        InternalServerErrorException ex = assertThrows(InternalServerErrorException.class,
                 () -> partnershipService.submitHotelPartnership(request));
 
-        assertTrue(ex.getMessage().contains("upload failed"));
+        assertTrue(ex.getMessage().contains("Failed to store hotel logo"));
 
         verify(hotelRepository, never()).save(any());
     }

@@ -29,30 +29,33 @@ class AuthControllerTest {
 
     @Test
     void testSignupSuccess() throws Exception {
-        doNothing().when(authService).SignUp(any(), any());
+        doNothing().when(authService).SignUp(any());
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
-                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Signed up successfully"));
+                .andExpect(jsonPath("$.message").value("User created successfully"));
     }
 
     @Test
     void testSignupError() throws Exception {
-        doThrow(new com.example.backend.exception.BadRequestException("Email Already Exists")).when(authService).SignUp(any(), any());
+        doThrow(new com.example.backend.exception.BadRequestException("Email Already Exists")).when(authService)
+                .SignUp(any());
 
         mockMvc.perform(post("/api/auth/signup")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
-                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                    {"firstName": "test", "lastName":"test", "email": "test@example.com", "password": "1234", "phoneNumber":"12345"}
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
-                .andExpect(jsonPath("$.error").value("Email Already Exists"));
+                .andExpect(jsonPath("$.message").value("Email Already Exists"));
     }
 }
 

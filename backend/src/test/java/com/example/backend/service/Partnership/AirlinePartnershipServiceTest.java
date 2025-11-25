@@ -4,6 +4,9 @@ import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
+import com.example.backend.mapper.AirlineMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.AuthService;
@@ -34,6 +37,9 @@ public class AirlinePartnershipServiceTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private AirlineMapper airlineMapper;
 
     @InjectMocks
     private PartnershipService partnershipService;
@@ -69,6 +75,13 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/logo.png");
 
+        Airline airline = new Airline();
+        airline.setAirlineName(request.getAirlineName());
+        airline.setAirlineNationality(request.getAirlineNationality());
+        airline.setAdmin(savedUser);
+        airline.setLogoUrl("http://example.com/logo.png");
+        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+
         partnershipService.submitAirlinePartnership(request);
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
@@ -89,7 +102,7 @@ public class AirlinePartnershipServiceTest {
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
         // When & Then
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
@@ -111,7 +124,7 @@ public class AirlinePartnershipServiceTest {
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(true);
 
         // When & Then
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getAirlineName()));
@@ -134,11 +147,11 @@ public class AirlinePartnershipServiceTest {
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
 
         // Mock AuthService signup failure
-        doThrow(new IllegalArgumentException("Failed to create admin user")).when(authService)
+        doThrow(new BadRequestException("Failed to create admin user")).when(authService)
                 .SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         // When & Then
-        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+        BadRequestException ex = assertThrows(BadRequestException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains("Failed to create admin user"));
@@ -164,7 +177,7 @@ public class AirlinePartnershipServiceTest {
         when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
 
         // When & Then
-        IllegalStateException ex = assertThrows(IllegalStateException.class,
+        InternalServerErrorException ex = assertThrows(InternalServerErrorException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
@@ -199,6 +212,11 @@ public class AirlinePartnershipServiceTest {
         // No logo provided
         request.setAirlineLogo(null);
 
+        Airline airline = new Airline();
+        airline.setAirlineName(request.getAirlineName());
+        airline.setAdmin(savedUser);
+        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+
         partnershipService.submitAirlinePartnership(request);
 
         verify(fileStorageService, never()).storeFile(any());
@@ -228,10 +246,10 @@ public class AirlinePartnershipServiceTest {
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
         // When & Then
-        IOException ex = assertThrows(IOException.class,
+        InternalServerErrorException ex = assertThrows(InternalServerErrorException.class,
                 () -> partnershipService.submitAirlinePartnership(request));
 
-        assertTrue(ex.getMessage().contains("upload failed"));
+        assertTrue(ex.getMessage().contains("Failed to store airline logo"));
 
         // airline should not be saved if upload fails
         verify(airlineRepository, never()).save(any());
@@ -267,6 +285,13 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/cap.png");
 
+        Airline airline = new Airline();
+        airline.setAirlineName(request.getAirlineName());
+        airline.setAirlineNationality(request.getAirlineNationality());
+        airline.setAdmin(savedUser);
+        airline.setLogoUrl("http://example.com/cap.png");
+        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+
         partnershipService.submitAirlinePartnership(request);
 
         // capture the airline passed to save
@@ -277,10 +302,6 @@ public class AirlinePartnershipServiceTest {
         assertEquals(request.getAirlineName(), captured.getAirlineName());
         assertEquals(request.getAirlineNationality(), captured.getAirlineNationality());
         assertEquals(savedUser, captured.getAdmin());
-        assertEquals(0.0f, captured.getAirlineRate(), 0.001f);
-        assertEquals(0, captured.getNumberOfRates());
-        assertEquals(Airline.Status.INACTIVE, captured.getStatus());
         assertEquals("http://example.com/cap.png", captured.getLogoUrl());
-        assertNotNull(captured.getCreatedAt());
     }
 }

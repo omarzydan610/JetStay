@@ -53,11 +53,13 @@ class AuthServiceTest {
     void testSignupSuccess() {
         when(userRepository.findByEmail(userDTO.getEmail())).thenReturn(Optional.empty());
         when(encoder.encode(anyString())).thenReturn("encoded");
-        when(userMapper.signupToUser(any(), any())).thenReturn(user);
 
         authService.SignUp(userDTO);
 
-        verify(userRepository).save(user);
+        // Verify that user was saved (UserMapper is created internally, not mocked)
+        verify(userRepository).save(any(User.class));
+        verify(userRepository).findByEmail(userDTO.getEmail());
+        verify(encoder).encode(anyString());
     }
 
     @Test
