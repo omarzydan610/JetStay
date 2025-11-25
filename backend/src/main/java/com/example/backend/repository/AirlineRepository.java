@@ -1,6 +1,9 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.Airline;
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,5 +27,5 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
 
     Airline findByAirlineName(String airlineName);
 
-    Airline findByAdminUserID(Integer userID);
+    Optional<Airline> findByAdminUserID(Integer userID);
 }

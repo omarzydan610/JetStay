@@ -108,8 +108,7 @@ class AuthServiceTest {
                 new UsernamePasswordAuthenticationToken("test@example.com", "123456")
         )).thenReturn(mock(org.springframework.security.core.Authentication.class));
 
-        // Because client user => managedIds = empty list
-        when(jwtAuthService.generateAuthToken(user, null))
+        when(jwtAuthService.generateAuthToken(eq(user), isNull()))
                 .thenReturn("mocked-jwt-token");
 
 

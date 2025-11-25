@@ -6,7 +6,7 @@ import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
-import com.example.backend.mapper.AirlineMapper;
+import com.example.backend.mapper.AirlineCreatorMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.AuthService;
@@ -39,7 +39,7 @@ public class AirlinePartnershipServiceTest {
     private AuthService authService;
 
     @Mock
-    private AirlineMapper airlineMapper;
+    private AirlineCreatorMapper airlineMapper;
 
     @InjectMocks
     private PartnershipService partnershipService;
@@ -80,7 +80,7 @@ public class AirlinePartnershipServiceTest {
         airline.setAirlineNationality(request.getAirlineNationality());
         airline.setAdmin(savedUser);
         airline.setLogoUrl("http://example.com/logo.png");
-        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+        when(airlineMapper.createAirline(anyString(), any(), any(User.class), any())).thenReturn(airline);
 
         partnershipService.submitAirlinePartnership(request);
 
@@ -215,7 +215,7 @@ public class AirlinePartnershipServiceTest {
         Airline airline = new Airline();
         airline.setAirlineName(request.getAirlineName());
         airline.setAdmin(savedUser);
-        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+        when(airlineMapper.createAirline(anyString(), any(), any(User.class), any())).thenReturn(airline);
 
         partnershipService.submitAirlinePartnership(request);
 
@@ -290,7 +290,7 @@ public class AirlinePartnershipServiceTest {
         airline.setAirlineNationality(request.getAirlineNationality());
         airline.setAdmin(savedUser);
         airline.setLogoUrl("http://example.com/cap.png");
-        when(airlineMapper.createAirline(any(), any(), any(), any())).thenReturn(airline);
+        when(airlineMapper.createAirline(anyString(), any(), any(User.class), any())).thenReturn(airline);
 
         partnershipService.submitAirlinePartnership(request);
 

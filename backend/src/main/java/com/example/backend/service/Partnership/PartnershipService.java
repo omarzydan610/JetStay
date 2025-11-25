@@ -8,7 +8,8 @@ import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
-import com.example.backend.mapper.AirlineMapper;
+import com.example.backend.mapper.AirlineCreatorMapper;
+import com.example.backend.mapper.HotelCreatorMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
@@ -25,7 +26,10 @@ import java.time.LocalDateTime;
 public class PartnershipService {
 
     @Autowired
-    private AirlineMapper airlineMapper;
+    private AirlineCreatorMapper airlineMapper;
+
+    @Autowired
+    private HotelCreatorMapper hotelMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -119,19 +123,9 @@ public class PartnershipService {
                 throw new InternalServerErrorException("Failed to store hotel logo", e);
             }
         }
-
-        Hotel hotel = new Hotel();
-        hotel.setHotelName(request.getHotelName());
-        hotel.setLatitude(request.getLatitude());
-        hotel.setLongitude(request.getLongitude());
-        hotel.setCity(request.getCity());
-        hotel.setCountry(request.getCountry());
-        hotel.setAdmin(savedAdmin);
-        hotel.setHotelRate(0.0f);
-        hotel.setNumberOfRates(0);
-        hotel.setLogoUrl(logoPath);
-        hotel.setCreatedAt(LocalDateTime.now());
-        hotel.setStatus(Hotel.Status.INACTIVE);
+        
+        Hotel hotel = hotelMapper.createHotel(request.getHotelName(), request.getLatitude(), request.getLongitude(),
+                request.getCity(), request.getCountry(), savedAdmin, logoPath);
 
         hotelRepository.save(hotel);
     }
