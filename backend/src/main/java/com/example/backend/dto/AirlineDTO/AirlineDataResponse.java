@@ -11,10 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class AirlineDataResponse {
-  String name;
-  String nationality;
-  Float rate;
-  Integer numberOfRates;
-  String logoUrl;
-  Airline.Status status;
+  private String name;
+  private String nationality;
+  private Float rate;
+  private Integer numberOfRates;
+  private String logoUrl;
+  private Airline.Status status;
 }

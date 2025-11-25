@@ -41,13 +41,13 @@ public class AirlineDataService {
     return airlineDataResponse;
   }
 
-  public AirlineDataResponse updateData(String authorizationHeader,
+  public void updateData(String authorizationHeader,
       AirlineUpdateDataRequest request) {
-        if(request.getName() == null &&
-           request.getNationality() == null &&
-           request.getLogoUrl() == null) {
-          throw new BadRequestException("Update request cannot be empty");
-        }
+    if (request.getName() == null &&
+        request.getNationality() == null &&
+        request.getLogoUrl() == null) {
+      throw new BadRequestException("Update request cannot be empty");
+    }
     String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
     String adminEmail = jwtAuthService.extractEmail(token);
     User adminUser = userRepository.findByEmail(adminEmail)
@@ -69,7 +69,6 @@ public class AirlineDataService {
       if (request.getLogoUrl() != null)
         airline.setLogoUrl(request.getLogoUrl());
       airlineRepository.save(airline);
-      return AirlineDataMapper.mapToResponse(airline);
     } catch (Exception e) {
       throw new BadRequestException("Failed to update airline data: " + e.getMessage());
     }
