@@ -1,4 +1,5 @@
 package com.example.backend.config;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,12 +13,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // Allow all auth endpoints without authentication
-                        .anyRequest().authenticated() // All other endpoints require authentication
-                );
+            .cors() // ← مهم جدًا عشان CORS يشتغل
+            .and()
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/api/partnership/**").permitAll() // ← انت محتاجه دلوقتي
+                    .anyRequest().authenticated()
+            );
 
         return http.build();
     }

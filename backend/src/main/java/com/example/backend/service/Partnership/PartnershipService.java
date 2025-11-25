@@ -1,5 +1,6 @@
 package com.example.backend.service.Partnership;
 
+import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
 import com.example.backend.dto.PartnershipRequist.HotelPartnershipRequest;
 import com.example.backend.entity.Airline;
@@ -8,9 +9,11 @@ import com.example.backend.entity.User;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AuthService.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -31,6 +34,9 @@ public class PartnershipService {
     @Autowired
     private FileStorageService fileStorageService;
 
+    @Autowired
+    private AuthService authService;
+
     // Airline flow
     public String submitAirlinePartnership(AirlinePartnershipRequest request) throws IOException {
         // validations moved here
@@ -49,16 +55,25 @@ public class PartnershipService {
             throw new IllegalArgumentException("Airline name already exists: " + request.getAirlineName());
         }
 
-        User airlineAdmin = new User();
-        airlineAdmin.setFirstName(request.getAdminFirstName());
-        airlineAdmin.setLastName(request.getAdminLastName());
-        airlineAdmin.setEmail(request.getManagerEmail());
-        airlineAdmin.setPassword(request.getManagerPassword());
-        airlineAdmin.setPhoneNumber(request.getAdminPhone());
-        airlineAdmin.setRole(User.UserRole.AIRLINE_ADMIN);
-        airlineAdmin.setStatus(User.UserStatus.ACTIVE);
+        // Create and save admin user using AuthService
+        UserDTO hotelAdmin = new UserDTO();
+        hotelAdmin.setFirstName(request.getAdminFirstName());
+        hotelAdmin.setLastName(request.getAdminLastName());
+        hotelAdmin.setEmail(request.getManagerEmail());
+        hotelAdmin.setPassword(request.getManagerPassword());
+        hotelAdmin.setPhoneNumber(request.getAdminPhone());
 
-        User savedAdmin = userRepository.save(airlineAdmin);
+
+        // Use AuthService to sign up the admin
+        Object signUpResult = authService.SignUp(hotelAdmin, null, User.UserRole.AIRLINE_ADMIN);
+        
+        if (signUpResult instanceof com.example.backend.dto.response.ErrorResponse) {
+            throw new IllegalArgumentException("Failed to create admin user: " + 
+                ((com.example.backend.dto.response.ErrorResponse) signUpResult).getMessage());
+        }
+
+        User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
+                .orElseThrow(() -> new IllegalStateException("Failed to retrieve saved admin user"));
 
         String logoPath = null;
         if (request.getAirlineLogo() != null && !request.getAirlineLogo().isEmpty()) {
@@ -93,16 +108,22 @@ public class PartnershipService {
             throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
         }
 
-        User hotelAdmin = new User();
+        UserDTO hotelAdmin = new UserDTO();
         hotelAdmin.setFirstName(request.getAdminFirstName());
         hotelAdmin.setLastName(request.getAdminLastName());
         hotelAdmin.setEmail(request.getManagerEmail());
         hotelAdmin.setPassword(request.getManagerPassword());
         hotelAdmin.setPhoneNumber(request.getAdminPhone());
-        hotelAdmin.setRole(User.UserRole.HOTEL_ADMIN);
-        hotelAdmin.setStatus(User.UserStatus.ACTIVE);
 
-        User savedAdmin = userRepository.save(hotelAdmin);
+        Object signUpResult = authService.SignUp(hotelAdmin, null, User.UserRole.HOTEL_ADMIN);
+
+        if (signUpResult instanceof com.example.backend.dto.response.ErrorResponse) {
+            throw new IllegalArgumentException("Failed to create admin user: " + 
+                ((com.example.backend.dto.response.ErrorResponse) signUpResult).getMessage());
+        }
+
+        User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
+                .orElseThrow(() -> new IllegalStateException("Failed to retrieve saved admin user"));
 
         String logoPath = null;
         if (request.getHotelLogo() != null && !request.getHotelLogo().isEmpty()) {
