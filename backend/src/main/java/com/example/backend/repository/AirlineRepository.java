@@ -22,5 +22,7 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
 
     boolean existsByAirlineName(String airlineName);
 
+    Airline findByAirlineName(String airlineName);
+
     List<Airline> findByAdminUserID(Integer userID);
 }

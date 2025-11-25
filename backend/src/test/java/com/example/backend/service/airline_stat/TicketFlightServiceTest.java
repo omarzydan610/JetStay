@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.FlightStatusDTO;
+import com.example.backend.dto.AirlineDTO.FlightStatusRequestDTO;
 import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.*;
@@ -132,7 +132,7 @@ public class TicketFlightServiceTest {
 
         @Test
         public void testGetTicketsAndFlightSummary_AllAirlines() {
-                FlightStatusDTO result = service.getTicketsAndFlightSummary(null);
+                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(null);
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());
@@ -143,7 +143,7 @@ public class TicketFlightServiceTest {
         @Test
         public void testGetTicketsAndFlightSummary_SpecificAirline() {
                 String airlineName = "Emirates";
-                FlightStatusDTO result = service.getTicketsAndFlightSummary(airlineName);
+                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(airlineName);
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());
