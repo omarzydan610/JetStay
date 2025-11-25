@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import airlineStatService from "../services/airlineStats.js";
 import { PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer } from "recharts";
 import logo from "../assets/logo.png"; 
-import plane from "../assets/plane.jpg";
+import plane from "../assets/plane.png";
 import StatsCard from "../components/airline-statistics/StatsCard.jsx";
 import '../css/animation.css';
 

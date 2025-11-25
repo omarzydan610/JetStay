@@ -28,3 +28,20 @@
   }
 }
 
+@keyframes planeMove {
+  0% {
+    transform: translate(500%, 500%);   /* far right + below screen */
+
+  }
+  100% {
+    transform: translate(-500%, -500%);  /* far left + above screen */
+  }
+}
+
+.bg-plane {
+  background-image: url('../assets/plane.png'); /* put your plane image in public/images */
+  background-repeat: no-repeat;
+  background-size: 500px auto; /* adjust plane size */
+  animation: planeMove 10s linear infinite;
+}
+

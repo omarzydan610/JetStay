@@ -7,7 +7,7 @@ export default function FlightListCards() {
   const [flights, setFlights] = useState([]);
   const [editingFlight, setEditingFlight] = useState(null);
   const [page, setPage] = useState(0);
-  const [size] = useState(6); // cards per page
+  const [size] = useState(9); // cards per page
 
   useEffect(() => {
     loadFlights();
@@ -30,44 +30,54 @@ export default function FlightListCards() {
   };
 
   return (
-    <div>
-      {editingFlight && (
-        <div className="mb-6">
-          <FlightForm
-            editingFlight={editingFlight}
-            onSuccess={loadFlights}
-            clearEditing={() => setEditingFlight(null)}
-          />
-        </div>
-      )}
+    <div className="relative bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl text-white overflow-hidden">
+      {/* Animated plane background */}
+      <div className="absolute inset-0 bg-plane pointer-events-none"></div>
 
-      {flights.length === 0 ? (
-        <p className="text-gray-500 mt-4 text-center">
-          No flights available
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {flights.map((f) => (
-            <FlightCard key={f.flightId} flight={f} onEdit={setEditingFlight} />
-          ))}
-        </div>
-      )}
+      {/* Content above background */}
+      <div className="relative z-10">
+        {editingFlight && (
+          <div className="mb-6">
+            <FlightForm
+              editingFlight={editingFlight}
+              onSuccess={loadFlights}
+              clearEditing={() => setEditingFlight(null)}
+            />
+          </div>
+        )}
 
-      {/* Pagination controls */}
-      <div className="flex justify-between mt-6">
-        <button
-          disabled={page === 0}
-          onClick={() => setPage(page - 1)}
-          className="bg-gray-300 px-4 py-2 rounded disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <button
-          onClick={() => setPage(page + 1)}
-          className="bg-gray-300 px-4 py-2 rounded"
-        >
-          Next
-        </button>
+        {flights.length === 0 ? (
+          <p className="text-blue-200 mt-4 text-center italic">
+            No flights available
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {flights.map((f) => (
+              <FlightCard
+                key={f.flightId}
+                flight={f}
+                onEdit={setEditingFlight}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Pagination controls */}
+        <div className="flex justify-between mt-8">
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(page - 1)}
+            className="bg-blue-700 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-600 transition-transform duration-300 hover:scale-105 disabled:opacity-50"
+          >
+            ← Previous
+          </button>
+          <button
+            onClick={() => setPage(page + 1)}
+            className="bg-blue-700 text-white px-6 py-2 rounded-md shadow-md hover:bg-blue-600 transition-transform duration-300 hover:scale-105"
+          >
+            Next →
+          </button>
+        </div>
       </div>
     </div>
   );

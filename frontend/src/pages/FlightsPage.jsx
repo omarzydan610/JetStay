@@ -5,19 +5,24 @@ export default function FlightsPage() {
   const navigate = useNavigate();
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Flights Management</h1>
+    <div className="min-h-screen bg-gradient-to-br from-blue-950 to-blue-900 text-white p-8">
+      {/* Page heading */}
+      <h1 className="text-3xl font-extrabold mb-8 text-center tracking-wide">
+        Flights Management
+      </h1>
 
       {/* Paginated list of flights as cards */}
-      <FlightListCards />
+      <div className="bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl">
+        <FlightListCards />
+      </div>
 
       {/* Back button to dashboard */}
-      <div className="mt-6">
+      <div className="mt-8 flex justify-center">
         <button
           onClick={() => navigate("/air-line/data")}
-          className="bg-gray-600 text-white px-4 py-2 rounded shadow hover:bg-gray-700"
+          className="bg-blue-700 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-blue-600 transition-transform duration-300 hover:scale-105"
         >
-          Back to Dashboard
+          ← Back to Dashboard
         </button>
       </div>
     </div>
