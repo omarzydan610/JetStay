@@ -1,6 +1,8 @@
 package com.example.backend.controller.AuthController;
 
+import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.service.AuthService.AuthService;
+import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +28,9 @@ class AuthControllerTest {
 
     @MockBean
     public AuthService authService;
+
+    @MockBean
+    private JwtAuthService jwtAuthService;
 
     @Test
     void testSignupSuccess() throws Exception {
@@ -57,6 +62,36 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("Email Already Exists"));
     }
+
+    @Test
+    void testLoginSuccess() throws Exception {
+        when(authService.Login(any(LoginDTO.class))).thenReturn("mocked-jwt-token");
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"email": "test@example.com", "password": "123456"}
+                        """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Loged it Logged in successfully"))
+                .andExpect(jsonPath("$.data").value("mocked-jwt-token"));
+    }
+
+    @Test
+    void testLoginError() throws Exception {
+        doThrow(new RuntimeException("Invalid email or password")).when(authService).Login(any(LoginDTO.class));
+
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                        {"email": "wrong@example.com", "password": "wrong"}
+                        """))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Invalid email or password"));
+    }
+
 }
 
 // Test security configuration

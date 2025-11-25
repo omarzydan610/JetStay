@@ -1,5 +1,6 @@
 package com.example.backend.controller.AuthController;
 
+import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.AuthService.AuthService;
@@ -25,6 +26,12 @@ public class AuthController {
     public ResponseEntity<?> createUser(@RequestBody UserDTO user) {
         authService.SignUp(user);
         return ResponseEntity.ok(SuccessResponse.of("User created successfully", null));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginController(@RequestBody LoginDTO user) {
+        String authToken = authService.Login(user);
+        return ResponseEntity.ok(SuccessResponse.of("Loged it Logged in successfully", authToken));
     }
 
 }

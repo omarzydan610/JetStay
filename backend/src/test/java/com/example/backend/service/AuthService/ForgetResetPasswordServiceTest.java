@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,13 +52,16 @@ class ForgetResetPasswordServiceTest {
   private PasswordEncoder passwordEncoder;
 
   @Autowired
-  private JwtService jwtService;
+  private JwtPassResetService jwtPassResetService;
 
   @Autowired
   private GenericEmailService emailService;
 
   @Autowired
   private EntityManager entityManager;
+
+  @MockBean
+  private JwtAuthService jwtAuthService;
 
   private User testUser;
 
@@ -169,7 +173,7 @@ class ForgetResetPasswordServiceTest {
     assertFalse(token.isEmpty(), "Token should not be empty");
 
     // Verify token is valid
-    assertTrue(jwtService.isTokenValid(token, testUser.getEmail()), "Token should be valid");
+    assertTrue(jwtPassResetService.isTokenValid(token, testUser.getEmail()), "Token should be valid");
 
     // Verify OTP was deleted after successful verification
     Optional<UserOtp> deletedOtp = userOtpRepository.findById(savedOtp.getOtpID());

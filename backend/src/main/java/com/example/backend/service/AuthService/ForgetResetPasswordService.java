@@ -27,14 +27,14 @@ public class ForgetResetPasswordService {
   private final UserRepository userRepository;
   private final UserOtpRepository userOtpRepository;
   private final PasswordEncoder passwordEncoder;
-  private final JwtService jwtPasswordResetService;
+  private final JwtPassResetService jwtPasswordResetService;
 
   public ForgetResetPasswordService(
       GenericEmailService emailService,
       UserRepository userRepository,
       UserOtpRepository userOtpRepository,
       PasswordEncoder passwordEncoder,
-      JwtService jwtPasswordResetService) {
+      JwtPassResetService jwtPasswordResetService) {
     this.emailService = emailService;
     this.userRepository = userRepository;
     this.userOtpRepository = userOtpRepository;

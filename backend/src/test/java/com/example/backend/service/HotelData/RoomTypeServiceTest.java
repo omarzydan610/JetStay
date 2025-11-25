@@ -8,11 +8,13 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AuthService.JwtAuthService;
 import com.example.backend.service.Hotel_data.RoomTypeService;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -36,6 +38,9 @@ public class RoomTypeServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @MockBean
+    private JwtAuthService jwtAuthService;
 
     private User admin;
     private Hotel hotel;

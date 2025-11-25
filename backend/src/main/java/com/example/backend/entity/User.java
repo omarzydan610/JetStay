@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Entity
 @Table(name = "users")
@@ -64,6 +67,6 @@ public class User {
     }
 
     public enum UserRole {
-        SYSTEM_ADMIN, CLIENT, AIRLINE_ADMIN, HOTEL_ADMIN
+        SYSTEM_ADMIN, CLIENT, AIRLINE_ADMIN, HOTEL_ADMIN;
     }
 }

@@ -4,10 +4,12 @@ import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +42,9 @@ public class AirlineStatisticsServiceTest {
 
         @Autowired
         private UserRepository userRepository;
+
+        @MockBean
+        private JwtAuthService jwtAuthService;
 
         @BeforeEach
         void setupData() {

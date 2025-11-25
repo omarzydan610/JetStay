@@ -2,6 +2,7 @@ package com.example.backend.service.airline_stat;
 
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
+import com.example.backend.service.AuthService.JwtAuthService;
 import com.example.backend.strategy.airline_stat.FlightCountStatistics;
 import com.example.backend.strategy.airline_stat.RatingStatistics;
 import com.example.backend.strategy.airline_stat.RevenueStatistics;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +38,9 @@ class FlightStatisticsServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @MockBean
+    private JwtAuthService jwtAuthService;
 
     @BeforeEach
     void setupData() {
