@@ -12,11 +12,13 @@ export default function FlightForm({ editingFlight, clearEditing }) {
     description: "",
   });
 
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (editingFlight) {
       setForm({
         ...editingFlight,
-        departureDate: editingFlight.departureDate?.slice(0, 16), // format for datetime-local
+        departureDate: editingFlight.departureDate?.slice(0, 16),
         arrivalDate: editingFlight.arrivalDate?.slice(0, 16),
       });
     }
@@ -24,10 +26,41 @@ export default function FlightForm({ editingFlight, clearEditing }) {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+    const now = new Date();
+
+    Object.keys(form).forEach((key) => {
+      if (!form[key] || form[key].trim() === "") {
+        newErrors[key] = "Required";
+      }
+    });
+
+    if (form.departureDate && new Date(form.departureDate) < now) {
+      newErrors.departureDate = "Departure cannot be in the past";
+    }
+    if (form.arrivalDate && new Date(form.arrivalDate) < now) {
+      newErrors.arrivalDate = "Arrival cannot be in the past";
+    }
+    if (
+      form.departureDate &&
+      form.arrivalDate &&
+      new Date(form.arrivalDate) <= new Date(form.departureDate)
+    ) {
+      newErrors.arrivalDate = "Arrival must be after departure";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       if (form.flightId) {
         await updateFlight(form.flightId, form);
@@ -41,6 +74,15 @@ export default function FlightForm({ editingFlight, clearEditing }) {
     }
   };
 
+  const inputClass = (field, accent) =>
+    `border ${
+      errors[field] ? "border-red-500" : accent
+    } bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 ${
+      errors[field] ? "focus:ring-red-400" : accent.replace("border", "focus:ring")
+    } transition`;
+
+  const nowStr = new Date().toISOString().slice(0, 16);
+
   return (
     <form
       onSubmit={handleSubmit}
@@ -50,41 +92,52 @@ export default function FlightForm({ editingFlight, clearEditing }) {
         {form.flightId ? "Update Flight" : "Add Flight"}
       </h2>
 
+      {/* Departure fields */}
+      <label className="block text-green-300 font-semibold">Departure Airport</label>
       <input
         type="text"
         name="departureAirport"
         placeholder="Departure Airport"
         value={form.departureAirport}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className={inputClass("departureAirport", "border-green-400")}
       />
+      <label className="block text-green-300 font-semibold">Departure Date & Time</label>
+      <input
+        type="datetime-local"
+        name="departureDate"
+        value={form.departureDate}
+        onChange={handleChange}
+        min={nowStr}
+        className={inputClass("departureDate", "border-green-400")}
+      />
+
+      {/* Arrival fields */}
+      <label className="block text-yellow-300 font-semibold">Arrival Airport</label>
       <input
         type="text"
         name="arrivalAirport"
         placeholder="Arrival Airport"
         value={form.arrivalAirport}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className={inputClass("arrivalAirport", "border-yellow-400")}
       />
-      <input
-        type="datetime-local"
-        name="departureDate"
-        value={form.departureDate}
-        onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-      />
+      <label className="block text-yellow-300 font-semibold">Arrival Date & Time</label>
       <input
         type="datetime-local"
         name="arrivalDate"
         value={form.arrivalDate}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        min={nowStr}
+        className={inputClass("arrivalDate", "border-yellow-400")}
       />
+
+      {/* Other fields */}
       <select
         name="status"
         value={form.status}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className={inputClass("status", "border-blue-700")}
       >
         <option value="PENDING">Pending</option>
         <option value="ON_TIME">On Time</option>
@@ -96,14 +149,14 @@ export default function FlightForm({ editingFlight, clearEditing }) {
         placeholder="Plane Type"
         value={form.planeType}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className={inputClass("planeType", "border-blue-700")}
       />
       <textarea
         name="description"
         placeholder="Description"
         value={form.description}
         onChange={handleChange}
-        className="border border-blue-700 bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+        className={inputClass("description", "border-blue-700")}
       />
 
       <div className="flex gap-3 justify-center">
@@ -120,6 +173,12 @@ export default function FlightForm({ editingFlight, clearEditing }) {
           Cancel
         </button>
       </div>
+
+      {Object.keys(errors).length > 0 && (
+        <p className="text-red-400 text-center mt-4">
+          Please fix highlighted fields before submitting.
+        </p>
+      )}
     </form>
   );
 }

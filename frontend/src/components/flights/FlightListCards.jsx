@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getFlights } from "../../services/flightService";
 import FlightCard from "./FlightCard";
 import FlightForm from "./FlightForm";
@@ -9,25 +9,20 @@ export default function FlightListCards() {
   const [page, setPage] = useState(0);
   const [size] = useState(9); // cards per page
 
-  useEffect(() => {
-    loadFlights();
-  }, [page]);
+const loadFlights = useCallback(async () => {
+  try {
+    const res = await getFlights(page, size);
+    setFlights(res.data?.content?.length ? res.data.content : dummyFlights.slice(page * size, page * size + size));
+  } catch (err) {
+    console.error("Error loading flights", err);
+    setFlights(dummyFlights.slice(page * size, page * size + size));
+  }
+}, [page, size]);
 
-  const loadFlights = async () => {
-    try {
-      const res = await getFlights(page, size);
-      if (res.data && res.data.content && res.data.content.length > 0) {
-        setFlights(res.data.content);
-      } else {
-        // fallback to dummy data if backend empty
-        setFlights(dummyFlights.slice(page * size, page * size + size));
-      }
-    } catch (err) {
-      console.error("Error loading flights", err);
-      // fallback to dummy data if backend fails
-      setFlights(dummyFlights.slice(page * size, page * size + size));
-    }
-  };
+useEffect(() => {
+  loadFlights();
+}, [loadFlights]);
+
 
   return (
     <div className="relative bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl text-white overflow-hidden">
@@ -40,7 +35,6 @@ export default function FlightListCards() {
           <div className="mb-6">
             <FlightForm
               editingFlight={editingFlight}
-              onSuccess={loadFlights}
               clearEditing={() => setEditingFlight(null)}
             />
           </div>

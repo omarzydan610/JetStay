@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AirlineProfileForm from "../components/airline/AirlineProfileForm";
 import FlightForm from "../components/flights/FlightForm";
-import FlightList from "../components/flights/FlightList";
 import { getMyAirline } from "../services/airlineService";
 
 export default function AirlineDashboardPage() {
