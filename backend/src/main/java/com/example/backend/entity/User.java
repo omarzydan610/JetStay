@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Iterator;
 
 @Entity
 @Table(name = "users")
@@ -35,11 +38,11 @@ public class User {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(name = "status", length = 20)
     private UserStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role")
+    @Column(name = "role", length = 20)
     private UserRole role;
 
     @Column(name = "created_at", nullable = false)
@@ -47,7 +50,16 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+
         createdAt = LocalDateTime.now();
+        // Set defaults only if null
+        if (status == null) {
+            status = UserStatus.ACTIVE;
+        }
+        if (role == null) {
+            role = UserRole.CLIENT;
+        }
+
     }
 
     public enum UserStatus {
@@ -55,6 +67,6 @@ public class User {
     }
 
     public enum UserRole {
-        SYSTEM_ADMIN, CLIENT, AIRLINE_ADMIN, HOTEL_ADMIN
+        SYSTEM_ADMIN, CLIENT, AIRLINE_ADMIN, HOTEL_ADMIN;
     }
 }

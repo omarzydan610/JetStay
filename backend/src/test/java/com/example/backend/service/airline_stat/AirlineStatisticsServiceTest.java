@@ -4,10 +4,12 @@ import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +43,9 @@ public class AirlineStatisticsServiceTest {
         @Autowired
         private UserRepository userRepository;
 
+        @MockBean
+        private JwtAuthService jwtAuthService;
+
         @BeforeEach
         void setupData() {
                 // Clear repositories in dependency order
@@ -73,9 +78,9 @@ public class AirlineStatisticsServiceTest {
 
                 // 3. Airlines (with non-null admin)
                 Airline emirates = airlineRepository.save(
-                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png"));
+                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(), Airline.Status.ACTIVE));
                 Airline qatar = airlineRepository.save(
-                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png"));
+                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(), Airline.Status.INACTIVE  ));
 
                 // 4. Flights
                 Flight emiratesFlight = flightRepository.save(new Flight(

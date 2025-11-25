@@ -1,4 +1,3 @@
-
 import FormInput from '../partnership-request-form_common_components/FormInput';
 import FileUpload from '../partnership-request-form_common_components/FileUpload';
 
@@ -26,17 +25,15 @@ const AirlineFormFields = ({ formData, errors, handleChange, handleFileChange })
       />
 
       <FileUpload
-        label={
-          <span>
-            Airline Logo <span className="text-gray-500 text-sm font-normal">(optional)</span>
-          </span>
-        }
+        label="Airline Logo"
         name="airlineLogo"
         onChange={handleFileChange}
         error={errors.airlineLogo}
+        accept="image/jpeg,image/png,image/gif"
+        fileName={formData.airlineLogo ? formData.airlineLogo.name : ''}
       />
 
-      {/* New Admin Fields */}
+      {/* Admin Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Manager First Name"

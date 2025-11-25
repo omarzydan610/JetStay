@@ -5,6 +5,9 @@ import HomePage from "./pages/HomePage";
 import AirlineStatisticsPage from "./pages/AirlineStatisticsPage";
 import AirlineDashboardPage from "./pages/AirlineDashboardPage";
 import FlightsPage from "./pages/FlightsPage";
+import PartnershipRequistPage from "./pages/PartnershipRequestPage";
+import AirlineProfile from "./pages/ProfilePages/AirlineProfile";
+import HotelProfile from "./pages/ProfilePages/HotelProfile";
 
 function App() {
   return (
@@ -17,6 +20,9 @@ function App() {
         <Route path="/air-line/:name" element={<AirlineStatisticsPage />} />
         <Route path="/air-line/data" element={<AirlineDashboardPage />} />
         <Route path="/air-line/flights" element={<FlightsPage />} />
+        <Route path="/partnership-request" element={<PartnershipRequistPage />} />
+        <Route path="/airline/profile" element={<AirlineProfile />} />
+        <Route path="/hotel/profile" element={<HotelProfile />} />
       </Routes>
     </Router>
   );
