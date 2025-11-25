@@ -52,10 +52,16 @@ public class Hotel {
 
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
-  private Status status = Status.INACTIVE;
+  private Status status;
 
   public enum Status {
     ACTIVE,
     INACTIVE
+  }
+
+  @PrePersist
+  protected void onCreate() {
+    this.status = Status.INACTIVE;
+    this.createdAt = LocalDateTime.now();
   }
 }

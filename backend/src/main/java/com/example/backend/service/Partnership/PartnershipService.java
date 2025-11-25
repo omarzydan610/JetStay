@@ -6,6 +6,9 @@ import com.example.backend.dto.PartnershipRequist.HotelPartnershipRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
+import com.example.backend.mapper.AirlineMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
@@ -14,13 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 
 @Service
 @Transactional
 public class PartnershipService {
+
+    @Autowired
+    private AirlineMapper airlineMapper;
 
     @Autowired
     private UserRepository userRepository;
@@ -38,96 +43,81 @@ public class PartnershipService {
     private AuthService authService;
 
     // Airline flow
-    public String submitAirlinePartnership(AirlinePartnershipRequest request) throws IOException {
+    public void submitAirlinePartnership(AirlinePartnershipRequest request) {
         // validations moved here
         if (request == null)
-            throw new IllegalArgumentException("Request cannot be null");
+            throw new BadRequestException("Request cannot be null");
         if (request.getManagerEmail() == null || request.getManagerEmail().isBlank())
-            throw new IllegalArgumentException("Manager email is required");
+            throw new BadRequestException("Manager email is required");
         if (request.getAirlineName() == null || request.getAirlineName().isBlank())
-            throw new IllegalArgumentException("Airline name is required");
-
+            throw new BadRequestException("Airline name is required");
         if (userRepository.existsByEmail(request.getManagerEmail())) {
-            throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
+            throw new BadRequestException("Manager email already exists: " + request.getManagerEmail());
         }
-
         if (airlineRepository.existsByAirlineName(request.getAirlineName())) {
-            throw new IllegalArgumentException("Airline name already exists: " + request.getAirlineName());
+            throw new BadRequestException("Airline name already exists: " + request.getAirlineName());
         }
 
         // Create and save admin user using AuthService
-        UserDTO hotelAdmin = new UserDTO();
-        hotelAdmin.setFirstName(request.getAdminFirstName());
-        hotelAdmin.setLastName(request.getAdminLastName());
-        hotelAdmin.setEmail(request.getManagerEmail());
-        hotelAdmin.setPassword(request.getManagerPassword());
-        hotelAdmin.setPhoneNumber(request.getAdminPhone());
-
+        UserDTO airlineAdmin = new UserDTO(request.getAdminFirstName(),
+                request.getAdminLastName(),
+                request.getManagerEmail(),
+                request.getManagerPassword(),
+                request.getAdminPhone());
 
         // Use AuthService to sign up the admin
-        Object signUpResult = authService.SignUp(hotelAdmin, null, User.UserRole.AIRLINE_ADMIN);
-        
-        if (signUpResult instanceof com.example.backend.dto.response.ErrorResponse) {
-            throw new IllegalArgumentException("Failed to create admin user: " + 
-                ((com.example.backend.dto.response.ErrorResponse) signUpResult).getMessage());
-        }
+        authService.SignUp(airlineAdmin, User.UserRole.AIRLINE_ADMIN);
 
         User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
-                .orElseThrow(() -> new IllegalStateException("Failed to retrieve saved admin user"));
+                .orElseThrow(() -> new InternalServerErrorException("Failed to retrieve saved admin user"));
 
         String logoPath = null;
         if (request.getAirlineLogo() != null && !request.getAirlineLogo().isEmpty()) {
-            logoPath = fileStorageService.storeFile(request.getAirlineLogo());
+            try {
+                logoPath = fileStorageService.storeFile(request.getAirlineLogo());
+            } catch (IOException e) {
+                throw new InternalServerErrorException("Failed to store airline logo", e);
+            }
         }
 
-        Airline airline = new Airline();
-        airline.setAirlineName(request.getAirlineName());
-        airline.setAirlineNationality(request.getAirlineNationality());
-        airline.setAdmin(savedAdmin);
-        airline.setAirlineRate(0.0f);
-        airline.setNumberOfRates(0);
-        airline.setLogoUrl(logoPath);
-        airline.setStatus(Airline.Status.INACTIVE);
-        airline.setCreatedAt(LocalDateTime.now());
+        Airline airline = airlineMapper.createAirline(request.getAirlineName(), request.getAirlineNationality(),
+                savedAdmin, logoPath);
 
-        Airline savedAirline = airlineRepository.save(airline);
-
-        return "Airline partnership request submitted successfully with ID: " + savedAirline.getAirlineID();
+        airlineRepository.save(airline);
     }
 
     // Hotel flow
-    public String submitHotelPartnership(HotelPartnershipRequest request) throws IOException {
+    public void submitHotelPartnership(HotelPartnershipRequest request) {
         if (request == null)
-            throw new IllegalArgumentException("Request cannot be null");
+            throw new BadRequestException("Request cannot be null");
         if (request.getManagerEmail() == null || request.getManagerEmail().isBlank())
-            throw new IllegalArgumentException("Manager email is required");
+            throw new BadRequestException("Manager email is required");
         if (request.getHotelName() == null || request.getHotelName().isBlank())
-            throw new IllegalArgumentException("Hotel name is required");
+            throw new BadRequestException("Hotel name is required");
 
         if (userRepository.existsByEmail(request.getManagerEmail())) {
-            throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
+            throw new BadRequestException("Manager email already exists: " + request.getManagerEmail());
         }
 
-        UserDTO hotelAdmin = new UserDTO();
-        hotelAdmin.setFirstName(request.getAdminFirstName());
-        hotelAdmin.setLastName(request.getAdminLastName());
-        hotelAdmin.setEmail(request.getManagerEmail());
-        hotelAdmin.setPassword(request.getManagerPassword());
-        hotelAdmin.setPhoneNumber(request.getAdminPhone());
+        UserDTO hotelAdmin = new UserDTO(
+                request.getAdminFirstName(),
+                request.getAdminLastName(),
+                request.getManagerEmail(),
+                request.getManagerPassword(),
+                request.getAdminPhone());
 
-        Object signUpResult = authService.SignUp(hotelAdmin, null, User.UserRole.HOTEL_ADMIN);
-
-        if (signUpResult instanceof com.example.backend.dto.response.ErrorResponse) {
-            throw new IllegalArgumentException("Failed to create admin user: " + 
-                ((com.example.backend.dto.response.ErrorResponse) signUpResult).getMessage());
-        }
+        authService.SignUp(hotelAdmin, User.UserRole.HOTEL_ADMIN);
 
         User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
-                .orElseThrow(() -> new IllegalStateException("Failed to retrieve saved admin user"));
+                .orElseThrow(() -> new InternalServerErrorException("Failed to retrieve saved admin user"));
 
         String logoPath = null;
         if (request.getHotelLogo() != null && !request.getHotelLogo().isEmpty()) {
-            logoPath = fileStorageService.storeFile(request.getHotelLogo());
+            try {
+                logoPath = fileStorageService.storeFile(request.getHotelLogo());
+            } catch (IOException e) {
+                throw new InternalServerErrorException("Failed to store hotel logo", e);
+            }
         }
 
         Hotel hotel = new Hotel();
@@ -143,8 +133,6 @@ public class PartnershipService {
         hotel.setCreatedAt(LocalDateTime.now());
         hotel.setStatus(Hotel.Status.INACTIVE);
 
-        Hotel savedHotel = hotelRepository.save(hotel);
-
-        return "Hotel partnership request submitted successfully with ID: " + savedHotel.getHotelID();
+        hotelRepository.save(hotel);
     }
 }

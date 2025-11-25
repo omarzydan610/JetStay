@@ -15,7 +15,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            .cors() // ← مهم جدًا عشان CORS يشتغل
+            .cors()
             .and()
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth

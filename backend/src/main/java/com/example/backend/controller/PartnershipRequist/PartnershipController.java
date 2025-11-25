@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/api/partnership")
 public class PartnershipController {
@@ -21,16 +19,14 @@ public class PartnershipController {
     private PartnershipService partnershipService;
 
     @PostMapping("/airline")
-    public ResponseEntity<SuccessResponse<String>> submitAirline(@ModelAttribute AirlinePartnershipRequest request)
-            throws IOException {
-        String message = partnershipService.submitAirlinePartnership(request);
-        return ResponseEntity.ok(SuccessResponse.of(message));
+    public ResponseEntity<SuccessResponse<Void>> submitAirline(@ModelAttribute AirlinePartnershipRequest request) {
+        partnershipService.submitAirlinePartnership(request);
+        return ResponseEntity.ok(SuccessResponse.of("Airline partnership request submitted successfully"));
     }
 
     @PostMapping("/hotel")
-    public ResponseEntity<SuccessResponse<String>> submitHotel(@ModelAttribute HotelPartnershipRequest request)
-            throws IOException {
-        String message = partnershipService.submitHotelPartnership(request);
-        return ResponseEntity.ok(SuccessResponse.of(message));
+    public ResponseEntity<SuccessResponse<Void>> submitHotel(@ModelAttribute HotelPartnershipRequest request) {
+        partnershipService.submitHotelPartnership(request);
+        return ResponseEntity.ok(SuccessResponse.of("Hotel partnership request submitted successfully"));
     }
 }

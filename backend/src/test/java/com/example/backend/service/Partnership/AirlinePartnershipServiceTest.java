@@ -2,7 +2,6 @@ package com.example.backend.service.Partnership;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
-import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
 import com.example.backend.repository.AirlineRepository;
@@ -55,10 +54,9 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
+
         // Mock AuthService signup success
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(10);
@@ -71,16 +69,11 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/logo.png");
 
-        // When
-        String response = partnershipService.submitAirlinePartnership(request);
-
-        // Then
-        assertNotNull(response);
-        assertTrue(response.contains("20"));
+        partnershipService.submitAirlinePartnership(request);
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
         verify(airlineRepository).existsByAirlineName(request.getAirlineName());
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
         verify(userRepository).findByEmail(request.getManagerEmail());
         verify(airlineRepository).save(any(Airline.class));
         verify(fileStorageService).storeFile(any());
@@ -139,10 +132,10 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
+
         // Mock AuthService signup failure
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(com.example.backend.dto.response.ErrorResponse.of("Signup Failed", "Email already exists", "/api/auth/signup"));
+        doThrow(new IllegalArgumentException("Failed to create admin user")).when(authService)
+                .SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         // When & Then
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -150,7 +143,7 @@ public class AirlinePartnershipServiceTest {
 
         assertTrue(ex.getMessage().contains("Failed to create admin user"));
 
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
         verify(userRepository, never()).findByEmail(anyString());
         verify(airlineRepository, never()).save(any());
     }
@@ -165,10 +158,9 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
+
         // Mock AuthService signup success but user not found in repository
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
         when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
 
         // When & Then
@@ -177,7 +169,7 @@ public class AirlinePartnershipServiceTest {
 
         assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
 
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
         verify(userRepository).findByEmail(request.getManagerEmail());
         verify(airlineRepository, never()).save(any());
     }
@@ -192,9 +184,8 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(30);
@@ -208,12 +199,7 @@ public class AirlinePartnershipServiceTest {
         // No logo provided
         request.setAirlineLogo(null);
 
-        // When
-        String response = partnershipService.submitAirlinePartnership(request);
-
-        // Then
-        assertNotNull(response);
-        assertTrue(response.contains("31"));
+        partnershipService.submitAirlinePartnership(request);
 
         verify(fileStorageService, never()).storeFile(any());
         verify(airlineRepository).save(any(Airline.class));
@@ -231,9 +217,8 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(40);
@@ -268,9 +253,8 @@ public class AirlinePartnershipServiceTest {
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.AIRLINE_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.AIRLINE_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(50);
@@ -283,11 +267,7 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/cap.png");
 
-        // When
-        String response = partnershipService.submitAirlinePartnership(request);
-
-        // Then
-        assertNotNull(response);
+        partnershipService.submitAirlinePartnership(request);
 
         // capture the airline passed to save
         org.mockito.ArgumentCaptor<Airline> captor = org.mockito.ArgumentCaptor.forClass(Airline.class);

@@ -2,7 +2,6 @@ package com.example.backend.service.Partnership;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
 import com.example.backend.dto.PartnershipRequist.HotelPartnershipRequest;
-import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
 import com.example.backend.repository.HotelRepository;
@@ -57,10 +56,9 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
+
         // Mock AuthService signup success
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(11);
@@ -73,15 +71,10 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hotel.png");
 
-        // When
-        String response = partnershipService.submitHotelPartnership(request);
-
-        // Then
-        assertNotNull(response);
-        assertTrue(response.contains("21"));
+        partnershipService.submitHotelPartnership(request);
 
         verify(userRepository).existsByEmail(request.getManagerEmail());
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
         verify(userRepository).findByEmail(request.getManagerEmail());
         verify(hotelRepository).save(any(Hotel.class));
         verify(fileStorageService).storeFile(any());
@@ -116,10 +109,10 @@ public class HotelPartnershipServiceTest {
         request.setManagerPassword("pwd");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
+
         // Mock AuthService signup failure
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(com.example.backend.dto.response.ErrorResponse.of("Signup Failed", "Email already exists", "/api/auth/signup"));
+        doThrow(new IllegalArgumentException("Failed to create admin user")).when(authService)
+                .SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         // When & Then
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
@@ -127,7 +120,7 @@ public class HotelPartnershipServiceTest {
 
         assertTrue(ex.getMessage().contains("Failed to create admin user"));
 
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
         verify(userRepository, never()).findByEmail(anyString());
         verify(hotelRepository, never()).save(any());
     }
@@ -141,10 +134,9 @@ public class HotelPartnershipServiceTest {
         request.setManagerPassword("pwd");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
+
         // Mock AuthService signup success but user not found in repository
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
         when(userRepository.findByEmail(request.getManagerEmail())).thenReturn(java.util.Optional.empty());
 
         // When & Then
@@ -153,7 +145,7 @@ public class HotelPartnershipServiceTest {
 
         assertTrue(ex.getMessage().contains("Failed to retrieve saved admin user"));
 
-        verify(authService).SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN));
+        verify(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
         verify(userRepository).findByEmail(request.getManagerEmail());
         verify(hotelRepository, never()).save(any());
     }
@@ -167,9 +159,8 @@ public class HotelPartnershipServiceTest {
         request.setManagerPassword("pwd");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(60);
@@ -182,12 +173,7 @@ public class HotelPartnershipServiceTest {
 
         request.setHotelLogo(null);
 
-        // When
-        String response = partnershipService.submitHotelPartnership(request);
-
-        // Then
-        assertNotNull(response);
-        assertTrue(response.contains("61"));
+        partnershipService.submitHotelPartnership(request);
 
         verify(fileStorageService, never()).storeFile(any());
         verify(hotelRepository).save(any(Hotel.class));
@@ -204,9 +190,8 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(70);
@@ -242,9 +227,8 @@ public class HotelPartnershipServiceTest {
         request.setHotelLogo(logo);
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(false);
-        
-        when(authService.SignUp(any(UserDTO.class), isNull(), eq(User.UserRole.HOTEL_ADMIN)))
-            .thenReturn(SuccessResponse.of("Signed up successfully"));
+
+        doNothing().when(authService).SignUp(any(UserDTO.class), eq(User.UserRole.HOTEL_ADMIN));
 
         User savedUser = new User();
         savedUser.setUserID(80);
@@ -257,11 +241,7 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hcap.png");
 
-        // When
-        String response = partnershipService.submitHotelPartnership(request);
-
-        // Then
-        assertNotNull(response);
+        partnershipService.submitHotelPartnership(request);
 
         org.mockito.ArgumentCaptor<Hotel> captor = org.mockito.ArgumentCaptor.forClass(Hotel.class);
         verify(hotelRepository).save(captor.capture());

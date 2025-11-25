@@ -5,14 +5,14 @@ import com.example.backend.entity.User;
 
 public class UserMapper {
 
-    public User signupToUser(UserDTO newUser, User.UserStatus userStatus, User.UserRole userRole) {
+    public User signupToUser(UserDTO newUser, User.UserRole userRole) {
         User user = new User();
         user.setFirstName(newUser.getFirstName());
         user.setLastName(newUser.getLastName());
         user.setEmail(newUser.getEmail());
         user.setPassword(newUser.getPassword());
         user.setPhoneNumber(newUser.getPhoneNumber());
-        user.setStatus(userStatus);
+        user.setStatus(User.UserStatus.ACTIVE);
         user.setRole(userRole);
         return user;
     }

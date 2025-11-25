@@ -1,8 +1,8 @@
 package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
-import com.example.backend.dto.response.ErrorResponse;
-import com.example.backend.dto.response.SuccessResponse;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.entity.User;
 import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.UserRepository;
@@ -53,14 +53,9 @@ class AuthServiceTest {
     void testSignupSuccess() {
         when(userRepository.findByEmail(userDTO.getEmail())).thenReturn(Optional.empty());
         when(encoder.encode(anyString())).thenReturn("encoded");
-        when(userMapper.signupToUser(any(),eq(null),eq(null))).thenReturn(user);
+        when(userMapper.signupToUser(any(), any())).thenReturn(user);
 
-        Object response = authService.SignUp(userDTO, null, null);
-
-        assertTrue(response instanceof SuccessResponse);
-        SuccessResponse<?> success = (SuccessResponse<?>) response;
-
-        assertEquals("Signed up successfully", success.getMessage());
+        authService.SignUp(userDTO);
 
         verify(userRepository).save(user);
     }
@@ -69,14 +64,7 @@ class AuthServiceTest {
     void testSignupEmailAlreadyExists() {
         when(userRepository.findByEmail(userDTO.getEmail())).thenReturn(Optional.of(user));
 
-        Object response = authService.SignUp(userDTO, null, null);
-
-        assertTrue(response instanceof ErrorResponse);
-        ErrorResponse error = (ErrorResponse) response;
-
-        assertEquals("Email Already Exists", error.getError());
-        assertEquals("Email is already registered", error.getMessage());
-        assertEquals("/api/auth/signup", error.getPath());
+        assertThrows(BadRequestException.class, () -> authService.SignUp(userDTO));
     }
 
     @Test
@@ -84,13 +72,6 @@ class AuthServiceTest {
         when(userRepository.findByEmail(userDTO.getEmail())).thenReturn(Optional.empty());
         when(encoder.encode(anyString())).thenThrow(new RuntimeException("DB error"));
 
-        Object response = authService.SignUp(userDTO, null, null);
-
-        assertTrue(response instanceof ErrorResponse);
-        ErrorResponse error = (ErrorResponse) response;
-
-        assertEquals("Signup Failed", error.getError());
-        assertEquals("An unexpected error occurred", error.getMessage());
-        assertEquals("/api/auth/signup", error.getPath());
+        assertThrows(InternalServerErrorException.class, () -> authService.SignUp(userDTO));
     }
 }
