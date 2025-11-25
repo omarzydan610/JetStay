@@ -47,7 +47,16 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+
         createdAt = LocalDateTime.now();
+        // Set defaults only if null
+        if (status == null) {
+            status = UserStatus.ACTIVE;
+        }
+        if (role == null) {
+            role = UserRole.CLIENT;
+        }
+
     }
 
     public enum UserStatus {
