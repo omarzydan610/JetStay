@@ -2,6 +2,7 @@ package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.dto.AuthDTO.UserDTO;
+import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.entity.User;
