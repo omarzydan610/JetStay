@@ -54,7 +54,7 @@ public class JwtAuthService {
                     .parseSignedClaims(token)
                     .getPayload();
         }catch(Exception e){
-            throw new BadRequestException("Invalid or expired reset token");
+            throw new BadRequestException("Invalid or expired token");
         }
     }
 
