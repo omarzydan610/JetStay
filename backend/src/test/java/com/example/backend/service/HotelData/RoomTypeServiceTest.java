@@ -1,10 +1,10 @@
 package com.example.backend.service.HotelData;
 
-import com.example.backend.dto.RoomTypeDTO;
+import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
 import com.example.backend.entity.User;
-import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
@@ -68,7 +68,7 @@ public class RoomTypeServiceTest {
     @Test
     @Order(1)
     void testAddRoomTypeSuccess() {
-        RoomTypeDTO dto = new RoomTypeDTO();
+        RoomTypeRequest dto = new RoomTypeRequest();
         dto.setHotelId(hotel.getHotelID());
         dto.setRoomTypeName("Deluxe");
         dto.setPrice(300f);
@@ -115,7 +115,7 @@ public class RoomTypeServiceTest {
                 new RoomType(null, "OldName", 2, hotel, 5, "Old", 100f)
         );
 
-        RoomTypeDTO dto = new RoomTypeDTO();
+        RoomTypeRequest dto = new RoomTypeRequest();
         dto.setRoomTypeName("NewName");
         dto.setPrice(400f);
         dto.setDescription("Updated");
@@ -131,10 +131,10 @@ public class RoomTypeServiceTest {
     @Test
     @Order(5)
     void testUpdateRoomType_NotFound() {
-        RoomTypeDTO dto = new RoomTypeDTO();
+        RoomTypeRequest dto = new RoomTypeRequest();
         dto.setRoomTypeName("Fail");
 
-        assertThrows(BadRequestException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> roomTypeService.updateRoomType(dto, -1));
     }
 
@@ -153,11 +153,11 @@ public class RoomTypeServiceTest {
     @Test
     @Order(7)
     void testAddRoomType_HotelNotFound() {
-        RoomTypeDTO dto = new RoomTypeDTO();
+        RoomTypeRequest dto = new RoomTypeRequest();
         dto.setHotelId(999999);
         dto.setRoomTypeName("Test");
 
-        assertThrows(BadRequestException.class,
+        assertThrows(ResourceNotFoundException.class,
                 () -> roomTypeService.addRoomType(dto));
     }
 }

@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.backend.dto.RoomTypeDTO;
-import com.example.backend.dto.RoomTypeData;
+import com.example.backend.dto.RoomTypeRequest;
+import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.RoomType;
 import com.example.backend.service.Hotel_data.RoomTypeService;
@@ -21,8 +21,8 @@ public class RoomTypeController {
 
     // Get room types for a hotel
     @GetMapping("/hotel/{hotelId}")
-    public ResponseEntity<SuccessResponse<List<RoomTypeData>>> getHotelRoomTypes(@PathVariable int hotelId) {
-        List<RoomTypeData> roomTypeData = roomTypeService.getRoomTypesByHotelId(hotelId);
+    public ResponseEntity<SuccessResponse<List<RoomTypeResponse>>> getHotelRoomTypes(@PathVariable int hotelId) {
+        List<RoomTypeResponse> roomTypeData = roomTypeService.getRoomTypesByHotelId(hotelId);
 
         return ResponseEntity.ok(
                 SuccessResponse.of("Room types retrieved successfully", roomTypeData));
@@ -30,7 +30,7 @@ public class RoomTypeController {
 
     // Add room type
     @PostMapping("/add")
-    public ResponseEntity<SuccessResponse<Void>> addRoomType(@RequestBody RoomTypeDTO roomTypeDTO) {
+    public ResponseEntity<SuccessResponse<Void>> addRoomType(@RequestBody RoomTypeRequest roomTypeDTO) {
         roomTypeService.addRoomType(roomTypeDTO);
 
         return ResponseEntity.ok(
@@ -40,7 +40,7 @@ public class RoomTypeController {
     // Update room type
     @PatchMapping("/update/{roomTypeId}")
     public ResponseEntity<SuccessResponse<Void>> updateRoomType(
-            @RequestBody RoomTypeDTO roomTypeDTO,
+            @RequestBody RoomTypeRequest roomTypeDTO,
             @PathVariable int roomTypeId) {
         roomTypeService.updateRoomType(roomTypeDTO, roomTypeId);
 

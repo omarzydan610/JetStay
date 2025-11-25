@@ -3,8 +3,8 @@ package com.example.backend.service.Hotel_data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.backend.dto.RoomTypeDTO;
-import com.example.backend.dto.RoomTypeData;
+import com.example.backend.dto.RoomTypeRequest;
+import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
 import com.example.backend.exception.ResourceNotFoundException;
@@ -31,21 +31,21 @@ public class RoomTypeService {
         }
     }
 
-    public java.util.List<RoomTypeData> getRoomTypesByHotelId(Integer hotelId) {
+    public java.util.List<RoomTypeResponse> getRoomTypesByHotelId(Integer hotelId) {
 
         try {
             Hotel hotel = hotelRepository.findById(hotelId).orElse(null);
             if (hotel == null) {
                 throw new ResourceNotFoundException("Hotel not found with ID: " + hotelId);
             }
-            java.util.List<RoomTypeData> roomTypes = roomTypeRepository.findByHotelId(hotelId);
+            java.util.List<RoomTypeResponse> roomTypes = roomTypeRepository.findByHotelId(hotelId);
             return roomTypes;
         } catch (Exception e) {
             throw e;
         }
     }
 
-    public RoomType addRoomType(RoomTypeDTO roomTypeDTO) {
+    public RoomType addRoomType(RoomTypeRequest roomTypeDTO) {
         try {
             Hotel hotel = hotelRepository.findById(roomTypeDTO.getHotelId()).orElse(null);
             if (hotel == null) {
@@ -64,7 +64,7 @@ public class RoomTypeService {
         }
     }
 
-    public RoomType updateRoomType(RoomTypeDTO roomTypeDTO, int roomTypeId) {
+    public RoomType updateRoomType(RoomTypeRequest roomTypeDTO, int roomTypeId) {
         try {
 
             RoomType existingRoomType = roomTypeRepository.findById(roomTypeId).orElse(null);

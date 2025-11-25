@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class RoomTypeData {
+public class RoomTypeResponse {
     private int roomTypeID;
     private String roomTypeName;
     private int numberOfGuests;
