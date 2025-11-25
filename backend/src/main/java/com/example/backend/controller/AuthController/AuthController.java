@@ -2,6 +2,7 @@ package com.example.backend.controller.AuthController;
 
 import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.dto.AuthDTO.UserDTO;
+import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.AuthService.AuthService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,8 +24,8 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@RequestBody UserDTO user) {
-        Object response = authService.SignUp(user, null, null);
-        return ResponseEntity.ok(response);
+        authService.SignUp(user);
+        return ResponseEntity.ok(SuccessResponse.of("User created successfully", null));
     }
 
     @PostMapping("/login")

@@ -54,17 +54,15 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
       </div>
 
       <FileUpload
-        label={
-          <span>
-            Hotel Logo <span className="text-gray-500 text-sm font-normal">(optional)</span>
-          </span>
-        }
+        label="Hotel Logo"
         name="hotelLogo"
         onChange={handleFileChange}
         error={errors.hotelLogo}
+        accept="image/jpeg,image/png,image/gif"
+        fileName={formData.hotelLogo ? formData.hotelLogo.name : ''}
       />
 
-      {/* New Admin Fields */}
+      {/* Admin Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <FormInput
           label="Manager First Name"
@@ -77,7 +75,7 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
         />
 
         <FormInput
-          label="ManagerLast Name"
+          label="Manager Last Name"
           name="adminLastName"
           value={formData.adminLastName}
           onChange={handleChange}
