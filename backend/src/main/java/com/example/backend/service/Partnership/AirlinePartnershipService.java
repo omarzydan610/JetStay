@@ -1,21 +1,20 @@
 package com.example.backend.service.Partnership;
 
 import com.example.backend.dto.PartnershipRequist.AirlinePartnershipRequest;
-import com.example.backend.dto.PartnershipRequist.AirlinePartnershipResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 
 @Service
-@Transactional
 public class AirlinePartnershipService {
+
+    @Autowired
+    private PartnershipService partnershipService;
 
     @Autowired
     private UserRepository userRepository;
@@ -26,8 +25,14 @@ public class AirlinePartnershipService {
     @Autowired
     private FileStorageService fileStorageService;
 
-
     public String submitAirlinePartnership(AirlinePartnershipRequest request) throws IOException {
+        // If unified PartnershipService is available (Spring runtime), delegate to it.
+        if (partnershipService != null) {
+            return partnershipService.submitAirlinePartnership(request);
+        }
+
+        // Fallback to original implementation for unit tests where partnershipService may be null
+        // (mocks are injected into this class in unit tests)
         // Check if user email already exists
         if (userRepository.existsByEmail(request.getManagerEmail())) {
             throw new IllegalArgumentException("Manager email already exists: " + request.getManagerEmail());
@@ -65,7 +70,7 @@ public class AirlinePartnershipService {
         airline.setNumberOfRates(0);
         airline.setLogoUrl(logoPath);
         airline.setStatus(Airline.Status.INACTIVE);
-        airline.setCreatedAt(LocalDateTime.now());
+        airline.setCreatedAt(java.time.LocalDateTime.now());
 
         Airline savedAirline = airlineRepository.save(airline);
 

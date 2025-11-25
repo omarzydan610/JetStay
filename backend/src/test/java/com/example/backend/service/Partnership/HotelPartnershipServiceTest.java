@@ -31,7 +31,7 @@ public class HotelPartnershipServiceTest {
     private FileStorageService fileStorageService;
 
     @InjectMocks
-    private HotelPartnershipService hotelPartnershipService;
+    private PartnershipService partnershipService;
 
     @Test
     public void testSubmitHotelPartnership_Success() throws IOException {
@@ -61,7 +61,7 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hotel.png");
 
-        String response = hotelPartnershipService.submitHotelPartnership(request);
+        String response = partnershipService.submitHotelPartnership(request);
 
         assertNotNull(response);
         assertTrue(response.contains("21"));
@@ -76,11 +76,12 @@ public class HotelPartnershipServiceTest {
     public void testSubmitHotelPartnership_ManagerEmailExists_Throws() {
         HotelPartnershipRequest request = new HotelPartnershipRequest();
         request.setManagerEmail("exists@hotel.com");
+        request.setHotelName("TestHotel");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> hotelPartnershipService.submitHotelPartnership(request));
+                () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
 
@@ -107,7 +108,7 @@ public class HotelPartnershipServiceTest {
 
         request.setHotelLogo(null);
 
-        String response = hotelPartnershipService.submitHotelPartnership(request);
+        String response = partnershipService.submitHotelPartnership(request);
 
         assertNotNull(response);
         assertTrue(response.contains("61"));
@@ -134,7 +135,7 @@ public class HotelPartnershipServiceTest {
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
         IOException ex = assertThrows(IOException.class,
-                () -> hotelPartnershipService.submitHotelPartnership(request));
+                () -> partnershipService.submitHotelPartnership(request));
 
         assertTrue(ex.getMessage().contains("upload failed"));
 
@@ -169,7 +170,7 @@ public class HotelPartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hcap.png");
 
-        String response = hotelPartnershipService.submitHotelPartnership(request);
+        String response = partnershipService.submitHotelPartnership(request);
 
         assertNotNull(response);
 

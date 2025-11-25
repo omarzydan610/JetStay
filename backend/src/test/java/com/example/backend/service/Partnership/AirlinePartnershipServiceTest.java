@@ -31,7 +31,7 @@ public class AirlinePartnershipServiceTest {
     private FileStorageService fileStorageService;
 
     @InjectMocks
-    private AirlinePartnershipService airlinePartnershipService;
+    private PartnershipService partnershipService;
 
     @Test
     public void testSubmitAirlinePartnership_Success() throws IOException {
@@ -59,7 +59,7 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/logo.png");
 
-        String response = airlinePartnershipService.submitAirlinePartnership(request);
+        String response = partnershipService.submitAirlinePartnership(request);
 
         assertNotNull(response);
         assertTrue(response.contains("20"));
@@ -75,11 +75,12 @@ public class AirlinePartnershipServiceTest {
     public void testSubmitAirlinePartnership_ManagerEmailExists_Throws() {
         AirlinePartnershipRequest request = new AirlinePartnershipRequest();
         request.setManagerEmail("existing@test.com");
+        request.setAirlineName("TestAirline");
 
         when(userRepository.existsByEmail(request.getManagerEmail())).thenReturn(true);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> airlinePartnershipService.submitAirlinePartnership(request));
+                () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getManagerEmail()));
 
@@ -97,7 +98,7 @@ public class AirlinePartnershipServiceTest {
         when(airlineRepository.existsByAirlineName(request.getAirlineName())).thenReturn(true);
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
-                () -> airlinePartnershipService.submitAirlinePartnership(request));
+                () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains(request.getAirlineName()));
 
@@ -127,7 +128,7 @@ public class AirlinePartnershipServiceTest {
         // No logo provided
         request.setAirlineLogo(null);
 
-        String response = airlinePartnershipService.submitAirlinePartnership(request);
+        String response = partnershipService.submitAirlinePartnership(request);
 
         assertNotNull(response);
         assertTrue(response.contains("31"));
@@ -155,7 +156,7 @@ public class AirlinePartnershipServiceTest {
         when(fileStorageService.storeFile(any())).thenThrow(new IOException("upload failed"));
 
         IOException ex = assertThrows(IOException.class,
-                () -> airlinePartnershipService.submitAirlinePartnership(request));
+                () -> partnershipService.submitAirlinePartnership(request));
 
         assertTrue(ex.getMessage().contains("upload failed"));
 
@@ -189,7 +190,7 @@ public class AirlinePartnershipServiceTest {
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/cap.png");
 
-        String response = airlinePartnershipService.submitAirlinePartnership(request);
+        String response = partnershipService.submitAirlinePartnership(request);
 
         assertNotNull(response);
 
