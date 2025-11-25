@@ -20,6 +20,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -100,6 +101,7 @@ class AuthServiceTest {
         User user = new User();
         user.setEmail("test@example.com");
         user.setPassword("encodedPassword");
+        user.setRole(User.UserRole.CLIENT); // important for the logic
 
         when(userRepository.findByEmail("test@example.com"))
                 .thenReturn(Optional.of(user));
@@ -108,7 +110,8 @@ class AuthServiceTest {
                 new UsernamePasswordAuthenticationToken("test@example.com", "123456")
         )).thenReturn(mock(org.springframework.security.core.Authentication.class));
 
-        when(jwtAuthService.generateAuthToken("test@example.com"))
+        // Because client user => managedIds = empty list
+        when(jwtAuthService.generateAuthToken(user, Collections.emptyList()))
                 .thenReturn("mocked-jwt-token");
 
         Object response = authService.Login(loginDTO);

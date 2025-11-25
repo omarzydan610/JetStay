@@ -1,5 +1,6 @@
 package com.example.backend.service.AuthService;
 
+import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class JwtAuthService {
@@ -23,9 +27,19 @@ public class JwtAuthService {
         return Keys.hmacShaKeyFor(authSecret.getBytes());
     }
 
-    public String generateAuthToken(String email) {
+    public String generateAuthToken(User user, List<Integer> managedIds) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user_id", user.getUserID());
+
+        if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
+            claims.put("hotel_ids", managedIds);
+        } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
+            claims.put("airline_ids", managedIds);
+        }
+
         return Jwts.builder()
-                .subject(email)
+                .subject(user.getEmail())
+                .claims(claims)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(getSigningKey())
