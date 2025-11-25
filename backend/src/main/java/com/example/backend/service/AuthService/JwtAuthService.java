@@ -1,0 +1,70 @@
+package com.example.backend.service.AuthService;
+
+import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class JwtAuthService {
+
+    @Value("${jwt.auth.secret}")
+    private String authSecret;
+
+    private static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24h
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(authSecret.getBytes());
+    }
+
+    public String generateAuthToken(User user, List<Integer> managedIds) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("user_id", user.getUserID());
+
+        if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
+            claims.put("hotel_ids", managedIds);
+        } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
+            claims.put("airline_ids", managedIds);
+        }
+
+        return Jwts.builder()
+                .subject(user.getEmail())
+                .claims(claims)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public Claims parseClaims(String token) {
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+        }catch(Exception e){
+            throw new BadRequestException("Invalid or expired token");
+        }
+    }
+
+    public String extractEmail(String token) {
+        return parseClaims(token).getSubject();
+    }
+
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        Claims claims = parseClaims(token);
+        boolean expired = claims.getExpiration().before(new Date());
+        return userDetails.getUsername().equals(claims.getSubject()) && !expired;
+    }
+}
