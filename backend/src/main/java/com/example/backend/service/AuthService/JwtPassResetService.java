@@ -12,7 +12,7 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 @Service
-public class JwtService {
+public class JwtPassResetService {
 
   @Value("${jwt.password-reset.secret}")
   private String secretKeyString;

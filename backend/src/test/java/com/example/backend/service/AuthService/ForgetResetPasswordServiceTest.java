@@ -51,7 +51,7 @@ class ForgetResetPasswordServiceTest {
   private PasswordEncoder passwordEncoder;
 
   @Autowired
-  private JwtService jwtService;
+  private JwtPassResetService jwtPassResetService;
 
   @Autowired
   private GenericEmailService emailService;
@@ -169,7 +169,7 @@ class ForgetResetPasswordServiceTest {
     assertFalse(token.isEmpty(), "Token should not be empty");
 
     // Verify token is valid
-    assertTrue(jwtService.isTokenValid(token, testUser.getEmail()), "Token should be valid");
+    assertTrue(jwtPassResetService.isTokenValid(token, testUser.getEmail()), "Token should be valid");
 
     // Verify OTP was deleted after successful verification
     Optional<UserOtp> deletedOtp = userOtpRepository.findById(savedOtp.getOtpID());
