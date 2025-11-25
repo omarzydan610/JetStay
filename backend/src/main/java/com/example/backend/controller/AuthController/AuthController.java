@@ -31,8 +31,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> loginController(@RequestBody LoginDTO user) {
         String authToken = authService.Login(user);
-        LoginResponse data = new LoginResponse(authToken);
-        return ResponseEntity.ok(SuccessResponse.of("Loged it Logged in successfully", data));
+        return ResponseEntity.ok(SuccessResponse.of("Loged it Logged in successfully", authToken));
     }
 
 }

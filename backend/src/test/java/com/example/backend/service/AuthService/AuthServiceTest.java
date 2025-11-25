@@ -93,7 +93,7 @@ class AuthServiceTest {
 
     @Test
     void testLoginSuccess() {
-
+        // Arrange
         LoginDTO loginDTO = new LoginDTO();
         loginDTO.setEmail("test@example.com");
         loginDTO.setPassword("123456");
@@ -101,7 +101,7 @@ class AuthServiceTest {
         User user = new User();
         user.setEmail("test@example.com");
         user.setPassword("encodedPassword");
-        user.setRole(User.UserRole.CLIENT); // important for the logic
+        user.setRole(User.UserRole.CLIENT);
 
         when(userRepository.findByEmail("test@example.com"))
                 .thenReturn(Optional.of(user));
@@ -114,14 +114,11 @@ class AuthServiceTest {
         when(jwtAuthService.generateAuthToken(user, Collections.emptyList()))
                 .thenReturn("mocked-jwt-token");
 
-        Object response = authService.Login(loginDTO);
 
-        assertTrue(response instanceof SuccessResponse);
-        SuccessResponse success = (SuccessResponse) response;
-
-        assertEquals("Logged in successfully", success.getMessage());
-        assertEquals("mocked-jwt-token", success.getData());
+        String token = authService.Login(loginDTO);
+        assertEquals("mocked-jwt-token", token);
     }
+
 
 
 

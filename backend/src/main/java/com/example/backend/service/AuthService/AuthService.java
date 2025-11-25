@@ -65,7 +65,7 @@ public class AuthService {
         }
     }
 
-    public Object Login(LoginDTO loginDTO) {
+    public String Login(LoginDTO loginDTO) {
 
         User user = userRepository.findByEmail(loginDTO.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("User does not exist"));
@@ -97,6 +97,6 @@ public class AuthService {
 
         String token = jwtAuthService.generateAuthToken(user, managedIds);
 
-        return SuccessResponse.of("Logged in successfully", token);
+        return token;
     }
 }
