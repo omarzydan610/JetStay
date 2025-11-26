@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -27,14 +26,14 @@ public class JwtAuthService {
         return Keys.hmacShaKeyFor(authSecret.getBytes());
     }
 
-    public String generateAuthToken(User user, List<Integer> managedIds) {
+    public String generateAuthToken(User user, Integer managedId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", user.getUserID());
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
-            claims.put("hotel_ids", managedIds);
+            claims.put("hotel_id", managedId);
         } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
-            claims.put("airline_ids", managedIds);
+            claims.put("airline_id", managedId);
         }
 
         return Jwts.builder()
@@ -45,6 +44,7 @@ public class JwtAuthService {
                 .signWith(getSigningKey())
                 .compact();
     }
+
 
     public Claims parseClaims(String token) {
         try {
