@@ -8,6 +8,7 @@ import FlightsPage from "./pages/FlightsPage";
 import PartnershipRequistPage from "./pages/PartnershipRequestPage";
 import AirlineProfile from "./pages/ProfilePages/AirlineProfile";
 import HotelProfile from "./pages/ProfilePages/HotelProfile";
+import RoomTypePage from "./pages/RoomTypePage";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/partnership-request" element={<PartnershipRequistPage />} />
         <Route path="/airline/profile" element={<AirlineProfile />} />
         <Route path="/hotel/profile" element={<HotelProfile />} />
+        <Route path="/room-types" element={<RoomTypePage />} />
       </Routes>
     </Router>
   );
