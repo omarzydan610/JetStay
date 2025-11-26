@@ -6,7 +6,7 @@ import com.example.backend.entity.User;
 
 
 @Component
-public class HotelMapper {
+public class HotelCreatorMapper {
   public Hotel createHotel(String name,Double latitude, Double longitude, String city, String country, User admin, String logoURL) {
     Hotel hotel = new Hotel();
     hotel.setHotelName(name);

@@ -6,6 +6,7 @@ import com.example.backend.entity.Airline;
 import com.example.backend.entity.Hotel;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.entity.User;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.UserMapper;
@@ -23,9 +24,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -92,10 +91,12 @@ public class AuthService {
         Integer managedId = null;
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
-            Hotel hotels = hotelRepository.findByAdminUserID(user.getUserID());
+            Hotel hotels = hotelRepository.findByAdminUserID(user.getUserID())
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
             managedId = hotels.getHotelID();
         } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
-            Airline airlines = airlineRepository.findByAdminUserID(user.getUserID());
+            Airline airlines = airlineRepository.findByAdminUserID(user.getUserID())
+                .orElseThrow(() -> new ResourceNotFoundException("Airline not found"));
             managedId = airlines.getAirlineID();
         }
 
