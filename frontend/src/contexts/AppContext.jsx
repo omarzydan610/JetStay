@@ -75,6 +75,14 @@ export const AppProvider = ({ children }) => {
     setError(null);
   };
 
+  const updateUserData = (newUserData) => {
+    setUserData((prev) => ({ ...prev, ...newUserData }));
+  };
+
+  const updateBusinessData = (newBusinessData) => {
+    setBusinessData((prev) => ({ ...prev, ...newBusinessData }));
+  };
+
   const value = {
     userData,
     businessData,
@@ -82,6 +90,8 @@ export const AppProvider = ({ children }) => {
     error,
     clearData,
     fetchUserAndBusinessData,
+    updateUserData,
+    updateBusinessData,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

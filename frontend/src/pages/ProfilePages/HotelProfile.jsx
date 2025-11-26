@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
   getHotelProfile,
-  updateHotelInfo,
-  updateAdminInfo,
+  updateHotelData,
+  updateAdminData,
 } from "../../services/profiles/hotelProfileService";
 
 const HotelProfile = () => {
@@ -13,6 +13,7 @@ const HotelProfile = () => {
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [editFormData, setEditFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [modalError, setModalError] = useState(null);
 
   useEffect(() => {
     fetchHotelProfile();
@@ -33,8 +34,9 @@ const HotelProfile = () => {
   };
 
   const handleEditHotel = () => {
+    setModalError(null);
     setEditFormData({
-      hotelName: hotelData.hotelName,
+      name: hotelData.hotelName,
       city: hotelData.city,
       country: hotelData.country,
       latitude: hotelData.latitude,
@@ -44,6 +46,7 @@ const HotelProfile = () => {
   };
 
   const handleEditAdmin = () => {
+    setModalError(null);
     setEditFormData({
       firstName: hotelData.admin.firstName,
       lastName: hotelData.admin.lastName,
@@ -56,19 +59,21 @@ const HotelProfile = () => {
   const handleSaveHotel = async () => {
     try {
       setIsSaving(true);
-      await updateHotelInfo(editFormData);
+      setModalError(null);
+      await updateHotelData(editFormData);
       setHotelData({
         ...hotelData,
-        hotelName: editFormData.hotelName,
+        hotelName: editFormData.name,
         city: editFormData.city,
         country: editFormData.country,
         latitude: editFormData.latitude,
         longitude: editFormData.longitude,
       });
       setIsEditingHotel(false);
+      window.location.reload();
     } catch (err) {
       console.error("Error updating hotel info:", err);
-      alert("Failed to update hotel information. Please try again.");
+      setModalError("Failed to update hotel information. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -77,7 +82,8 @@ const HotelProfile = () => {
   const handleSaveAdmin = async () => {
     try {
       setIsSaving(true);
-      await updateAdminInfo(editFormData);
+      setModalError(null);
+      await updateAdminData(editFormData);
       setHotelData({
         ...hotelData,
         admin: {
@@ -89,9 +95,10 @@ const HotelProfile = () => {
         },
       });
       setIsEditingAdmin(false);
+      window.location.reload();
     } catch (err) {
       console.error("Error updating admin info:", err);
-      alert("Failed to update admin information. Please try again.");
+      setModalError("Failed to update admin information. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -719,6 +726,14 @@ const HotelProfile = () => {
                   />
                 </div>
               </div>
+
+              {/* Error Message */}
+              {modalError && (
+                <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-700">{modalError}</p>
+                </div>
+              )}
+
               <div className="mt-6 flex gap-3">
                 <button
                   onClick={() => setIsEditingHotel(false)}

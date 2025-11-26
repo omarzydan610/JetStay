@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import {
   getAirlineProfile,
-  updateAirlineInfo,
-  updateAdminInfo,
+  updateAirlineData,
+  updateAdminData,
 } from "../../services/profiles/airlineProfileService";
 
 const AirlineProfile = () => {
@@ -13,6 +13,7 @@ const AirlineProfile = () => {
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [editFormData, setEditFormData] = useState({});
   const [isSaving, setIsSaving] = useState(false);
+  const [modalError, setModalError] = useState(null);
 
   useEffect(() => {
     fetchAirlineProfile();
@@ -33,15 +34,17 @@ const AirlineProfile = () => {
   };
 
   const handleEditAirline = () => {
+    setModalError(null);
     setEditFormData({
-      airlineName: airlineData.airlineName,
-      airlineNationality: airlineData.airlineNationality,
+      name: airlineData.name,
+      nationality: airlineData.nationality,
       logoUrl: airlineData.logoUrl,
     });
     setIsEditingAirline(true);
   };
 
   const handleEditAdmin = () => {
+    setModalError(null);
     setEditFormData({
       firstName: airlineData.admin.firstName,
       lastName: airlineData.admin.lastName,
@@ -54,17 +57,19 @@ const AirlineProfile = () => {
   const handleSaveAirline = async () => {
     try {
       setIsSaving(true);
-      await updateAirlineInfo(editFormData);
+      setModalError(null);
+      await updateAirlineData(editFormData);
       setAirlineData({
         ...airlineData,
-        airlineName: editFormData.airlineName,
-        airlineNationality: editFormData.airlineNationality,
+        name: editFormData.name,
+        nationality: editFormData.nationality,
         logoUrl: editFormData.logoUrl,
       });
       setIsEditingAirline(false);
+      window.location.reload();
     } catch (err) {
       console.error("Error updating airline info:", err);
-      alert("Failed to update airline information. Please try again.");
+      setModalError("Failed to update airline information. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -73,7 +78,8 @@ const AirlineProfile = () => {
   const handleSaveAdmin = async () => {
     try {
       setIsSaving(true);
-      await updateAdminInfo(editFormData);
+      setModalError(null);
+      await updateAdminData(editFormData);
       setAirlineData({
         ...airlineData,
         admin: {
@@ -85,9 +91,10 @@ const AirlineProfile = () => {
         },
       });
       setIsEditingAdmin(false);
+      window.location.reload();
     } catch (err) {
       console.error("Error updating admin info:", err);
-      alert("Failed to update admin information. Please try again.");
+      setModalError("Failed to update admin information. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -617,6 +624,14 @@ const AirlineProfile = () => {
                 />
               </div>
             </div>
+
+            {/* Error Message */}
+            {modalError && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-700">{modalError}</p>
+              </div>
+            )}
+
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setIsEditingAirline(false)}
@@ -732,6 +747,14 @@ const AirlineProfile = () => {
                 />
               </div>
             </div>
+
+            {/* Error Message */}
+            {modalError && (
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                <p className="text-sm text-red-700">{modalError}</p>
+              </div>
+            )}
+
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setIsEditingAdmin(false)}

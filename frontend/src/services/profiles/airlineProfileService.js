@@ -25,10 +25,10 @@ export const getAirlineData = async () => {
  * @param {Object} airlineData - Updated airline data (name, nationality, logoUrl)
  * @returns {Promise} Updated airline data
  */
-export const updateAirlineInfo = async (airlineData) => {
+export const updateAirlineData = async (airlineData) => {
   try {
     const token = authService.getToken();
-    const response = await apiClient.put("/api/airline/info", airlineData, {
+    const response = await apiClient.post("/api/airline/update", airlineData, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -40,22 +40,3 @@ export const updateAirlineInfo = async (airlineData) => {
   }
 };
 
-/**
- * Update admin information
- * @param {Object} adminData - Updated admin data (firstName, lastName, email, phoneNumber)
- * @returns {Promise} Updated admin data
- */
-export const updateAdminInfo = async (adminData) => {
-  try {
-    const token = authService.getToken();
-    const response = await apiClient.put("/api/airline/admin", adminData, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Error updating admin info:", error);
-    throw error;
-  }
-};
