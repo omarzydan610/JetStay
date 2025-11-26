@@ -28,7 +28,7 @@ public class Airline {
   @Column(name = "airline_nationality", nullable = false)
   private String airlineNationality;
 
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "admin_id", nullable = false)
   private User admin;
 

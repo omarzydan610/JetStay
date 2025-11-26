@@ -2,7 +2,6 @@ package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.dto.AuthDTO.UserDTO;
-import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.entity.User;
@@ -20,7 +19,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -111,7 +109,7 @@ class AuthServiceTest {
         )).thenReturn(mock(org.springframework.security.core.Authentication.class));
 
         // Because client user => managedIds = empty list
-        when(jwtAuthService.generateAuthToken(user, Collections.emptyList()))
+        when(jwtAuthService.generateAuthToken(user, null))
                 .thenReturn("mocked-jwt-token");
 
 
