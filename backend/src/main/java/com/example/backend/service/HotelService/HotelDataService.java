@@ -29,7 +29,7 @@ public class HotelDataService {
     String adminEmail = jwtAuthService.extractEmail(token);
     User adminUser = userRepository.findByEmail(adminEmail)
         .orElseThrow(() -> new BadRequestException("Admin user not found"));
-    if (User.UserRole.AIRLINE_ADMIN != adminUser.getRole()) {
+    if (User.UserRole.HOTEL_ADMIN != adminUser.getRole()) {
       throw new BadRequestException("User is not a hotel admin");
     }
     Hotel hotel = hotelRepository.findByAdminUserID(adminUser.getUserID())
@@ -55,8 +55,8 @@ public class HotelDataService {
     String adminEmail = jwtAuthService.extractEmail(token);
     User adminUser = userRepository.findByEmail(adminEmail)
         .orElseThrow(() -> new BadRequestException("Admin user not found"));
-    if (User.UserRole.AIRLINE_ADMIN != adminUser.getRole()) {
-      throw new BadRequestException("User is not an airline admin");
+    if (User.UserRole.HOTEL_ADMIN != adminUser.getRole()) {
+      throw new BadRequestException("User is not a hotel admin");
     }
     Hotel hotel = hotelRepository.findByAdminUserID(adminUser.getUserID())
         .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
