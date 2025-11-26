@@ -6,6 +6,7 @@ import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.InternalServerErrorException;
+import com.example.backend.mapper.HotelCreatorMapper;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.AuthService;
@@ -19,7 +20,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +37,9 @@ public class HotelPartnershipServiceTest {
 
     @Mock
     private AuthService authService;
+
+    @Mock
+    private HotelCreatorMapper hotelMapper;
 
     @InjectMocks
     private PartnershipService partnershipService;
@@ -72,6 +76,16 @@ public class HotelPartnershipServiceTest {
         when(hotelRepository.save(any(Hotel.class))).thenReturn(savedHotel);
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hotel.png");
+
+        Hotel hotel = new Hotel();
+        hotel.setHotelName(request.getHotelName());
+        hotel.setLatitude(request.getLatitude());
+        hotel.setLongitude(request.getLongitude());
+        hotel.setCity(request.getCity());
+        hotel.setCountry(request.getCountry());
+        hotel.setAdmin(savedUser);
+        hotel.setLogoUrl("http://example.com/hotel.png");
+        when(hotelMapper.createHotel(any(), any(), any(), any(), any(), any(), any())).thenReturn(hotel);
 
         partnershipService.submitHotelPartnership(request);
 
@@ -175,6 +189,11 @@ public class HotelPartnershipServiceTest {
 
         request.setHotelLogo(null);
 
+        Hotel hotel = new Hotel();
+        hotel.setHotelName(request.getHotelName());
+        hotel.setAdmin(savedUser);
+        when(hotelMapper.createHotel(any(), any(), any(), any(), any(), any(), any())).thenReturn(hotel);
+
         partnershipService.submitHotelPartnership(request);
 
         verify(fileStorageService, never()).storeFile(any());
@@ -242,6 +261,20 @@ public class HotelPartnershipServiceTest {
         when(hotelRepository.save(any(Hotel.class))).thenReturn(savedHotel);
 
         when(fileStorageService.storeFile(any())).thenReturn("http://example.com/hcap.png");
+
+        Hotel hotel = new Hotel();
+        hotel.setHotelName(request.getHotelName());
+        hotel.setLatitude(request.getLatitude());
+        hotel.setLongitude(request.getLongitude());
+        hotel.setCity(request.getCity());
+        hotel.setCountry(request.getCountry());
+        hotel.setAdmin(savedUser);
+        hotel.setLogoUrl("http://example.com/hcap.png");
+        hotel.setHotelRate(0.0f);
+        hotel.setNumberOfRates(0);
+        hotel.setStatus(Hotel.Status.INACTIVE);
+        hotel.setCreatedAt(java.time.LocalDateTime.now());
+        when(hotelMapper.createHotel(any(), any(), any(), any(), any(), any(), any())).thenReturn(hotel);
 
         partnershipService.submitHotelPartnership(request);
 

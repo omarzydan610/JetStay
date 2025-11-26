@@ -5,7 +5,7 @@ import com.example.backend.entity.Airline;
 import com.example.backend.entity.User;
 
 @Component
-public class AirlineMapper {
+public class AirlineCreatorMapper {
   public Airline createAirline(String name, String nationality, User admin, String logoURL) {
     Airline airline = new Airline();
     airline.setAirlineName(name);

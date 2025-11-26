@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**")
                         .permitAll()
+                        .requestMatchers("/api/partnership/**").permitAll()
 
                         // Role-based endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

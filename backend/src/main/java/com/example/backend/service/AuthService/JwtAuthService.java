@@ -66,6 +66,15 @@ public class JwtAuthService {
         return (Integer) claims.get("user_id");
     }
     
+    public Integer extractAirlineID(String token) {
+        Claims claims = parseClaims(token);
+            return (Integer) claims.getOrDefault("airline_id", null);
+    }
+
+    public Integer extractHotelID(String token) {
+        Claims claims = parseClaims(token);
+            return (Integer) claims.getOrDefault("hotel_id", null);
+    }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Claims claims = parseClaims(token);
