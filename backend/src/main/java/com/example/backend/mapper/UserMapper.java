@@ -1,6 +1,7 @@
 package com.example.backend.mapper;
 
 import com.example.backend.dto.AuthDTO.UserDTO;
+import com.example.backend.dto.UserDto.UserDataResponse;
 import com.example.backend.entity.User;
 
 public class UserMapper {
@@ -15,6 +16,17 @@ public class UserMapper {
         user.setStatus(User.UserStatus.ACTIVE);
         user.setRole(userRole);
         return user;
+    }
+
+    public static UserDataResponse getUserData(User user) {
+        UserDataResponse response = new UserDataResponse(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPhoneNumber(),
+                user.getRole(),
+                user.getStatus());
+        return response;
     }
 
 }

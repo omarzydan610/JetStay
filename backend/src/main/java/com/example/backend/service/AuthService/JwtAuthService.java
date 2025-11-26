@@ -45,7 +45,6 @@ public class JwtAuthService {
                 .compact();
     }
 
-
     public Claims parseClaims(String token) {
         try {
             return Jwts.parser()
@@ -62,9 +61,22 @@ public class JwtAuthService {
         return parseClaims(token).getSubject();
     }
 
+    public Integer extractUserId(String token) {
+        Claims claims = parseClaims(token);
+        return (Integer) claims.get("user_id");
+    }
+    
+
     public boolean isTokenValid(String token, UserDetails userDetails) {
         Claims claims = parseClaims(token);
         boolean expired = claims.getExpiration().before(new Date());
         return userDetails.getUsername().equals(claims.getSubject()) && !expired;
+    }
+
+    public String extractTokenFromHeader(String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            return authorizationHeader.substring(7);
+        }
+        throw new BadRequestException("Invalid Authorization header");
     }
 }

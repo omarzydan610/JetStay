@@ -42,6 +42,22 @@ class AuthService {
     }
   }
 
+  async getUserProfile() {
+    const token = this.getToken();
+    console.log(token);
+
+    try {
+      const response = await apiClient.get("/api/user/data", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Token management
   setToken(token) {
     localStorage.setItem("auth_token", token);
