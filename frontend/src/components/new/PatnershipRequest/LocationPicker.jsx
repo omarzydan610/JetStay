@@ -33,27 +33,6 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
     }
   }, [latitude, longitude]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const newCoords = { ...coords, [name]: value };
-    setCoords(newCoords);
-
-    const lat = parseFloat(newCoords.lat);
-    const lng = parseFloat(newCoords.lng);
-
-    if (
-      !isNaN(lat) &&
-      !isNaN(lng) &&
-      lat >= -90 &&
-      lat <= 90 &&
-      lng >= -180 &&
-      lng <= 180
-    ) {
-      onLocationChange(lat, lng);
-      setMapCenter({ lat, lng });
-    }
-  };
-
   const getLocationFromBrowser = () => {
     if (!navigator.geolocation) {
       alert("Geolocation not supported. Enter coordinates manually.");
@@ -107,14 +86,6 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
 
   const latStatus = getCoordinateStatus(coords.lat, -90, 90);
   const lngStatus = getCoordinateStatus(coords.lng, -180, 180);
-
-  const getInputClass = (status) => {
-    const base =
-      "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500";
-    if (status === "valid") return `${base} border-green-500 bg-green-50`;
-    if (status === "invalid") return `${base} border-red-500 bg-red-50`;
-    return `${base} border-gray-300`;
-  };
 
   const getButtonClass = (mode) => {
     const base =

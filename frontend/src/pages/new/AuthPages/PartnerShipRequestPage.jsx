@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import AirlineForm from "../../../components/new/PatnershipRequest/AirlineForm";
 import HotelForm from "../../../components/new/PatnershipRequest/HotelForm";
 import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
-import Plane from "../../../Icons/Plane";
+import PlaneIcon from "../../../Icons/PlaneIcon";
 import HotelIcon from "../../../Icons/HotelIcon";
 
 const PartnerShipRequestPage = () => {
@@ -86,7 +86,7 @@ const PartnerShipRequestPage = () => {
                     : "text-gray-600 hover:text-sky-600"
                 }`}
               >
-                <Plane
+                <PlaneIcon
                   className={`w-4 h-4 inline mr-2 ${
                     partnerType === "airline" ? "text-white" : "text-gray-600"
                   }`}

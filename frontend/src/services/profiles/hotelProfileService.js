@@ -1,13 +1,14 @@
 import apiClient from "../axiosConfig";
+import authService from "../AuthServices/authService";
 
 /**
  * Fetch hotel profile information
  * @returns {Promise} Hotel profile data
  */
-export const getHotelProfile = async () => {
+export const getHotelData = async () => {
   try {
-    const token = localStorage.getItem("Auth-Token");
-    const response = await apiClient.get("/api/hotel/profile", {
+    const token = authService.getToken();
+    const response = await apiClient.get("/api/hotel/data", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -26,7 +27,7 @@ export const getHotelProfile = async () => {
  */
 export const updateHotelInfo = async (hotelData) => {
   try {
-    const token = localStorage.getItem("Auth-Token");
+    const token = localStorage.getItem("auth_token");
     const response = await apiClient.put("/api/hotel/info", hotelData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -46,7 +47,7 @@ export const updateHotelInfo = async (hotelData) => {
  */
 export const updateAdminInfo = async (adminData) => {
   try {
-    const token = localStorage.getItem("Auth-Token");
+    const token = localStorage.getItem("auth_token");
     const response = await apiClient.put("/api/hotel/admin", adminData, {
       headers: {
         Authorization: `Bearer ${token}`,

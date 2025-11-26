@@ -1,5 +1,6 @@
 import apiClient from "../axiosConfig";
 
+
 class AuthService {
   async login(credentials) {
     try {
@@ -42,7 +43,7 @@ class AuthService {
     }
   }
 
-  async getUserProfile() {
+  async getUserData() {
     const token = this.getToken();
     console.log(token);
 
@@ -56,6 +57,10 @@ class AuthService {
     } catch (error) {
       throw this.handleError(error);
     }
+  }
+
+  async logout(clearDataCallback) {
+    this.clearToken();
   }
 
   // Token management

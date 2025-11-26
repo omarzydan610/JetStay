@@ -116,6 +116,7 @@ const HotelFormFields = ({
         />
 
         <EmailInput
+          name="managerEmail"
           value={formData.managerEmail}
           onChange={handleChange}
           error={errors.managerEmail}

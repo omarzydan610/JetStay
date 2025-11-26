@@ -2,7 +2,7 @@ import TextInput from "../../new/AuthComponents/TextInput";
 import EmailInput from "../../new/AuthComponents/EmailInput";
 import PasswordInput from "../../new/AuthComponents/PasswordInput";
 import FileUpload from "./FileUpload";
-import Plane from "../../../Icons/Plane";
+import Plane from "../../../Icons/PlaneIcon";
 import PersonIcon from "../../../Icons/PersonIcon";
 
 const AirlineFormFields = ({
@@ -90,6 +90,7 @@ const AirlineFormFields = ({
         />
 
         <EmailInput
+          name="managerEmail"
           value={formData.managerEmail}
           onChange={handleChange}
           error={errors.managerEmail}

@@ -5,6 +5,7 @@ import passwordService from "../../../services/AuthServices/passwordService";
 import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
 import PasswordInput from "../../../components/new/AuthComponents/PasswordInput";
 import ErrorAlert from "../../../components/new/AuthComponents/ErrorAlert";
+import SuccessAlert from "../../../components/new/AuthComponents/SuccessAlert";
 import SubmitButton from "../../../components/new/AuthComponents/SubmitButton";
 
 function ResetPasswordPage() {
@@ -183,6 +184,8 @@ function ResetPasswordPage() {
           />
 
           <ErrorAlert message={error} />
+
+          <SuccessAlert message={success} />
 
           <SubmitButton
             onClick={handleSubmit}

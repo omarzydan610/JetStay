@@ -1,13 +1,14 @@
 import apiClient from "../axiosConfig";
+import authService from "../AuthServices/authService";
 
 /**
  * Fetch airline profile information
  * @returns {Promise} Airline profile data
  */
-export const getAirlineProfile = async () => {
+export const getAirlineData = async () => {
   try {
-    const token = localStorage.getItem("Auth-Token");
-    const response = await apiClient.get("/api/airline/profile", {
+    const token = authService.getToken();
+    const response = await apiClient.get("/api/airline/data", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -26,7 +27,7 @@ export const getAirlineProfile = async () => {
  */
 export const updateAirlineInfo = async (airlineData) => {
   try {
-    const token = localStorage.getItem("Auth-Token");
+    const token = authService.getToken();
     const response = await apiClient.put("/api/airline/info", airlineData, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -46,7 +47,7 @@ export const updateAirlineInfo = async (airlineData) => {
  */
 export const updateAdminInfo = async (adminData) => {
   try {
-    const token = localStorage.getItem("Auth-Token");
+    const token = authService.getToken();
     const response = await apiClient.put("/api/airline/admin", adminData, {
       headers: {
         Authorization: `Bearer ${token}`,

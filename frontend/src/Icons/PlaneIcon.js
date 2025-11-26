@@ -1,4 +1,4 @@
-function Plane({ className = "w-7 h-7 text-white" }) {
+function PlaneIcon({ className = "w-7 h-7 text-white" }) {
   return (
     <svg
       className={className}
@@ -11,4 +11,4 @@ function Plane({ className = "w-7 h-7 text-white" }) {
     </svg>
   );
 }
-export default Plane;
+export default PlaneIcon;

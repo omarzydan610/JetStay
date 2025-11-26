@@ -9,6 +9,7 @@ function EmailInput({
   touched,
   placeholder = "your.email@example.com",
   label = "Email Address",
+  name = "email",
   icon: Icon,
 }) {
   const inputBase =
@@ -20,7 +21,7 @@ function EmailInput({
 
   return (
     <div className="space-y-1.5">
-      <label htmlFor="email" className="text-sm font-medium text-slate-900">
+      <label htmlFor={name} className="text-sm font-medium text-slate-900">
         {label}
       </label>
       <div className="relative">
@@ -30,9 +31,9 @@ function EmailInput({
           </span>
         )}
         <input
-          id="email"
+          id={name}
           type="email"
-          name="email"
+          name={name}
           value={value}
           onChange={onChange}
           onBlur={onBlur}

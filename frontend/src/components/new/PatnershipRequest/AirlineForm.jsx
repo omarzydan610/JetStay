@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import AirlineFormFields from "./AirlineFormFields";
 import SubmitButton from "./SubmitButton";
 import partnershipService from "../../../services/AuthServices/partnershipService";
+import ErrorAlert from "../AuthComponents/ErrorAlert";
 
 const AirlineForm = () => {
   const [formData, setFormData] = useState({
@@ -19,7 +20,7 @@ const AirlineForm = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [submissionError, setSubmissionError] = useState("");
+  const [error, setError] = useState("");
 
   const validateForm = () => {
     const newErrors = {};
@@ -160,7 +161,7 @@ const AirlineForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmissionError("");
+    setError("");
 
     if (!validateForm()) return;
 
@@ -208,7 +209,7 @@ const AirlineForm = () => {
       });
     } catch (error) {
       console.error("Error submitting form:", error);
-      setSubmissionError(
+      setError(
         error.message ||
           "Failed to submit partnership request. Please try again."
       );
@@ -234,28 +235,10 @@ const AirlineForm = () => {
     );
   }
 
-  if (submissionError) {
-    return (
-      <div className="bg-gradient-to-br from-red-50 to-pink-100 border border-red-200 rounded-2xl p-8 text-center shadow-lg">
-        <div className="w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="text-white text-3xl">⚠️</span>
-        </div>
-        <h3 className="text-red-800 text-2xl font-bold mb-4">
-          Submission Failed
-        </h3>
-        <p className="text-red-700 text-lg mb-6">{submissionError}</p>
-        <button
-          onClick={() => setSubmissionError("")}
-          className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-xl transition duration-200 transform hover:scale-105"
-        >
-          Try Again
-        </button>
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <ErrorAlert message={error} />
+
       <AirlineFormFields
         formData={formData}
         errors={errors}
