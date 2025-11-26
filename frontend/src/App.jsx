@@ -6,7 +6,7 @@ import ForgotPasswordPage from "./pages/new/AuthPages/ForgotPasswordPage";
 import VerifyOtpPage from "./pages/new/AuthPages/VerifyOtpPage";
 import ResetPasswordPage from "./pages/new/AuthPages/ResetPasswordPage";
 import BaseHomePage from "./pages/new/HomePage/BaseHomePage";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/new/ProtectedRoute";
 import BaseProfile from "./pages/new/Profiles/BaseProfile";
 
 function App() {

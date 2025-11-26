@@ -1,10 +1,9 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../../contexts/AppContext";
-import Navbar from "../../../components/Navbar";
+import Navbar from "../../../components/new/Navbar";
 import HotelProfile from "./HotelProfile";
 import AirlineProfile from "./AirlineProfile";
-
 
 function BaseProfile() {
   const navigate = useNavigate();
