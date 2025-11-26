@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
-import TextInput from "../../new/AuthComponents/TextInput";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -20,7 +19,7 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
     lng: longitude || "",
   });
   const [isGettingLocation, setIsGettingLocation] = useState(false);
-  const [activeMode, setActiveMode] = useState("manual");
+  const [activeMode, setActiveMode] = useState("map");
   const [mapCenter, setMapCenter] = useState({ lat: 40.7128, lng: -74.006 }); // default
 
   useEffect(() => {
@@ -111,7 +110,7 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
 
   const getInputClass = (status) => {
     const base =
-      "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500";
+      "w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500";
     if (status === "valid") return `${base} border-green-500 bg-green-50`;
     if (status === "invalid") return `${base} border-red-500 bg-red-50`;
     return `${base} border-gray-300`;
@@ -121,7 +120,7 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
     const base =
       "px-4 py-3 rounded-lg font-medium transition duration-200 flex items-center justify-center gap-2 flex-1";
     return activeMode === mode
-      ? `${base} bg-sky-600 text-white shadow-md`
+      ? `${base} bg-blue-600 text-white shadow-md`
       : `${base} bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300`;
   };
 
@@ -132,19 +131,7 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
         <h3 className="text-lg font-semibold text-gray-800 mb-4">
           📍 Choose Location Method
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={() => setActiveMode("manual")}
-            className={getButtonClass("manual")}
-          >
-            ⌨️{" "}
-            <div className="text-left">
-              <div className="font-medium">Manual Input</div>
-              <div className="text-xs opacity-80">Enter coordinates</div>
-            </div>
-          </button>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <button
             type="button"
             onClick={getLocationFromBrowser}
@@ -177,47 +164,6 @@ const LocationPicker = ({ latitude, longitude, onLocationChange, errors }) => {
           </button>
         </div>
       </div>
-
-      {/* Manual Input */}
-      {activeMode === "manual" && (
-        <div className="bg-sky-50 border border-sky-200 rounded-lg p-4">
-          <h4 className="text-md font-semibold text-sky-800 mb-3">
-            Enter Coordinates Manually
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <TextInput
-              label="Latitude *"
-              name="lat"
-              value={coords.lat}
-              onChange={handleChange}
-              error={
-                latStatus === "invalid" ? "Invalid latitude (-90 to 90)" : ""
-              }
-              placeholder="e.g., 40.7128"
-              touched={true}
-              type="number"
-              step="any"
-              min="-90"
-              max="90"
-            />
-            <TextInput
-              label="Longitude *"
-              name="lng"
-              value={coords.lng}
-              onChange={handleChange}
-              error={
-                lngStatus === "invalid" ? "Invalid longitude (-180 to 180)" : ""
-              }
-              placeholder="e.g., -74.0060"
-              touched={true}
-              type="number"
-              step="any"
-              min="-180"
-              max="180"
-            />
-          </div>
-        </div>
-      )}
 
       {/* Map Picker */}
       {activeMode === "map" && (

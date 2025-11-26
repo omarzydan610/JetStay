@@ -1,4 +1,4 @@
-import apiClient from "./axiosConfig";
+import apiClient from "../axiosConfig";
 
 class AuthService {
   async login(credentials) {

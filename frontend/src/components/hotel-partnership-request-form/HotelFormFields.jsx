@@ -1,18 +1,26 @@
-import FormInput from '../partnership-request-form_common_components/FormInput';
-import LocationPicker from '../partnership-request-form_common_components/LocationPicker';
-import FileUpload from '../partnership-request-form_common_components/FileUpload';
+import TextInput from "../new/AuthComponents/TextInput";
+import EmailInput from "../new/AuthComponents/EmailInput";
+import PasswordInput from "../new/AuthComponents/PasswordInput";
+import FileUpload from "../new/PatnershipRequest/FileUpload";
+import LocationPicker from "../new/PatnershipRequest/LocationPicker";
 
-const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onLocationChange }) => {
+const HotelFormFields = ({
+  formData,
+  errors,
+  handleChange,
+  handleFileChange,
+  onLocationChange,
+}) => {
   return (
     <div className="space-y-4">
-      <FormInput
+      <TextInput
         label="Hotel Name"
         name="hotelName"
         value={formData.hotelName}
         onChange={handleChange}
         error={errors.hotelName}
         placeholder="Enter hotel name"
-        required
+        touched={true}
       />
 
       <div className="mb-4">
@@ -23,33 +31,29 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
           latitude={formData.latitude}
           longitude={formData.longitude}
           onLocationChange={onLocationChange}
+          errors={errors}
         />
-        {(errors.latitude || errors.longitude) && (
-          <div className="text-red-500 text-xs mt-1">
-            {errors.latitude || errors.longitude}
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
+        <TextInput
           label="City"
           name="city"
           value={formData.city}
           onChange={handleChange}
           error={errors.city}
           placeholder="Enter city"
-          required
+          touched={true}
         />
 
-        <FormInput
+        <TextInput
           label="Country"
           name="country"
           value={formData.country}
           onChange={handleChange}
           error={errors.country}
           placeholder="Enter country"
-          required
+          touched={true}
         />
       </div>
 
@@ -59,33 +63,35 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
         onChange={handleFileChange}
         error={errors.hotelLogo}
         accept="image/jpeg,image/png,image/gif"
-        fileName={formData.hotelLogo ? formData.hotelLogo.name : ''}
+        fileName={formData.hotelLogo ? formData.hotelLogo.name : ""}
+        touched={true}
+        placeholder="Choose hotel logo..."
       />
 
       {/* Admin Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
+        <TextInput
           label="Manager First Name"
           name="adminFirstName"
           value={formData.adminFirstName}
           onChange={handleChange}
           error={errors.adminFirstName}
           placeholder="Enter Manager first name"
-          required
+          touched={true}
         />
 
-        <FormInput
+        <TextInput
           label="Manager Last Name"
           name="adminLastName"
           value={formData.adminLastName}
           onChange={handleChange}
           error={errors.adminLastName}
           placeholder="Enter Manager last name"
-          required
+          touched={true}
         />
       </div>
 
-      <FormInput
+      <TextInput
         label="Manager Phone Number"
         name="adminPhone"
         type="tel"
@@ -93,41 +99,34 @@ const HotelFormFields = ({ formData, errors, handleChange, handleFileChange, onL
         onChange={handleChange}
         error={errors.adminPhone}
         placeholder="Enter Manager phone number"
-        required
+        touched={true}
       />
 
-      <FormInput
-        label="Manager Email"
-        name="managerEmail"
-        type="email"
+      <EmailInput
         value={formData.managerEmail}
         onChange={handleChange}
         error={errors.managerEmail}
         placeholder="Enter manager email"
-        required
+        touched={true}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
-          label="Manager Password"
+        <PasswordInput
           name="managerPassword"
-          type="password"
           value={formData.managerPassword}
           onChange={handleChange}
           error={errors.managerPassword}
           placeholder="Enter manager password"
-          required
+          touched={true}
         />
 
-        <FormInput
-          label="Confirm Password"
+        <PasswordInput
           name="confirmPassword"
-          type="password"
           value={formData.confirmPassword}
           onChange={handleChange}
           error={errors.confirmPassword}
           placeholder="Confirm your password"
-          required
+          touched={true}
         />
       </div>
     </div>

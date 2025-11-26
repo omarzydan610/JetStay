@@ -1,27 +1,34 @@
-import FormInput from '../partnership-request-form_common_components/FormInput';
-import FileUpload from '../partnership-request-form_common_components/FileUpload';
+import TextInput from "../new/AuthComponents/TextInput";
+import EmailInput from "../new/AuthComponents/EmailInput";
+import PasswordInput from "../new/AuthComponents/PasswordInput";
+import FileUpload from "../new/PatnershipRequest/FileUpload";
 
-const AirlineFormFields = ({ formData, errors, handleChange, handleFileChange }) => {
+const AirlineFormFields = ({
+  formData,
+  errors,
+  handleChange,
+  handleFileChange,
+}) => {
   return (
     <div className="space-y-4">
-      <FormInput
+      <TextInput
         label="Airline Name"
         name="airlineName"
         value={formData.airlineName}
         onChange={handleChange}
         error={errors.airlineName}
         placeholder="Enter airline name"
-        required
+        touched={true}
       />
 
-      <FormInput
+      <TextInput
         label="Airline Nationality"
         name="airlineNational"
         value={formData.airlineNational}
         onChange={handleChange}
         error={errors.airlineNational}
         placeholder="Enter airline nationality"
-        required
+        touched={true}
       />
 
       <FileUpload
@@ -30,33 +37,35 @@ const AirlineFormFields = ({ formData, errors, handleChange, handleFileChange })
         onChange={handleFileChange}
         error={errors.airlineLogo}
         accept="image/jpeg,image/png,image/gif"
-        fileName={formData.airlineLogo ? formData.airlineLogo.name : ''}
+        fileName={formData.airlineLogo ? formData.airlineLogo.name : ""}
+        touched={true}
+        placeholder="Choose airline logo..."
       />
 
       {/* Admin Fields */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
+        <TextInput
           label="Manager First Name"
           name="adminFirstName"
           value={formData.adminFirstName}
           onChange={handleChange}
           error={errors.adminFirstName}
           placeholder="Enter Manager first name"
-          required
+          touched={true}
         />
 
-        <FormInput
+        <TextInput
           label="Manager Last Name"
           name="adminLastName"
           value={formData.adminLastName}
           onChange={handleChange}
           error={errors.adminLastName}
           placeholder="Enter Manager last name"
-          required
+          touched={true}
         />
       </div>
 
-      <FormInput
+      <TextInput
         label="Manager Phone Number"
         name="adminPhone"
         type="tel"
@@ -64,41 +73,34 @@ const AirlineFormFields = ({ formData, errors, handleChange, handleFileChange })
         onChange={handleChange}
         error={errors.adminPhone}
         placeholder="Enter Manager phone number"
-        required
+        touched={true}
       />
 
-      <FormInput
-        label="Manager Email"
-        name="managerEmail"
-        type="email"
+      <EmailInput
         value={formData.managerEmail}
         onChange={handleChange}
         error={errors.managerEmail}
         placeholder="Enter manager email"
-        required
+        touched={true}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormInput
-          label="Manager Password"
+        <PasswordInput
           name="managerPassword"
-          type="password"
           value={formData.managerPassword}
           onChange={handleChange}
           error={errors.managerPassword}
           placeholder="Enter manager password"
-          required
+          touched={true}
         />
 
-        <FormInput
-          label="Confirm Password"
+        <PasswordInput
           name="confirmPassword"
-          type="password"
           value={formData.confirmPassword}
           onChange={handleChange}
           error={errors.confirmPassword}
           placeholder="Confirm your password"
-          required
+          touched={true}
         />
       </div>
     </div>

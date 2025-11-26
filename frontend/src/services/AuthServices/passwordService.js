@@ -1,4 +1,4 @@
-import apiClient from "./axiosConfig";
+import apiClient from "../axiosConfigaxiosConfig";
 
 class PasswordService {
   async sendOtpRequest(email) {
