@@ -85,7 +85,8 @@ class RoomTypeService {
     }
 }
 
-export default new RoomTypeService();
+const roomTypeService = new RoomTypeService();
+export default roomTypeService;
 
 // src/services/roomTypeService.js
 // import axios from 'axios';

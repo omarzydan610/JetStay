@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import roomTypeService from '../services/roomTypeService';
 import RoomTypeList from '../components/roomType/RoomTypeList';
 import RoomTypeModal from '../components/roomType/RoomTypeModal';
@@ -12,22 +12,11 @@ const RoomTypePage = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
 
-    // Fetch all room types on component mount
-    useEffect(() => {
-        fetchRoomTypes();
+    const showNotification = useCallback((message, type = 'success') => {
+        setNotification({ message, type });
     }, []);
 
-    // Auto-hide notification after 5 seconds
-    useEffect(() => {
-        if (notification) {
-            const timer = setTimeout(() => {
-                setNotification(null);
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [notification]);
-
-    const fetchRoomTypes = async () => {
+    const fetchRoomTypes = useCallback(async () => {
         setIsLoading(true);
         try {
             const response = await roomTypeService.getAllRoomTypes();
@@ -43,11 +32,22 @@ const RoomTypePage = () => {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [showNotification]);
 
-    const showNotification = (message, type = 'success') => {
-        setNotification({ message, type });
-    };
+    // Fetch all room types on component mount
+    useEffect(() => {
+        fetchRoomTypes();
+    }, [fetchRoomTypes]);
+
+    // Auto-hide notification after 5 seconds
+    useEffect(() => {
+        if (notification) {
+            const timer = setTimeout(() => {
+                setNotification(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     const handleCreate = () => {
         setSelectedRoomType(null);
