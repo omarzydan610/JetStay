@@ -21,10 +21,25 @@ class AuthService {
   async signup(userData) {
     try {
       const response = await apiClient.post('/api/auth/signup', userData);
-      
+
       return response.data;
     } catch (error) {
       throw this.handleError(error);
+    }
+  }
+
+  async googleLogin(googleToken) {
+    try {
+      const res = await apiClient.post("api/auth/google", googleToken);
+
+      const token = res.data?.data;
+
+      if (token) {
+        this.setToken(token);
+      }
+      return res.data;
+    } catch (err) {
+      throw this.handleError(err);
     }
   }
 
