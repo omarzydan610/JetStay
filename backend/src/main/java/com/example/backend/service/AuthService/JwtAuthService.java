@@ -45,7 +45,6 @@ public class JwtAuthService {
                 .compact();
     }
 
-
     public Claims parseClaims(String token) {
         try {
             return Jwts.parser()

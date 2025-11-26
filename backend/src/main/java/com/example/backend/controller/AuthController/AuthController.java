@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
-
 public class AuthController {
 
     private final AuthService authService;
@@ -20,7 +19,6 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
-
 
     @PostMapping("/signup")
     public ResponseEntity<?> createUser(@RequestBody UserDTO user) {

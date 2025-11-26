@@ -131,7 +131,7 @@ public class ForgetResetPasswordService {
     return jwtPasswordResetService.generatePasswordResetToken(email, otp);
   }
 
-  public void changePassword(String email, String resetToken, String newPassword) {
+  public void resetPassword(String email, String resetToken, String newPassword) {
     // Validate inputs
     if (email == null || email.trim().isEmpty()) {
       throw new BadRequestException("Email is required");
