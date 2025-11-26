@@ -10,6 +10,7 @@ import AirlineProfile from "./pages/ProfilePages/AirlineProfile";
 import HotelProfile from "./pages/ProfilePages/HotelProfile";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp"
+import RoomTypePage from "./pages/RoomTypePage";
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
         <Route path="/hotel/profile" element={<HotelProfile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/room-types" element={<RoomTypePage />} />
       </Routes>
     </Router>
   );
