@@ -40,7 +40,7 @@ public class Hotel {
   @Column(name = "number_of_rates")
   private Integer numberOfRates;
 
-  @ManyToOne
+  @OneToOne
   @JoinColumn(name = "admin_id", nullable = false)
   private User admin;
 

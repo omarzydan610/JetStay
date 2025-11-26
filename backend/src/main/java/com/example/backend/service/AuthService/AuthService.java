@@ -2,7 +2,6 @@ package com.example.backend.service.AuthService;
 
 import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.dto.AuthDTO.UserDTO;
-import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Hotel;
 import com.example.backend.exception.BadRequestException;
@@ -90,21 +89,17 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password");
         }
 
-        List<Integer> managedIds = new ArrayList<>();
+        Integer managedId = null;
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
-            List<Hotel> hotels = hotelRepository.findByAdminUserID(user.getUserID());
-            managedIds = hotels.stream()
-                    .map(Hotel::getHotelID)
-                    .toList();
+            Hotel hotels = hotelRepository.findByAdminUserID(user.getUserID());
+            managedId = hotels.getHotelID();
         } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
-            List<Airline> airlines = airlineRepository.findByAdminUserID(user.getUserID());
-            managedIds = airlines.stream()
-                    .map(Airline::getAirlineID)
-                    .toList();
+            Airline airlines = airlineRepository.findByAdminUserID(user.getUserID());
+            managedId = airlines.getAirlineID();
         }
 
-        String token = jwtAuthService.generateAuthToken(user, managedIds);
+        String token = jwtAuthService.generateAuthToken(user, managedId);
 
         return token;
     }

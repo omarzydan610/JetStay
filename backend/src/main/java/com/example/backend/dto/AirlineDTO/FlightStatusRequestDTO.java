@@ -1,10 +1,10 @@
 package com.example.backend.dto.AirlineDTO;
 
-public class FlightStatusDTO {
+public class FlightStatusRequestDTO {
     private long pendingCount;
     private long onTimeCount;
 
-    public FlightStatusDTO(long pendingCount, long onTimeCount) {
+    public FlightStatusRequestDTO(long pendingCount, long onTimeCount) {
         this.pendingCount = pendingCount;
         this.onTimeCount = onTimeCount;
     }

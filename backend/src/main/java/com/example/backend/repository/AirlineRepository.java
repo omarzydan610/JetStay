@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+
 
 @Repository
 public interface AirlineRepository extends JpaRepository<Airline, Integer> {
@@ -22,5 +22,7 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
 
     boolean existsByAirlineName(String airlineName);
 
-    List<Airline> findByAdminUserID(Integer userID);
+    Airline findByAirlineName(String airlineName);
+
+    Airline findByAdminUserID(Integer userID);
 }
