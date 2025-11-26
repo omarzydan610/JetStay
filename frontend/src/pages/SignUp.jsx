@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import authService from '../Services/authService';
+import authService from '../services/authService';
 import PhoneIcon from '../Icons/PhoneIcon';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
 import InputIcon from '../Icons/inputIcon';
-import GoogleIcon from '../Icons/GoogleIcon';
 import Showpass from '../Icons/Showpass';
 import Hidepass from '../Icons/Hidepass';
 import JetStayIcon from '../Icons/JetStayIcon';
 import { useNavigate } from 'react-router-dom';
+import GoogleLoginButton from '../components/GoogleLogin';
 
 function SignUp() {
   const navigate = useNavigate();
@@ -97,27 +97,33 @@ function SignUp() {
 
   const handleSubmit = async () => {
     if (!validateAll()) return;
-    const newacc = {
+
+    const newAccount = {
       firstName: form.firstName,
       lastName: form.lastName,
       email: form.email,
       password: form.password,
       phoneNumber: '+20' + form.phoneNumber
     };
-    setIsLoading(true);
-    try {
 
-      const response = await authService.signup(newacc);
-      setSuccess('Account created successfully! Redirecting to login...');
-      console.log('Signup successful:', response);
-      navigate("/login")
+    setIsLoading(true);
+
+    try {
+      const response = await authService.signup(newAccount);
+
+      if (response.success) {
+        setSuccess("Account created successfully! Redirecting to login...");
+        console.log("Signup successful:", response);
+
+        navigate("/login");
+      }
 
     } catch (error) {
-      console.error('Signup error:', error, newacc);
+      console.error("Signup error:", error, newAccount);
 
+      // Handle known errors
       switch (error.code) {
-        case 'VALIDATION_ERROR':
-          // Handle field-specific validation errors
+        case "VALIDATION_ERROR":
           if (error.errors) {
             const fieldErrors = {};
             error.errors.forEach(err => {
@@ -128,14 +134,21 @@ function SignUp() {
             setErrors({ general: error.message });
           }
           break;
+
+        case "SERVER_ERROR":
+        case "UNAUTHORIZED":
+        case "FORBIDDEN":
+        case "NETWORK_ERROR":
         default:
-          setErrors({ general: error.message || 'Registration failed. Please try again.' });
+          setErrors({
+            general: error.message || "Registration failed. Please try again."
+          });
       }
     }
+
     setIsLoading(false);
   };
 
-  const handleGoogleSignUp = () => console.log('Google Sign Up clicked');
 
   const inputBase = "w-full py-3 pl-11 pr-12 border-2 rounded-xl text-base outline-none transition-all duration-200";
   const inputNormal = "border-gray-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10";
@@ -320,14 +333,7 @@ function SignUp() {
             </div>
 
             {/* Google Sign Up */}
-            <button
-              type="button"
-              onClick={handleGoogleSignUp}
-              className="w-full flex items-center justify-center gap-3 py-3 bg-white border-2 border-gray-200 rounded-xl text-base font-semibold text-gray-700 cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-300 mb-5"
-            >
-              <span className="w-5 h-5"><GoogleIcon /></span>
-              Sign up with Google
-            </button>
+            <GoogleLoginButton />
 
             {/* Login Link */}
             <div className="text-center text-gray-500 text-sm">

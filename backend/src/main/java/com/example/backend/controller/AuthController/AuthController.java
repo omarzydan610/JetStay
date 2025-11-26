@@ -34,4 +34,10 @@ public class AuthController {
         return ResponseEntity.ok(SuccessResponse.of("Loged it Logged in successfully", authToken));
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<?> loginWithGoogle(@RequestBody String googleToken) {
+        String jwt = authService.Googlelogin(googleToken);
+        return ResponseEntity.ok(SuccessResponse.of("Logged in successfully", jwt));
+    }
+
 }

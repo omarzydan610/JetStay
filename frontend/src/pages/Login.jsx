@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import authService from '../Services/authService';
+import { useNavigate } from "react-router-dom";
+import authService from '../services/authService';
 import EmailIcon from '../Icons/EmailIcon';
 import PassIcon from '../Icons/PassIcon';
-import GoogleIcon from '../Icons/GoogleIcon';
 import Showpass from '../Icons/Showpass';
 import Hidepass from '../Icons/Hidepass';
 import Plane from '../Icons/Plane';
-
+import GoogleLoginButton from '../components/GoogleLogin';
 
 function Login() {
+
+  const navigate = useNavigate();
 
   const [form, setForm] = useState({
     email: '',
@@ -72,8 +74,7 @@ function Login() {
 
       // Check if user is authenticated
       if (authService.isAuthenticated()) {
-        // Redirect to dashboard or home page
-        // navigate('/home');
+        navigate("/");
         console.log('User authenticated successfully');
       }
 
@@ -96,8 +97,6 @@ function Login() {
     }
     setIsLoading(false);
   };
-
-  const handleGoogleLogin = () => console.log('Google Login clicked');
 
   const inputBase = "w-full py-3 pl-11 pr-12 border-2 rounded-xl text-base outline-none transition-all duration-200";
   const inputNormal = "border-gray-200 focus:border-blue-600 focus:ring-4 focus:ring-blue-600/10";
@@ -197,19 +196,12 @@ function Login() {
             </div>
 
             {/* Google Login */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-3 py-3 bg-white border-2 border-gray-200 rounded-xl text-base font-semibold text-gray-700 cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-300 mb-5"
-            >
-              <span className="w-5 h-5"><GoogleIcon /></span>
-              Sign in with Google
-            </button>
+            <GoogleLoginButton  />
 
             {/* Sign Up Link */}
             <div className="text-center text-gray-500 text-sm">
               Don't have an account?{' '}
-              <a href="/" className="text-blue-600 font-semibold hover:text-blue-700">Sign Up</a>
+              <a href="/signup" className="text-blue-600 font-semibold hover:text-blue-700">Sign Up</a>
             </div>
           </div>
         </div>
