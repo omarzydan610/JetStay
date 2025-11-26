@@ -1,6 +1,6 @@
 package com.example.backend.service.airline_stat;
 
-import com.example.backend.dto.AirlineDTO.FlightStatusDTO;
+import com.example.backend.dto.AirlineDTO.FlightStatusRequestDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.AirlineRepository;
@@ -16,18 +16,18 @@ public class FlightStatusService {
     @Autowired
     private AirlineRepository airlineRepository;
 
-    public FlightStatusDTO getTicketsAndFlightSummary(String airlineName) {
+    public FlightStatusRequestDTO getTicketsAndFlightSummary(String airlineName) {
         validateAirlineExists(airlineName);
 
-        FlightStatusDTO summary;
+        FlightStatusRequestDTO summary;
 
         if (airlineName == null || airlineName.isBlank()) {
-            summary = new FlightStatusDTO(
+            summary = new FlightStatusRequestDTO(
                     flightRepository.countByStatus(Flight.FlightStatus.PENDING),
                     flightRepository.countByStatus(Flight.FlightStatus.ON_TIME));
 
         } else {
-            summary = new FlightStatusDTO(
+            summary = new FlightStatusRequestDTO(
                     flightRepository.countByAirlineAirlineNameAndStatus(airlineName, Flight.FlightStatus.PENDING),
                     flightRepository.countByAirlineAirlineNameAndStatus(airlineName, Flight.FlightStatus.ON_TIME));
 
