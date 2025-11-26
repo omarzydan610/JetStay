@@ -1,4 +1,3 @@
-// src/pages/RoomTypePage.jsx
 import React, { useState, useEffect } from 'react';
 import roomTypeService from '../services/roomTypeService';
 import RoomTypeList from '../components/roomType/RoomTypeList';
