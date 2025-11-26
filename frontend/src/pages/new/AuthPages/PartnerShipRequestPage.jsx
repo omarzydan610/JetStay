@@ -33,7 +33,7 @@ const PartnerShipRequestPage = () => {
         <div className="flex flex-col items-center pt-10 pb-4 px-6 relative">
           {/* Back Button */}
           <button
-            onClick={() => navigate("/auth?mode=signup")}
+            onClick={() => navigate("/auth", { state: { mode: "signup" } })}
             className="absolute top-4 left-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
             aria-label="Go back to authentication"
           >

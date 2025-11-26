@@ -232,7 +232,7 @@ class ForgetResetPasswordServiceTest {
   }
 
   @Test
-  void changePassword_Success_UpdatesPassword() {
+  void resetPassword_Success_UpdatesPassword() {
     // Arrange
     doNothing().when(emailService).sendEmail(anyString(), anyString(), anyString());
     forgetResetPasswordService.forgotPassword(testUser.getEmail());
@@ -246,7 +246,7 @@ class ForgetResetPasswordServiceTest {
     String newPassword = "newPassword456";
 
     // Act
-    forgetResetPasswordService.changePassword(testUser.getEmail(), token, newPassword);
+    forgetResetPasswordService.resetPassword(testUser.getEmail(), token, newPassword);
 
     // Assert
     User updatedUser = userRepository.findById(testUser.getUserID()).orElseThrow();
@@ -257,10 +257,10 @@ class ForgetResetPasswordServiceTest {
   }
 
   @Test
-  void changePassword_InvalidToken_ThrowsException() {
+  void resetPassword_InvalidToken_ThrowsException() {
     // Act & Assert
     RuntimeException exception = assertThrows(RuntimeException.class,
-        () -> forgetResetPasswordService.changePassword(
+        () -> forgetResetPasswordService.resetPassword(
             testUser.getEmail(),
             "invalid-token",
             "newPassword123"));
@@ -268,7 +268,7 @@ class ForgetResetPasswordServiceTest {
   }
 
   @Test
-  void changePassword_TokenForDifferentEmail_ThrowsException() {
+  void resetPassword_TokenForDifferentEmail_ThrowsException() {
     // Arrange
     doNothing().when(emailService).sendEmail(anyString(), anyString(), anyString());
     forgetResetPasswordService.forgotPassword(testUser.getEmail());
@@ -282,7 +282,7 @@ class ForgetResetPasswordServiceTest {
 
     // Act & Assert
     RuntimeException exception = assertThrows(RuntimeException.class,
-        () -> forgetResetPasswordService.changePassword(
+        () -> forgetResetPasswordService.resetPassword(
             "different@example.com",
             token,
             "newPassword123"));
@@ -309,7 +309,7 @@ class ForgetResetPasswordServiceTest {
     assertNotNull(token);
 
     // Step 4: Change password with token
-    forgetResetPasswordService.changePassword(testUser.getEmail(), token, newPassword);
+    forgetResetPasswordService.resetPassword(testUser.getEmail(), token, newPassword);
 
     // Assert: Verify complete flow
     User finalUser = userRepository.findById(testUser.getUserID()).orElseThrow();

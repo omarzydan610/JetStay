@@ -1,4 +1,4 @@
-import apiClient from "../axiosConfigaxiosConfig";
+import apiClient from "../axiosConfig";
 
 class PasswordService {
   async sendOtpRequest(email) {
@@ -16,9 +16,9 @@ class PasswordService {
     return response.data;
   }
 
-  async changePasswordWithToken(email, newPassword, resetToken) {
+  async resetPassword(email, resetToken, newPassword) {
     const response = await apiClient.post(
-      "/api/auth/change-password",
+      "/api/auth/reset-password",
       { email, newPassword },
       { headers: { "Reset-Token": resetToken } }
     );

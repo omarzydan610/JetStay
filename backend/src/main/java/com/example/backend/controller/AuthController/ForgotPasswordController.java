@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.response.SuccessResponse;
-import com.example.backend.dto.AuthDTO.ChangePasswordRequest;
+import com.example.backend.dto.AuthDTO.ResetPasswordRequest;
 import com.example.backend.dto.AuthDTO.ForgotPasswordRequest;
 import com.example.backend.dto.AuthDTO.VerifyOtpRequest;
 import com.example.backend.dto.AuthDTO.VerifyOtpResponse;
@@ -32,12 +32,12 @@ public class ForgotPasswordController {
     return ResponseEntity.ok(SuccessResponse.of("OTP verified successfully", data));
   }
 
-  @PostMapping("/change-password")
-  public ResponseEntity<SuccessResponse<Void>> changePasswordWithToken(
-      @RequestBody ChangePasswordRequest request,
+  @PostMapping("/reset-password")
+  public ResponseEntity<SuccessResponse<Void>> resetPasswordWithToken(
+      @RequestBody ResetPasswordRequest request,
       @RequestHeader("Reset-Token") String resetToken) {
-    forgotPasswordService.changePassword(request.getEmail(), resetToken, request.getNewPassword());
-    return ResponseEntity.ok(SuccessResponse.of("Password changed successfully"));
+    forgotPasswordService.resetPassword(request.getEmail(), resetToken, request.getNewPassword());
+    return ResponseEntity.ok(SuccessResponse.of("Password reset successfully"));
   }
 
 }

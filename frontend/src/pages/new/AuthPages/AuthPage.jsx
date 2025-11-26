@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import authService from "../../../services/AuthServices/authService";
 import GoogleLoginButton from "../../../components/new/AuthComponents/GoogleLogin";
@@ -26,8 +26,9 @@ import Hidepass from "../../../Icons/Hidepass";
 
 function AuthPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const initialMode = searchParams.get("mode") === "signup" ? false : true;
+  const location = useLocation();
+  const stateMode = location.state?.mode;
+  const initialMode = stateMode === "signup" ? false : true;
   const [isLogin, setIsLogin] = useState(initialMode);
 
   // Login form state
