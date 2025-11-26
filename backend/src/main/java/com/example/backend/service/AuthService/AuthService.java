@@ -13,6 +13,11 @@ import com.example.backend.mapper.UserMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -20,11 +25,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AuthService {
+
+    @Value("${google.client.id}")
+    private String googleClientId;
 
     private final PasswordEncoder encoder;
     private final UserRepository userRepository;
@@ -98,5 +107,45 @@ public class AuthService {
         String token = jwtAuthService.generateAuthToken(user, managedIds);
 
         return token;
+    }
+
+    public String Googlelogin(String googleToken) {
+
+        try {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    GsonFactory.getDefaultInstance()
+            )
+                    .setAudience(Collections.singletonList(googleClientId))
+                    .build();
+
+            GoogleIdToken idToken = verifier.verify(googleToken);
+            if (idToken == null) {
+                throw new UnauthorizedException("Invalid Google token");
+            }
+
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            String fname = (String) payload.get("given_name");
+            String lname = (String) payload.get("family_name");
+
+            // Check if user exists, otherwise create
+            User user = userRepository.findByEmail(email)
+                    .orElseGet(() -> {
+                        User newUser = new User();
+                        newUser.setEmail(email);
+                        newUser.setFirstName(fname);
+                        newUser.setLastName(lname);
+                        newUser.setPassword(" ");
+                        newUser.setPhoneNumber("+20");   //Google token doesn't include phone number
+                        newUser.setRole(User.UserRole.CLIENT);
+                        return userRepository.save(newUser);
+                    });
+
+            return jwtAuthService.generateAuthToken(user, null);
+
+        } catch (Exception e) {
+            throw new UnauthorizedException("Google login failed: " + e.getMessage());
+        }
     }
 }
