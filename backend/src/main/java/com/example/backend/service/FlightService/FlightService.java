@@ -122,8 +122,8 @@ public class FlightService {
         return null;
     }
 
-    public List<Flight> getAllFlightForAirLine(int airlineID) {
-        return flightRepository.findByAirlineAirlineID(airlineID);
+    public List<Flight> getAllFlightForAirLine(int airlineID, int page, int size) {
+        return flightRepository.findByAirlineAirlineID(airlineID, page * size, size);
     }
 
 }

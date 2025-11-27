@@ -13,6 +13,10 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     // Find all flights by airline ID
     List<Flight> findByAirlineAirlineID(int airlineId);
 
+    // Find flights by airline ID with pagination
+    @Query("SELECT f FROM Flight f WHERE f.airline.airlineID = :airlineId order by f.flightID asc offset :offset limit :limit")
+    List<Flight> findByAirlineAirlineID(@Param("airlineId") Integer airlineId, @Param("offset") int offset, @Param("limit") int limit);
+
     // Get only flight IDs for a specific airline
     @Query("SELECT f.flightID FROM Flight f WHERE f.airline.airlineID = :airlineId")
     List<Integer> allFlightsIdsByAirlineId(@Param("airlineId") Integer airlineId);
