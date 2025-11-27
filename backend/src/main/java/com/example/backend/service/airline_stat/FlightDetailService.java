@@ -3,7 +3,7 @@ package com.example.backend.service.airline_stat;
 import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Flight;
-import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightRepository;
 import org.springframework.stereotype.Service;
@@ -22,13 +22,11 @@ public class FlightDetailService {
         this.airlineRepository = airlineRepository;
     }
 
-    public List<FlightsDataRequestDTO> getFlightsByAirlineName(String airlineName) {
-        validateAirlineExists(airlineName);
-        Airline airline = airlineRepository.findByAirlineName(airlineName);
-
+    public List<FlightsDataRequestDTO> getFlightsByAirlineID(int airlineID) {
+        Airline airline = airlineRepository.findById(airlineID).orElse(null);
 
         if (airline == null) {
-            return List.of();
+            throw new UnauthorizedException("Airline not found for the given ID: " + airlineID);
         }
 
         List<Flight> flights = flightRepository.findByAirline_AirlineID(airline.getAirlineID());
@@ -44,18 +42,9 @@ public class FlightDetailService {
                         .status(flight.getStatus().name())
                         .description(flight.getDescription())
                         .planeType(flight.getPlaneType())
-                        .build()
-                )
+                        .build())
                 .collect(Collectors.toList());
 
     }
 
-    private void validateAirlineExists(String airlineName) {
-        if (airlineName != null && !airlineName.isBlank()) {
-            Integer airlineId = airlineRepository.findAirlineIDByAirlineName(airlineName);
-            if (airlineId == null) {
-                throw new ResourceNotFoundException("Airline", "name", airlineName);
-            }
-        }
-    }
 }
