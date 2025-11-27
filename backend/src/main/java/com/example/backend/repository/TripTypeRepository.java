@@ -14,9 +14,9 @@ public interface TripTypeRepository extends JpaRepository<TripType, Integer> {
 
     @Query("SELECT t.typeName, AVG(t.quantity) " +
             "FROM TripType t " +
-            "WHERE t.flight.airline.airlineName = :airlineName " +
+            "WHERE t.flight.airline.airlineID = :airlineID " +
             "GROUP BY t.typeName")
-    List<Object[]> findAverageTicketsByTypeForAirlineName(@Param("airlineName") String airlineName);
+    List<Object[]> findAverageTicketsByTypeForAirlineID(@Param("airlineID") int airlineID);
 
 
     @Query("SELECT t.typeName, AVG(t.quantity) " +
