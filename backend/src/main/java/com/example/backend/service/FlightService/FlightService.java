@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.FlightDTO.FlightRequest;
@@ -122,8 +123,9 @@ public class FlightService {
         return null;
     }
 
-    public List<Flight> getAllFlightForAirLine(int airlineID) {
-        return flightRepository.findByAirlineAirlineID(airlineID);
+    public List<Flight> getAllFlightForAirLine(int airlineID, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return flightRepository.findByAirlineAirlineID(airlineID, pageRequest);
     }
 
 }
