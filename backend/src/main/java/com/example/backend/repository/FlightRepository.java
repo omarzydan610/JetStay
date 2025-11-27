@@ -14,8 +14,10 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     List<Flight> findByAirlineAirlineID(int airlineId);
 
     // Find flights by airline ID with pagination
-    @Query("SELECT f FROM Flight f WHERE f.airline.airlineID = :airlineId order by f.flightID asc offset :offset limit :limit")
-    List<Flight> findByAirlineAirlineID(@Param("airlineId") Integer airlineId, @Param("offset") int offset, @Param("limit") int limit);
+    @Query("SELECT f FROM Flight f WHERE f.airline.airlineID = :airlineId ORDER BY f.flightID ASC")
+    List<Flight> findByAirlineAirlineID(
+            @Param("airlineId") Integer airlineId,
+            org.springframework.data.domain.Pageable pageable);
 
     // Get only flight IDs for a specific airline
     @Query("SELECT f.flightID FROM Flight f WHERE f.airline.airlineID = :airlineId")
