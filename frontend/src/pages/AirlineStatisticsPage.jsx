@@ -7,14 +7,11 @@ import StatsCard from "../components/airline-statistics/StatsCard.jsx";
 import "../css/animation.css";
 
 const COLORS = ["#4CAF50", "#FFC107", "#2196F3", "#FF5722", "#9C27B0", "#00BCD4"]; // generic color palette
-const FLIGHTS_PER_PAGE = 2;
 
 const AirlineStatisticsPage = () => {
   const [airlineStats, setAirlineStats] = useState(null);
   const [flightStatus, setFlightStatus] = useState(null);
   const [tripTypeStats, setTripTypeStats] = useState(null);
-  const [flightsData, setFlightsData] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,8 +23,8 @@ const AirlineStatisticsPage = () => {
         const stats = await airlineStatService.getAirlineStats();
         setAirlineStats(stats);
 
-        const details = await airlineStatService.getAirlineDetails();
-        setFlightsData(details || []);
+        // const details = await airlineStatService.getAirlineDetails();
+        // setFlightsData(details || []);
 
         const flights = await airlineStatService.getFlightStatus();
         setFlightStatus(flights);
@@ -47,7 +44,6 @@ const AirlineStatisticsPage = () => {
 
   
 
-  const totalPages = Math.ceil(flightsData.length / FLIGHTS_PER_PAGE);
   if (loading) return <p className="p-6 text-gray-500 text-lg text-center">Loading...</p>;
   if (error) return <p className="p-6 text-red-500 text-lg text-center">{error}</p>;
 

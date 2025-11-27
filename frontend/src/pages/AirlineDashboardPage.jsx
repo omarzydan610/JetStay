@@ -6,7 +6,6 @@ import { createFlight, updateFlight } from "../services/flightService";
 
 export default function AirlineDashboardPage() {
   const navigate = useNavigate();
-  const [airline, setAirline] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // tickets state
@@ -25,10 +24,9 @@ export default function AirlineDashboardPage() {
     const fetchAirline = async () => {
       try {
         const res = await getMyAirline();
-        setAirline(res);
+        console.log("Airline profile fetched:", res);
       } catch (err) {
         console.error("Error fetching airline profile", err);
-        setAirline(null);
       } finally {
         setLoading(false);
       }

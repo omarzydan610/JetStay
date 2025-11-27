@@ -9,7 +9,6 @@ import BaseHomePage from "./pages/new/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/new/ProtectedRoute";
 import BaseProfile from "./pages/new/Profiles/BaseProfile";
 import AirlineDashboardPage from "./pages/AirlineDashboardPage";
-import AirlineStatisticsPage from "./pages/AirlineStatisticsPage";
 import FlightsPage from "./pages/FlightsPage";
 
 function App() {

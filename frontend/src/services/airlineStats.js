@@ -35,13 +35,12 @@ const DUMMY_AIRLINE_DETAILS = [
 
 const airlineStatService = {
   getAirlineStats: async () => {
-    let data;
     try {
       const token = authService.getToken();
       const res = await apiClient.get(`/api/airline/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      data = res.data;
+      console.log("Airline stats fetched:", res);
     } catch (err) {
       console.error("Error fetching airline stats:", err);
     } finally {
@@ -50,13 +49,12 @@ const airlineStatService = {
   },
 
   getFlightStatus: async () => {
-    let data;
     try {
       const token = authService.getToken();
       const res = await apiClient.get(`/api/airline/flight-status`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      data = res.data;
+      console.log("Flight status fetched:", res);
     } catch (err) {
       console.error("Error fetching flight status:", err);
     } finally {
@@ -65,13 +63,12 @@ const airlineStatService = {
   },
 
   getTripTypeStats: async () => {
-    let data;
     try {
       const token = authService.getToken();
       const res = await apiClient.get(`/api/airline/trip-type`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      data = res.data;
+      console.log("Trip type stats fetched:", res);
     } catch (err) {
       console.error("Error fetching trip type stats:", err);
     } finally {
@@ -80,13 +77,12 @@ const airlineStatService = {
   },
 
   getAirlineDetails: async () => {
-    let data;
     try {
       const token = authService.getToken();
       const res = await apiClient.get(`/api/airline/details`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      data = res.data;
+      console.log("Airline details fetched:", res);
     } catch (err) {
       console.error("Error fetching airline details:", err);
     } finally {
