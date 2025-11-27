@@ -96,7 +96,7 @@ public class RoomTypeServiceTest {
                 new RoomType(null, "Suite", 2, hotel, 5, "Desc", 200f)
         );
 
-        RoomType found = roomTypeService.getRoomTypeById(saved.getRoomTypeID());
+        RoomType found = roomTypeService.getRoomTypeById(hotel.getHotelID(), saved.getRoomTypeID());
 
         assertNotNull(found);
         assertEquals("Suite", found.getRoomTypeName());
@@ -150,7 +150,7 @@ public class RoomTypeServiceTest {
                 new RoomType(null, "Del", 2, hotel, 4, "D", 150f)
         );
 
-        roomTypeService.deleteRoomType(saved.getRoomTypeID());
+        roomTypeService.deleteRoomType(hotel.getHotelID(), saved.getRoomTypeID());
 
         assertFalse(roomTypeRepository.findById(saved.getRoomTypeID()).isPresent());
     }

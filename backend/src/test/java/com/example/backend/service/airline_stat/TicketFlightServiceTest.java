@@ -143,7 +143,7 @@ public class TicketFlightServiceTest {
         @Test
         public void testGetTicketsAndFlightSummary_SpecificAirline() {
         
-                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(1);
+                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());

@@ -136,7 +136,7 @@ public class TripTypeStatsServiceTest {
         @Test
         public void testGetAverageTicketsPerType() {
 
-                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(1);
+                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());
