@@ -24,10 +24,11 @@ export const getMyAirline = async () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     data = response.data;
+    console.log("Airline data fetched:", data);
   } catch (error) {
     console.error("Error fetching airline data:", error);
-  } finally {
     return data || DUMMY_AIRLINE;
+
   }
 };
 
@@ -59,8 +60,7 @@ export const saveAirline = async (airline, logoFile) => {
     savedData = response.data;
   } catch (error) {
     console.error("Error saving airline data:", error);
-  } finally {
-    return savedData || {
+      return savedData || {
       ...DUMMY_AIRLINE,
       airlineName: airline.airlineName,
       airlineNationality: airline.airlineNationality,

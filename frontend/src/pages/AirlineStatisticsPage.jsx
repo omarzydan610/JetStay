@@ -45,11 +45,9 @@ const AirlineStatisticsPage = () => {
     fetchData();
   }, []);
 
-  const totalPages = Math.ceil(flightsData.length / FLIGHTS_PER_PAGE);
-  const handlePrevPage = () => { if (currentPage > 0) setCurrentPage(prev => prev - 1); };
-  const handleNextPage = () => { if (currentPage < totalPages - 1) setCurrentPage(prev => prev + 1); };
-  const paginatedFlights = flightsData.slice(currentPage * FLIGHTS_PER_PAGE, (currentPage + 1) * FLIGHTS_PER_PAGE);
+  
 
+  const totalPages = Math.ceil(flightsData.length / FLIGHTS_PER_PAGE);
   if (loading) return <p className="p-6 text-gray-500 text-lg text-center">Loading...</p>;
   if (error) return <p className="p-6 text-red-500 text-lg text-center">{error}</p>;
 
@@ -79,14 +77,21 @@ const AirlineStatisticsPage = () => {
 
           {/* Plane Animation */}
           <div
-            className="p-6 shadow-2xl rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 text-white overflow-hidden relative flex justify-center items-end h-32"
+            className="p-6 shadow-xl rounded-2xl bg-gradient-to-r from-sky-400 to-blue-600 
+                      text-white overflow-hidden relative flex justify-center items-end h-40 
+                      transition-transform duration-500 hover:scale-105 hover:shadow-2xl"
           >
+            {/* Decorative overlay */}
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm rounded-2xl"></div>
+
+            {/* Plane image */}
             <img
               src={plane}
               alt="plane"
-              className="h-20 w-auto animate-fly-up absolute bottom-0"
+              className="h-20 w-auto animate-fly-up absolute bottom-2"
             />
           </div>
+
 
         </div>
       )}

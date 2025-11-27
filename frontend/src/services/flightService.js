@@ -1,19 +1,22 @@
 import apiClient from "./axiosConfig.js";
 import authService from "./AuthServices/authService.js";
 
-const API_URL = "/api/airline/flights";
+const API_URL = "/api/flight/";
 
-export const getFlights = async () => {
+export const getFlights = async (page = 0, size = 10) => {
   const token = authService.getToken();
   const res = await apiClient.get(API_URL, {
     headers: { Authorization: `Bearer ${token}` },
+    params: { page, size }
   });
+  console.log("Fetched flights:", res.data);
   return res.data;
 };
 
+
 export const createFlight = async (flightData) => {
   const token = authService.getToken();
-  const res = await apiClient.post(API_URL, flightData, {
+  const res = await apiClient.post(`${API_URL}add`, flightData, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -21,7 +24,7 @@ export const createFlight = async (flightData) => {
 
 export const updateFlight = async (id, flightData) => {
   const token = authService.getToken();
-  const res = await apiClient.put(`${API_URL}/${id}`, flightData, {
+  const res = await apiClient.patch(`${API_URL}update/${id}`, flightData, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
@@ -29,8 +32,9 @@ export const updateFlight = async (id, flightData) => {
 
 export const deleteFlight = async (id) => {
   const token = authService.getToken();
-  const res = await apiClient.delete(`${API_URL}/${id}`, {
+  const res = await apiClient.delete(`${API_URL}delete/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
 };
+

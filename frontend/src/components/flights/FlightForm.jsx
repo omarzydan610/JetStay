@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
-import { createFlight, updateFlight } from "/home/hema/Desktop/swe/JetStay/frontend/src/services/flightService.js";
+import { createFlight, updateFlight } from "../../services/flightService.js";
+import { getCountries, getCities, getAirports } from "../../services/airportService.js";
 
 export default function FlightForm({ editingFlight, clearEditing }) {
   const [form, setForm] = useState({
+    departureCountry: "",
+    departureCity: "",
     departureAirport: "",
+    arrivalCountry: "",
+    arrivalCity: "",
     arrivalAirport: "",
     departureDate: "",
     arrivalDate: "",
@@ -13,172 +18,252 @@ export default function FlightForm({ editingFlight, clearEditing }) {
   });
 
   const [errors, setErrors] = useState({});
+  const [countries, setCountries] = useState([]);
+  const [departureCities, setDepartureCities] = useState([]);
+  const [arrivalCities, setArrivalCities] = useState([]);
+  const [departureAirports, setDepartureAirports] = useState([]);
+  const [arrivalAirports, setArrivalAirports] = useState([]);
 
   useEffect(() => {
-    if (editingFlight) {
-      setForm({
-        ...editingFlight,
-        departureDate: editingFlight.departureDate?.slice(0, 16),
-        arrivalDate: editingFlight.arrivalDate?.slice(0, 16),
-      });
-    }
+    loadCountries();
+    if (editingFlight) setForm(editingFlight);
   }, [editingFlight]);
+
+  const loadCountries = async () => {
+    try {
+      const res = await getCountries();
+      setCountries(res);
+    } catch (err) {
+      console.error("Error fetching countries", err);
+    }
+  };
+
+  const handleCountryChange = async (e, type) => {
+    const countryCode = e.target.value;
+    setForm({
+      ...form,
+      [`${type}Country`]: countryCode,
+      [`${type}City`]: "",
+      [`${type}Airport`]: "",
+    });
+    try {
+      const res = await getCities(countryCode);
+      if (type === "departure") setDepartureCities(res);
+      else setArrivalCities(res);
+    } catch (err) {
+      console.error("Error fetching cities", err);
+    }
+  };
+
+  const handleCityChange = async (e, type) => {
+    const cityId = e.target.value;
+    setForm({
+      ...form,
+      [`${type}City`]: cityId,
+      [`${type}Airport`]: "",
+    });
+    try {
+      const res = await getAirports(cityId);
+      if (type === "departure") setDepartureAirports(res);
+      else setArrivalAirports(res);
+    } catch (err) {
+      console.error("Error fetching airports", err);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setErrors({ ...errors, [e.target.name]: "" });
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    const now = new Date();
+  const inputClass = (field) =>
+    `border ${errors[field] ? "border-red-500" : "border-white/40"} 
+     bg-white text-gray-700 p-3 w-full rounded-md 
+     focus:outline-none focus:ring-2 focus:ring-white/60 transition`;
 
-    Object.keys(form).forEach((key) => {
-      if (!form[key] || form[key].trim() === "") {
-        newErrors[key] = "Required";
-      }
-    });
-
-    if (form.departureDate && new Date(form.departureDate) < now) {
-      newErrors.departureDate = "Departure cannot be in the past";
-    }
-    if (form.arrivalDate && new Date(form.arrivalDate) < now) {
-      newErrors.arrivalDate = "Arrival cannot be in the past";
-    }
-    if (
-      form.departureDate &&
-      form.arrivalDate &&
-      new Date(form.arrivalDate) <= new Date(form.departureDate)
-    ) {
-      newErrors.arrivalDate = "Arrival must be after departure";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const nowStr = new Date().toISOString().slice(0, 16);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
     try {
-      if (form.flightId) {
-        await updateFlight(form.flightId, form);
-      } else {
-        await createFlight(form);
-      }
+      if (form.flightId) await updateFlight(form.flightId, form);
+      else await createFlight(form);
       clearEditing();
     } catch (err) {
-      console.error("Error saving flight", err);
-      alert("Error saving flight");
+      console.error(err);
     }
   };
-
-  const inputClass = (field, accent) =>
-    `border ${
-      errors[field] ? "border-red-500" : accent
-    } bg-blue-950 text-white p-3 w-full rounded-md focus:outline-none focus:ring-2 ${
-      errors[field] ? "focus:ring-red-400" : accent.replace("border", "focus:ring")
-    } transition`;
-
-  const nowStr = new Date().toISOString().slice(0, 16);
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 bg-gradient-to-br from-blue-900 to-blue-800 p-8 rounded-lg shadow-xl text-white transform transition-all duration-500 hover:scale-[1.01]"
+      className="space-y-6 bg-white p-8 rounded-xl shadow-xl border border-white max-w-2xl mx-auto"
     >
-      <h2 className="text-2xl font-bold text-center mb-6">
+      <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
         {form.flightId ? "Update Flight" : "Add Flight"}
       </h2>
 
-      {/* Departure fields */}
-      <label className="block text-green-300 font-semibold">Departure Airport</label>
-      <input
-        type="text"
-        name="departureAirport"
-        placeholder="Departure Airport"
-        value={form.departureAirport}
-        onChange={handleChange}
-        className={inputClass("departureAirport", "border-green-400")}
-      />
-      <label className="block text-green-300 font-semibold">Departure Date & Time</label>
-      <input
-        type="datetime-local"
-        name="departureDate"
-        value={form.departureDate}
-        onChange={handleChange}
-        min={nowStr}
-        className={inputClass("departureDate", "border-green-400")}
-      />
-
-      {/* Arrival fields */}
-      <label className="block text-yellow-300 font-semibold">Arrival Airport</label>
-      <input
-        type="text"
-        name="arrivalAirport"
-        placeholder="Arrival Airport"
-        value={form.arrivalAirport}
-        onChange={handleChange}
-        className={inputClass("arrivalAirport", "border-yellow-400")}
-      />
-      <label className="block text-yellow-300 font-semibold">Arrival Date & Time</label>
-      <input
-        type="datetime-local"
-        name="arrivalDate"
-        value={form.arrivalDate}
-        onChange={handleChange}
-        min={nowStr}
-        className={inputClass("arrivalDate", "border-yellow-400")}
-      />
-
-      {/* Other fields */}
-      <select
-        name="status"
-        value={form.status}
-        onChange={handleChange}
-        className={inputClass("status", "border-blue-700")}
-      >
-        <option value="PENDING">Pending</option>
-        <option value="ON_TIME">On Time</option>
-        <option value="CANCELLED">Cancelled</option>
-      </select>
-      <input
-        type="text"
-        name="planeType"
-        placeholder="Plane Type"
-        value={form.planeType}
-        onChange={handleChange}
-        className={inputClass("planeType", "border-blue-700")}
-      />
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={form.description}
-        onChange={handleChange}
-        className={inputClass("description", "border-blue-700")}
-      />
-
-      <div className="flex gap-3 justify-center">
-        <button
-          className="bg-blue-700 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-blue-600 transition-transform duration-300 hover:scale-105"
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Departure Country</label>
+        <select
+          value={form.departureCountry}
+          onChange={(e) => handleCountryChange(e, "departure")}
+          className={inputClass("departureCountry")}
         >
-          {form.flightId ? "Update Flight" : "Add Flight"}
-        </button>
-        <button
-          type="button"
-          onClick={clearEditing}
-          className="bg-gray-600 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-gray-500 transition-transform duration-300 hover:scale-105"
-        >
-          Cancel
-        </button>
+          <option value="">Select Country</option>
+          {countries.map((c) => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
       </div>
 
-      {Object.keys(errors).length > 0 && (
-        <p className="text-red-400 text-center mt-4">
-          Please fix highlighted fields before submitting.
-        </p>
+      {departureCities.length > 0 && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">Departure City</label>
+          <select
+            value={form.departureCity}
+            onChange={(e) => handleCityChange(e, "departure")}
+            className={inputClass("departureCity")}
+          >
+            <option value="">Select City</option>
+            {departureCities.map((city) => (
+              <option key={city.id} value={city.id}>{city.name}</option>
+            ))}
+          </select>
+        </div>
       )}
+
+      {departureAirports.length > 0 && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">Departure Airport</label>
+          <select
+            name="departureAirport"
+            value={form.departureAirport}
+            onChange={handleChange}
+            className={inputClass("departureAirport")}
+          >
+            <option value="">Select Airport</option>
+            {departureAirports.map((a) => (
+              <option key={a.id} value={a.code}>{a.name} ({a.code})</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Departure Date & Time</label>
+        <input
+          type="datetime-local"
+          name="departureDate"
+          value={form.departureDate}
+          onChange={handleChange}
+          min={nowStr}
+          className={inputClass("departureDate")}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Arrival Country</label>
+        <select
+          value={form.arrivalCountry}
+          onChange={(e) => handleCountryChange(e, "arrival")}
+          className={inputClass("arrivalCountry")}
+        >
+          <option value="">Select Country</option>
+          {countries.map((c) => (
+            <option key={c.code} value={c.code}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {arrivalCities.length > 0 && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">Arrival City</label>
+          <select
+            value={form.arrivalCity}
+            onChange={(e) => handleCityChange(e, "arrival")}
+            className={inputClass("arrivalCity")}
+          >
+            <option value="">Select City</option>
+            {arrivalCities.map((city) => (
+              <option key={city.id} value={city.id}>{city.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {arrivalAirports.length > 0 && (
+        <div>
+          <label className="block text-sm font-semibold text-gray-600 mb-1">Arrival Airport</label>
+          <select
+            name="arrivalAirport"
+            value={form.arrivalAirport}
+            onChange={handleChange}
+            className={inputClass("arrivalAirport")}
+          >
+            <option value="">Select Airport</option>
+            {arrivalAirports.map((a) => (
+              <option key={a.id} value={a.code}>{a.name} ({a.code})</option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Arrival Date & Time</label>
+        <input
+          type="datetime-local"
+          name="arrivalDate"
+          value={form.arrivalDate}
+          onChange={handleChange}
+          min={nowStr}
+          className={inputClass("arrivalDate")}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Status</label>
+        <select
+          name="status"
+          value={form.status}
+          onChange={handleChange}
+          className={inputClass("status")}
+        >
+          <option value="PENDING">PENDING</option>
+          <option value="ON_TIME">ON TIME</option>
+          <option value="CANCELLED">CANCELLED</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Plane Type</label>
+        <input
+          name="planeType"
+          value={form.planeType}
+          onChange={handleChange}
+          className={inputClass("planeType")}
+          placeholder="e.g. Boeing 737"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-semibold text-gray-600 mb-1">Description</label>
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          className={`${inputClass("description")} h-24`}
+        />
+      </div>
+
+      <div className="flex justify-between">
+        <button
+          type="submit"
+          className="px-6 py-3 rounded-lg bg-white text-gray-800 font-semibold border border-white hover:bg-gray-100"
+        >
+          {form.flightId ? "Update Flight" : "Create Flight"}
+        </button>
+      </div>
     </form>
   );
 }

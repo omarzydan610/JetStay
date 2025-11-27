@@ -14,7 +14,7 @@ const DUMMY_FLIGHT_STATUS = {
 };
 
 const DUMMY_TRIP_TYPE_STATS = {
-  averageTicketsPerType: {
+ Tickets :{
     Business: 5,
     Economy: 7,
   },
