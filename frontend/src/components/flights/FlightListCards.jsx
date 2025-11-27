@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getFlights, updateFlight } from "../../services/flightService";
+import { getFlights } from "../../services/flightService";
 import FlightCard from "./FlightCard";
 import UpdateFlightForm from "./UpdateFlightForm";
 
@@ -33,17 +33,6 @@ export default function FlightListCards() {
   // Handle flight update from the form
   const handleUpdateFlight = async (updatedFlight) => {
     try {
-      // Update in DB
-      await updateFlight(updatedFlight.flightID, {
-        departureAirportInt: updatedFlight.departureAirportInt,
-        arrivalAirportInt: updatedFlight.arrivalAirportInt,
-        departureDate: updatedFlight.departureDate,
-        arrivalDate: updatedFlight.arrivalDate,
-        status: updatedFlight.status,
-        planeType: updatedFlight.planeType,
-        description: updatedFlight.description,
-      });
-
       // Update local state
       setFlights((prevFlights) =>
         prevFlights.map((f) =>

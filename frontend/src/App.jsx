@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/new/ProtectedRoute";
 import BaseProfile from "./pages/new/Profiles/BaseProfile";
 import AirlineDashboardPage from "./pages/AirlineDashboardPage";
 import FlightsPage from "./pages/FlightsPage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -41,6 +43,7 @@ function App() {
 
         </Routes>
       </Router>
+      <ToastContainer position="top-right" autoClose={2500} />
     </AppProvider>
   );
 }
