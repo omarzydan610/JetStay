@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { createFlight, updateFlight } from "../../services/flightService";
+import { createFlight, updateFlight } from "/home/hema/Desktop/swe/JetStay/frontend/src/services/flightService.js";
 
 export default function FlightForm({ editingFlight, clearEditing }) {
   const [form, setForm] = useState({

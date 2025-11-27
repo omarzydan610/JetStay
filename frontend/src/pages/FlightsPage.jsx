@@ -19,7 +19,7 @@ export default function FlightsPage() {
       {/* Back button to dashboard */}
       <div className="mt-8 flex justify-center">
         <button
-          onClick={() => navigate("/air-line/data")}
+          onClick={() => navigate("/airline/add-flight")}
           className="bg-blue-700 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-blue-600 transition-transform duration-300 hover:scale-105"
         >
           ← Back to Dashboard

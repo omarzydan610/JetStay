@@ -8,6 +8,9 @@ import ResetPasswordPage from "./pages/new/AuthPages/ResetPasswordPage";
 import BaseHomePage from "./pages/new/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/new/ProtectedRoute";
 import BaseProfile from "./pages/new/Profiles/BaseProfile";
+import AirlineDashboardPage from "./pages/AirlineDashboardPage";
+import AirlineStatisticsPage from "./pages/AirlineStatisticsPage";
+import FlightsPage from "./pages/FlightsPage";
 
 function App() {
   return (
@@ -31,6 +34,12 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/profile" element={<BaseProfile />} />
+          <Route path="/airline/add-flight" element={<AirlineDashboardPage />} />
+          <Route path="/airline/flights" element={<FlightsPage />} />
+
+
+
+
         </Routes>
       </Router>
     </AppProvider>

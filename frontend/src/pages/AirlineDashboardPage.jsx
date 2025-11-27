@@ -74,14 +74,9 @@ export default function AirlineDashboardPage() {
           >
             Statistics
           </button>
+
           <button
-            onClick={() => navigate("/reset-password")}
-            className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
-          >
-            Change Password
-          </button>
-          <button
-            onClick={() => navigate("/air-line/flights")}
+            onClick={() => navigate("/airline/flights")}
             className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
           >
             Manage Flights
@@ -93,9 +88,6 @@ export default function AirlineDashboardPage() {
       <main className="flex-1 p-8">
         {/* Profile + Add Flight side by side */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl">
-            <AirlineProfileForm airline={airline} onSave={setAirline} />
-          </div>
           <div className="bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl">
             <FlightForm clearEditing={() => {}} />
           </div>
