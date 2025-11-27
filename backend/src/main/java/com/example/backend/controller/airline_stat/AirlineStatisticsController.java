@@ -22,7 +22,7 @@ public class AirlineStatisticsController {
     @GetMapping("/")
     public ResponseEntity<SuccessResponse<AirlineStatsRequestDTO>> getAirlineStatistics() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         AirlineStatsRequestDTO stats = airlineStatisticsService
                 .getAirlineStatistics(claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Airline statistics retrieved successfully", stats));

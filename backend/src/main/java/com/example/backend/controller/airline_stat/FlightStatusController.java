@@ -22,7 +22,7 @@ public class FlightStatusController {
     @GetMapping("/")
     public ResponseEntity<SuccessResponse<FlightStatusRequestDTO>> getFlightStatus() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         FlightStatusRequestDTO data = flightStatusService.getTicketsAndFlightSummary(claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Flight status retrieved successfully", data));
     }

@@ -24,7 +24,7 @@ public class AirlineDetailedFlightsController {
     @GetMapping("/")
     public ResponseEntity<SuccessResponse<List<FlightsDataRequestDTO>>> getAirlineFlights() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         List<FlightsDataRequestDTO> flights = flightDetailService.getFlightsByAirlineID(claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Airline statistics retrieved successfully", flights));
     }

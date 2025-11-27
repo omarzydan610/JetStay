@@ -24,7 +24,7 @@ public class TripTypeStatisticsController {
     @GetMapping("/")
     public ResponseEntity<SuccessResponse<TripTypeStatsRequestDTO>> getTripTypes() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         TripTypeStatsRequestDTO data = tripTypeStatsService.getTripTypeStats(claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Trip type statistics retrieved successfully", data));
     }
