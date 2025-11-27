@@ -2,11 +2,15 @@ package com.example.backend.service.AirlineService;
 
 import com.example.backend.dto.AirlineDTO.AirlineDataResponse;
 import com.example.backend.dto.AirlineDTO.AirlineUpdateDataRequest;
+import com.example.backend.dto.AirlineDTO.CityDtoResponse;
+import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
 import com.example.backend.entity.Airline;
+import com.example.backend.entity.Airport;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.AirlineRepository;
+import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +41,10 @@ class AirlineDataServiceTest {
 
   @InjectMocks
   private AirlineDataService airlineDataService;
+
+  @Mock private AirportRepository airportRepository;
+
+
 
   private User airlineAdmin;
   private Airline airline;
@@ -368,5 +377,87 @@ class AirlineDataServiceTest {
     assertTrue(exception.getMessage().contains("Failed to update airline data"));
 
     verify(airlineRepository).save(airline);
+  }
+
+  @Test
+  void getAllAirPorts_ReturnsList() {
+    Airport airport = new Airport();
+    airport.setAirportID(1);
+    airport.setAirportName("Test Airport");
+    airport.setCountry("Egypt");
+    airport.setCity("Cairo");
+
+    when(airportRepository.findByCountryAndCity("Egypt", "Cairo"))
+        .thenReturn(List.of(airport));
+
+    List<Airport> result = airlineDataService.getAllAirPorts("Egypt", "Cairo");
+
+    assertNotNull(result);
+    assertEquals(1, result.size());
+    assertEquals("Cairo", result.get(0).getCity());
+    verify(airportRepository).findByCountryAndCity("Egypt", "Cairo");
+  }
+
+  @Test
+  void getAllAirPorts_ReturnsEmptyList() {
+    when(airportRepository.findByCountryAndCity("USA", "Miami"))
+        .thenReturn(List.of());
+
+    List<Airport> result = airlineDataService.getAllAirPorts("USA", "Miami");
+
+    assertNotNull(result);
+    assertTrue(result.isEmpty());
+    verify(airportRepository).findByCountryAndCity("USA", "Miami");
+  }
+
+  @Test
+  void getAllCountries_ReturnsList() {
+    List<CountryDtoResponse> countries = List.of(
+        new CountryDtoResponse("Egypt"),
+        new CountryDtoResponse("UAE"));
+
+    when(airportRepository.findAllCountries()).thenReturn(countries);
+
+    List<CountryDtoResponse> result = airlineDataService.getAllCountries();
+
+    assertEquals(2, result.size());
+    assertEquals("Egypt", result.get(0).getName());
+    verify(airportRepository).findAllCountries();
+  }
+
+  @Test
+  void getAllCountries_ReturnsEmptyList() {
+    when(airportRepository.findAllCountries()).thenReturn(List.of());
+
+    List<CountryDtoResponse> result = airlineDataService.getAllCountries();
+
+    assertTrue(result.isEmpty());
+    verify(airportRepository).findAllCountries();
+  }
+
+  @Test
+  void getCitiesByCountry_ReturnsList() {
+    List<CityDtoResponse> cities = List.of(
+        new CityDtoResponse("Cairo"),
+        new CityDtoResponse("Giza"));
+
+    when(airportRepository.findAllCitiesByCountry("Egypt")).thenReturn(cities);
+
+    List<CityDtoResponse> result = airlineDataService.getCitiesByCountry("Egypt");
+
+    assertEquals(2, result.size());
+    assertEquals("Cairo", result.get(0).getName());
+    verify(airportRepository).findAllCitiesByCountry("Egypt");
+  }
+
+  @Test
+  void getCitiesByCountry_ReturnsEmptyList() {
+    when(airportRepository.findAllCitiesByCountry("USA"))
+        .thenReturn(List.of());
+
+    List<CityDtoResponse> result = airlineDataService.getCitiesByCountry("USA");
+
+    assertTrue(result.isEmpty());
+    verify(airportRepository).findAllCitiesByCountry("USA");
   }
 }
