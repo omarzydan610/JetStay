@@ -179,7 +179,7 @@ public class FlightServiceIntegrationTestComplete {
                 LocalDateTime.now(), LocalDateTime.now().plusHours(2),
                 Flight.FlightStatus.ON_TIME, "F2", "A380"));
 
-        List<Flight> list = flightService.getAllFlightForAirLine(airline.getAirlineID());
+        List<Flight> list = flightService.getAllFlightForAirLine(airline.getAirlineID(), 0, 10);
 
         assertEquals(2, list.size());
     }
