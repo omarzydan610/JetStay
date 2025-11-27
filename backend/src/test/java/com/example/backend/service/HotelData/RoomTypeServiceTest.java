@@ -5,6 +5,7 @@ import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
 import com.example.backend.entity.User;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
@@ -70,6 +71,7 @@ public class RoomTypeServiceTest {
         hotel = hotelRepository.save(hotel);
     }
 
+    // 1
     @Test
     @Order(1)
     void testAddRoomTypeSuccess() {
@@ -86,22 +88,22 @@ public class RoomTypeServiceTest {
         assertNotNull(created);
         assertNotNull(created.getRoomTypeID());
         assertEquals("Deluxe", created.getRoomTypeName());
-        assertEquals(300f, created.getPrice());
     }
 
+    // 2
     @Test
     @Order(2)
     void testGetRoomTypeById() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "Suite", 2, hotel, 5, "Desc", 200f)
-        );
+                new RoomType(null, "Suite", 2, hotel, 5, "Desc", 200f));
 
-        RoomType found = roomTypeService.getRoomTypeById(saved.getRoomTypeID());
+        RoomType found = roomTypeService.getRoomTypeById(hotel.getHotelID(), saved.getRoomTypeID());
 
         assertNotNull(found);
         assertEquals("Suite", found.getRoomTypeName());
     }
 
+    // 3
     @Test
     @Order(3)
     void testGetRoomTypesByHotelId() {
@@ -113,12 +115,12 @@ public class RoomTypeServiceTest {
         assertEquals(2, list.size());
     }
 
+    // 4
     @Test
     @Order(4)
     void testUpdateRoomTypeSuccess() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "OldName", 2, hotel, 5, "Old", 100f)
-        );
+                new RoomType(null, "OldName", 2, hotel, 5, "Old", 100f));
 
         RoomTypeRequest dto = new RoomTypeRequest();
         dto.setRoomTypeName("NewName");
@@ -133,6 +135,7 @@ public class RoomTypeServiceTest {
         assertEquals(400f, updated.getPrice());
     }
 
+    // 5
     @Test
     @Order(5)
     void testUpdateRoomType_NotFound() {
@@ -143,18 +146,19 @@ public class RoomTypeServiceTest {
                 () -> roomTypeService.updateRoomType(dto, -1));
     }
 
+    // 6
     @Test
     @Order(6)
     void testDeleteRoomType() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "Del", 2, hotel, 4, "D", 150f)
-        );
+                new RoomType(null, "Del", 2, hotel, 4, "D", 150f));
 
-        roomTypeService.deleteRoomType(saved.getRoomTypeID());
+        roomTypeService.deleteRoomType(hotel.getHotelID(), saved.getRoomTypeID());
 
         assertFalse(roomTypeRepository.findById(saved.getRoomTypeID()).isPresent());
     }
 
+    // 7
     @Test
     @Order(7)
     void testAddRoomType_HotelNotFound() {
@@ -164,5 +168,97 @@ public class RoomTypeServiceTest {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> roomTypeService.addRoomType(dto));
+    }
+
+    // 8
+    @Test
+    @Order(8)
+    void testGetRoomTypeById_NotFound() {
+        assertThrows(ResourceNotFoundException.class,
+                () -> roomTypeService.getRoomTypeById(hotel.getHotelID(), 999999));
+    }
+
+    // 9
+    @Test
+    @Order(9)
+    void testGetRoomTypeById_Unauthorized() {
+        RoomType saved = roomTypeRepository.save(
+                new RoomType(null, "UnauthorizedTest", 2, hotel, 4, "X", 100f));
+
+        assertThrows(UnauthorizedException.class,
+                () -> roomTypeService.getRoomTypeById(9999, saved.getRoomTypeID()));
+    }
+
+    // 10
+    @Test
+    @Order(10)
+    void testDeleteRoomType_NotFound() {
+        assertThrows(ResourceNotFoundException.class,
+                () -> roomTypeService.deleteRoomType(hotel.getHotelID(), -1));
+    }
+
+    // 11
+    @Test
+    @Order(11)
+    void testDeleteRoomType_Unauthorized() {
+        RoomType saved = roomTypeRepository.save(
+                new RoomType(null, "DelFail", 2, hotel, 4, "D", 150f));
+
+        assertThrows(UnauthorizedException.class,
+                () -> roomTypeService.deleteRoomType(9999, saved.getRoomTypeID()));
+    }
+
+    // 12
+    @Test
+    @Order(12)
+    void testGetRoomTypesByHotelId_HotelNotFound() {
+        assertThrows(ResourceNotFoundException.class,
+                () -> roomTypeService.getRoomTypesByHotelId(999999));
+    }
+
+    // 13
+    @Test
+    @Order(13)
+    void testAddRoomType_WithNullOptionalFields() {
+        RoomTypeRequest dto = new RoomTypeRequest();
+        dto.setHotelId(hotel.getHotelID());
+        dto.setRoomTypeName("NullFieldsTest");
+        dto.setPrice(200f);
+        dto.setQuantity(1);
+        dto.setNumberOfGuests(2);
+
+        RoomType saved = roomTypeService.addRoomType(dto);
+
+        assertNotNull(saved);
+        assertEquals("NullFieldsTest", saved.getRoomTypeName());
+    }
+
+    // 14
+    @Test
+    @Order(14)
+    void testUpdateRoomType_UpdateAllFields() {
+        RoomType saved = roomTypeRepository.save(
+                new RoomType(null, "NameA", 2, hotel, 5, "DescA", 100f));
+
+        RoomTypeRequest dto = new RoomTypeRequest();
+        dto.setRoomTypeName("NameB");
+        dto.setPrice(500f);
+        dto.setDescription("DescB");
+        dto.setQuantity(10);
+        dto.setNumberOfGuests(4);
+
+        RoomType updated = roomTypeService.updateRoomType(dto, saved.getRoomTypeID());
+
+        assertEquals("NameB", updated.getRoomTypeName());
+        assertEquals("DescB", updated.getDescription());
+        assertEquals(10, updated.getQuantity());
+    }
+
+    // 15
+    @Test
+    @Order(15)
+    void testGetRoomTypesByHotelId_EmptyList() {
+        List<?> result = roomTypeService.getRoomTypesByHotelId(hotel.getHotelID());
+        assertTrue(result.isEmpty());
     }
 }

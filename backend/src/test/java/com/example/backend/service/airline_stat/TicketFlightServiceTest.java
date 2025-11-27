@@ -2,7 +2,7 @@ package com.example.backend.service.airline_stat;
 
 import com.example.backend.dto.AirlineDTO.FlightStatusRequestDTO;
 import com.example.backend.entity.*;
-import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
 import com.example.backend.service.AuthService.JwtAuthService;
@@ -132,7 +132,7 @@ public class TicketFlightServiceTest {
 
         @Test
         public void testGetTicketsAndFlightSummary_AllAirlines() {
-                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(null);
+                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary();
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());
@@ -142,8 +142,8 @@ public class TicketFlightServiceTest {
 
         @Test
         public void testGetTicketsAndFlightSummary_SpecificAirline() {
-                String airlineName = "Emirates";
-                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(airlineName);
+        
+                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());
@@ -154,9 +154,9 @@ public class TicketFlightServiceTest {
         @Test
         public void testGetTicketsAndFlightSummary_NonExistentAirline_ThrowsException() {
                 // Act & Assert
-                ResourceNotFoundException exception = assertThrows(
-                                ResourceNotFoundException.class,
-                                () -> service.getTicketsAndFlightSummary("NonExistentAirline"));
-                assertEquals("Airline not found with name: NonExistentAirline", exception.getMessage());
+                UnauthorizedException exception = assertThrows(
+                                UnauthorizedException.class,
+                                () -> service.getTicketsAndFlightSummary(-999));
+                assertEquals("Airline not found for the given ID: -999", exception.getMessage());
         }
 }

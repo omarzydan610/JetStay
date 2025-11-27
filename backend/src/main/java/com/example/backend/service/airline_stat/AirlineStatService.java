@@ -1,6 +1,9 @@
 package com.example.backend.service.airline_stat;
 
+import com.example.backend.dto.AirlineDTO.AirlineStatsRequestDTO;
+import com.example.backend.entity.Airline;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.strategy.airline_stat.FlightCountStatistics;
 import com.example.backend.strategy.airline_stat.RatingStatistics;
@@ -53,5 +56,19 @@ public class AirlineStatService {
             }
         }
     }
+    public AirlineStatsRequestDTO getAirlineStatistics(int airlineID) {
+        Airline airline = airlineRepository.findById(airlineID).orElse(null);
+        if (airline == null) {
+            throw new UnauthorizedException("Airline not found for the given ID: " + airlineID);
+        }
+        String airlineName = airline.getAirlineName();
+        return new AirlineStatsRequestDTO.Builder()
+                .airlineName(airlineName)
+                .totalFlights(getAirlinecount(airlineName))
+                .totalRevenue(getAirlineRevenue(airlineName))
+                .avgRating(getAirlineAvgRating(airlineName))
+                .build();
+    }
+
 
 }

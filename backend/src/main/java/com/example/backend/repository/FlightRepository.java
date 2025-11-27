@@ -20,7 +20,7 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     @Query("SELECT f.flightID FROM Flight f")
     List<Integer> allFlightsIds();
 
-    long countByAirlineAirlineNameAndStatus(String airlineName, Flight.FlightStatus flightStatus);
+    long countByAirlineAirlineIDAndStatus(Integer airlineId, Flight.FlightStatus flightStatus);
 
     long countByStatus(Flight.FlightStatus flightStatus);
 

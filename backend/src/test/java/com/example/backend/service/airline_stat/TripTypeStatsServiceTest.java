@@ -2,7 +2,7 @@ package com.example.backend.service.airline_stat;
 
 import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.*;
-import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.entity.Flight.FlightStatus;
@@ -82,9 +82,11 @@ public class TripTypeStatsServiceTest {
 
                 // 3. Airlines (with non-null admin)
                 Airline emirates = airlineRepository.save(
-                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(), Airline.Status.ACTIVE));
+                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2,
+                                                LocalDateTime.now(), Airline.Status.ACTIVE));
                 Airline qatar = airlineRepository.save(
-                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(), Airline.Status.INACTIVE  ));
+                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0,
+                                                LocalDateTime.now(), Airline.Status.INACTIVE));
 
                 // 4. Flights
                 Flight emiratesFlight = flightRepository.save(new Flight(
@@ -133,9 +135,8 @@ public class TripTypeStatsServiceTest {
 
         @Test
         public void testGetAverageTicketsPerType() {
-                String airlineName = "Emirates";
 
-                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(airlineName);
+                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());
@@ -145,7 +146,7 @@ public class TripTypeStatsServiceTest {
 
         @Test
         public void testGetAverageTicketsPerTypeForAll() {
-                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats("");
+                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats();
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());
@@ -156,9 +157,9 @@ public class TripTypeStatsServiceTest {
         @Test
         public void testGetTripTypeStats_NonExistentAirline_ThrowsException() {
                 // Act & Assert
-                ResourceNotFoundException exception = assertThrows(
-                                ResourceNotFoundException.class,
-                                () -> tripTypeStatsService.getTripTypeStats("InvalidAirline"));
-                assertEquals("Airline not found with name: InvalidAirline", exception.getMessage());
+                UnauthorizedException exception = assertThrows(
+                                UnauthorizedException.class,
+                                () -> tripTypeStatsService.getTripTypeStats(-999));
+                assertEquals("Airline not found for the given ID: -999", exception.getMessage());
         }
 }
