@@ -8,6 +8,7 @@ import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 
@@ -19,11 +20,14 @@ public class RoomTypeService {
     @Autowired
     private HotelRepository hotelRepository;
 
-    public RoomType getRoomTypeById(int roomTypeId) {
+    public RoomType getRoomTypeById(int hotelId, int roomTypeId) {
         try {
             RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
             if (roomType == null) {
                 throw new ResourceNotFoundException("Room type not found with ID: " + roomTypeId);
+            }
+            if (roomType.getHotel().getHotelID() != hotelId) {
+                throw new UnauthorizedException("Room type with ID: " + roomTypeId + " does not belong to Hotel with ID: " + hotelId);
             }
             return roomType;
         } catch (Exception e) {
@@ -83,11 +87,14 @@ public class RoomTypeService {
 
     }
 
-    public void deleteRoomType(int roomTypeId) {
+    public void deleteRoomType(int hotelId, int roomTypeId) {
         try {
             RoomType roomType = roomTypeRepository.findById(roomTypeId).orElse(null);
             if (roomType == null) {
                 throw new ResourceNotFoundException("Room type not found with ID: " + roomTypeId);
+            }
+            if (roomType.getHotel().getHotelID() != hotelId) {
+                throw new UnauthorizedException("Room type with ID: " + roomTypeId + " does not belong to Hotel with ID: " + hotelId);
             }
             roomTypeRepository.deleteById(roomTypeId);
         } catch (Exception e) {

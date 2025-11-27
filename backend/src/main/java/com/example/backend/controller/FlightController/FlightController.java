@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,16 +29,16 @@ public class FlightController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getFlightById(@PathVariable int id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         int airlineID = claims.get("airline_id", Integer.class);
         Flight flight = flightService.getFlightById(id, airlineID);
         return ResponseEntity.ok(SuccessResponse.of("Flight retrieved successfully", flight));
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> addFlight(FlightRequest flightRequest) {
+    public ResponseEntity<?> addFlight(@RequestBody FlightRequest flightRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         flightService.addFlight(flightRequest, claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Flight add successfully"));
     }
@@ -45,16 +46,16 @@ public class FlightController {
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteFlight(@PathVariable int id) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         int airlineID = claims.get("airline_id", Integer.class);
         flightService.deleteFlight(id, airlineID);
         return ResponseEntity.ok(SuccessResponse.of("Flight deleted successfully"));
     }
 
     @PatchMapping("/update/{flightID}")
-    public ResponseEntity<?> updateFlight(@PathVariable int flightID, FlightRequest flightRequest) {
+    public ResponseEntity<?> updateFlight(@PathVariable int flightID, @RequestBody FlightRequest flightRequest) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         int airlineID = claims.get("airline_id", Integer.class);
         flightService.updateFlight(flightID, flightRequest, airlineID);
         return ResponseEntity.ok(SuccessResponse.of("Flight updated successfully"));
@@ -63,7 +64,7 @@ public class FlightController {
     @GetMapping("/")
     public ResponseEntity<?> getAllFlightForAirLine() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getDetails();
+        Claims claims = (Claims) auth.getCredentials();
         Integer airlineID = claims.get("airline_id", Integer.class);
 
         List<Flight> flights = flightService.getAllFlightForAirLine(airlineID);

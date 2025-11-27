@@ -172,7 +172,7 @@ public class FlightDetailServiceTest {
     @Test
     public void testGetFlightsByAirlineName_ExistingAirline() {
         List<FlightsDataRequestDTO> flights =
-                flightDetailService.getFlightsByAirlineName("Emirates");
+                flightDetailService.getFlightsByAirlineID(1);
 
         assertNotNull(flights);
         assertEquals(1, flights.size());

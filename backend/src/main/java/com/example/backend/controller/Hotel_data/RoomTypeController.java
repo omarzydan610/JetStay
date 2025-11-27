@@ -2,6 +2,8 @@ package com.example.backend.controller.Hotel_data;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.RoomTypeRequest;
@@ -9,6 +11,8 @@ import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.RoomType;
 import com.example.backend.service.Hotel_data.RoomTypeService;
+
+import io.jsonwebtoken.Claims;
 
 import java.util.List;
 
@@ -20,9 +24,12 @@ public class RoomTypeController {
     private RoomTypeService roomTypeService;
 
     // Get room types for a hotel
-    @GetMapping("/hotel/{hotelId}")
-    public ResponseEntity<SuccessResponse<List<RoomTypeResponse>>> getHotelRoomTypes(@PathVariable int hotelId) {
-        List<RoomTypeResponse> roomTypeData = roomTypeService.getRoomTypesByHotelId(hotelId);
+    @GetMapping("/")
+    public ResponseEntity<SuccessResponse<List<RoomTypeResponse>>> getHotelRoomTypes() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        List<RoomTypeResponse> roomTypeData = roomTypeService
+                .getRoomTypesByHotelId(claims.get("hotel_id", Integer.class));
 
         return ResponseEntity.ok(
                 SuccessResponse.of("Room types retrieved successfully", roomTypeData));
@@ -31,6 +38,9 @@ public class RoomTypeController {
     // Add room type
     @PostMapping("/add")
     public ResponseEntity<SuccessResponse<Void>> addRoomType(@RequestBody RoomTypeRequest roomTypeDTO) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        roomTypeDTO.setHotelId(claims.get("hotel_id", Integer.class));
         roomTypeService.addRoomType(roomTypeDTO);
 
         return ResponseEntity.ok(
@@ -42,6 +52,9 @@ public class RoomTypeController {
     public ResponseEntity<SuccessResponse<Void>> updateRoomType(
             @RequestBody RoomTypeRequest roomTypeDTO,
             @PathVariable int roomTypeId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        roomTypeDTO.setHotelId(claims.get("hotel_id", Integer.class));
         roomTypeService.updateRoomType(roomTypeDTO, roomTypeId);
 
         return ResponseEntity.ok(
@@ -51,7 +64,10 @@ public class RoomTypeController {
     // Delete room type
     @DeleteMapping("/delete/{roomTypeId}")
     public ResponseEntity<SuccessResponse<Void>> deleteRoomType(@PathVariable int roomTypeId) {
-        roomTypeService.deleteRoomType(roomTypeId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        int hotelId = claims.get("hotel_id", Integer.class);
+        roomTypeService.deleteRoomType(hotelId, roomTypeId);
 
         return ResponseEntity.ok(
                 SuccessResponse.of("Room type deleted successfully"));
@@ -60,7 +76,10 @@ public class RoomTypeController {
     // Get one room type
     @GetMapping("/{roomTypeId}")
     public ResponseEntity<SuccessResponse<RoomType>> getRoomType(@PathVariable int roomTypeId) {
-        RoomType roomType = roomTypeService.getRoomTypeById(roomTypeId);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        int hotelId = claims.get("hotel_id", Integer.class);
+        RoomType roomType = roomTypeService.getRoomTypeById(hotelId, roomTypeId);
 
         return ResponseEntity.ok(
                 SuccessResponse.of("Room type retrieved successfully", roomType));

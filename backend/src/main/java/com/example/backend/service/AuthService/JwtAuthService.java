@@ -56,6 +56,7 @@ public class JwtAuthService {
             throw new BadRequestException("Invalid or expired token");
         }
     }
+    
 
     public String extractEmail(String token) {
         return parseClaims(token).getSubject();
