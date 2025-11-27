@@ -54,6 +54,7 @@ function PasswordInput({
           } transition-all duration-200`}
           placeholder={placeholder}
           autoComplete={autoCompleteValue}
+          maxLength={150}
         />
         {(ShowIcon || HideIcon) && (
           <button

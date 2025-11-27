@@ -42,6 +42,7 @@ function EmailInput({
           } transition-all duration-200`}
           placeholder={placeholder}
           autoComplete="email"
+          maxLength={150}
         />
       </div>
       <AnimatePresence>

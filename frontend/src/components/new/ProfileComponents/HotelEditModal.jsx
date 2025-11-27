@@ -151,6 +151,7 @@ function HotelEditModal({ isOpen, onClose, businessData, onSave, error }) {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="Enter hotel name"
                   required
+                  maxLength={150}
                 />
               </div>
 
@@ -169,6 +170,7 @@ function HotelEditModal({ isOpen, onClose, businessData, onSave, error }) {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                     placeholder="Enter country"
                     required
+                    maxLength={150}
                   />
                 </div>
                 <div>
@@ -182,6 +184,7 @@ function HotelEditModal({ isOpen, onClose, businessData, onSave, error }) {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                     placeholder="Enter city"
                     required
+                    maxLength={150}
                   />
                 </div>
               </div>
