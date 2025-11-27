@@ -78,15 +78,15 @@ const AirlineStatisticsPage = () => {
           </StatsCard>
 
           {/* Plane Animation */}
-<div
-  className="p-6 shadow-2xl rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 text-white overflow-hidden relative flex justify-center items-end h-32"
->
-  <img
-    src={plane}
-    alt="plane"
-    className="h-20 w-auto animate-fly-inside absolute bottom-0"
-  />
-</div>
+          <div
+            className="p-6 shadow-2xl rounded-xl bg-gradient-to-r from-blue-400 to-blue-600 text-white overflow-hidden relative flex justify-center items-end h-32"
+          >
+            <img
+              src={plane}
+              alt="plane"
+              className="h-20 w-auto animate-fly-up absolute bottom-0"
+            />
+          </div>
 
         </div>
       )}
@@ -116,30 +116,32 @@ const AirlineStatisticsPage = () => {
           )}
         </StatsCard>
 
-        <StatsCard title="Trip Type Stats" className="bg-white text-gray-800 shadow rounded-lg p-4">
-          {tripTypeStats && Object.keys(tripTypeStats).length > 0 ? (
-            <ul className="space-y-2">
-              {Object.entries(tripTypeStats).map(([type, value]) => (
-                <li key={type} className="flex flex-col bg-gray-50 p-2 rounded-md text-gray-800">
-                  <span className="font-medium">{type}</span>
-                  {typeof value === "object" && value !== null ? (
-                    <ul className="ml-2 space-y-1">
-                      {Object.entries(value).map(([subType, subValue]) => (
-                        <li key={subType}>
-                          {subType}: <span className="font-semibold">{subValue}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <span className="font-semibold">{value}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-gray-600">No trip type data available.</p>
-          )}
-        </StatsCard>
+      <StatsCard title="Trip Type Stats" className="bg-gray-100 text-gray-800 shadow rounded-lg p-4">
+        {tripTypeStats && Object.keys(tripTypeStats).length > 0 ? (
+          <ul className="space-y-4">
+            {Object.entries(tripTypeStats).map(([type, value]) => (
+              <li key={type} className="flex flex-col bg-white-200 p-4 rounded-lg shadow-md text-gray-800">
+                <span className="font-medium text-green-900">{type}</span>
+                {typeof value === "object" && value !== null ? (
+                  <ul className="ml-4 space-y-2 mt-2">
+                    {Object.entries(value).map(([subType, subValue]) => (
+                      <li key={subType}>
+                        {subType}: <span className="font-semibold">{subValue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="font-semibold mt-2">{value}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-600">No trip type data available.</p>
+        )}
+      </StatsCard>
+
+
       </div>
     </div>
   );

@@ -69,7 +69,7 @@ export default function AirlineDashboardPage() {
         <h2 className="text-2xl font-bold mb-8">Dashboard</h2>
         <nav className="space-y-4">
           <button
-            onClick={() => navigate(`/air-line/${airline?.airlineName}`)}
+            onClick={() => navigate(`/`)}
             className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
           >
             Statistics
