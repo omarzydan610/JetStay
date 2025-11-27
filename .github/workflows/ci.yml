@@ -3,6 +3,8 @@ name: JetStay Pipeline
 on:
   pull_request:
     branches: ["**"]
+  push:
+    branches: ["main", "master"]
 
 jobs:
   backend-setup:
