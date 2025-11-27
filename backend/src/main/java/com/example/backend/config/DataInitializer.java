@@ -4,6 +4,7 @@ import com.example.backend.entity.User;
 import com.example.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class DataInitializer implements CommandLineRunner {
 
   private final UserRepository userRepository;
+  private final PasswordEncoder encoder;
 
   @Override
   public void run(String... args) throws Exception {
@@ -18,7 +20,7 @@ public class DataInitializer implements CommandLineRunner {
     if (!userRepository.existsByEmail("jetstay@admin.com")) {
       User admin = new User();
       admin.setEmail("jetstay@admin.com");
-      admin.setPassword("jetstay1234");
+      admin.setPassword(encoder.encode("jetstay1234"));
       admin.setFirstName("Admin");
       admin.setLastName("Admin");
       admin.setPhoneNumber("01011121314");

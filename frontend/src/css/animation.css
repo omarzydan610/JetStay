@@ -1,9 +1,9 @@
 @keyframes flyAcrossUp {
   0% {
-    transform: translate(800%, 500%);   /* far right + below screen */
+    transform: translate(900%, 500%);   /* far right + below screen */
   }
   100% {
-    transform: translate(-200%, -200%);  /* far left + above screen */
+    transform: translate(-400%, -200%);  /* far left + above screen */
   }
 }
 

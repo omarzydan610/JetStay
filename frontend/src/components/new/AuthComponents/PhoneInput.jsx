@@ -18,7 +18,7 @@ function PhoneInput({
   countryCodeError,
   defaultCountryCode = "+20",
   icon: Icon,
-  maxLength = "10",
+  maxLength = "150",
   countryCodeMaxLength = "5",
 }) {
   const inputBase =

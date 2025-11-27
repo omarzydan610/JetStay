@@ -42,6 +42,7 @@ function TextInput({
             touched && error ? inputError : inputNormal
           } transition-all duration-200`}
           placeholder={placeholder}
+          maxLength={150}
         />
       </div>
       <AnimatePresence>
@@ -62,4 +63,3 @@ function TextInput({
 }
 
 export default TextInput;
-

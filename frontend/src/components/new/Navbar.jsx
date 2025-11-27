@@ -98,6 +98,7 @@ const Navbar = () => {
                     <span>Profile</span>
                   </motion.button>
 
+
                   <div className="border-t border-slate-200 my-1"></div>
 
                   <motion.button

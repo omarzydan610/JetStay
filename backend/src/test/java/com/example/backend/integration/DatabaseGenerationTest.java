@@ -78,7 +78,6 @@ public class DatabaseGenerationTest {
         
         User admin = adminUser.get();
         assertThat(admin.getEmail()).isEqualTo("jetstay@admin.com");
-        assertThat(admin.getPassword()).isEqualTo("jetstay1234");
         assertThat(admin.getFirstName()).isEqualTo("Admin");
         assertThat(admin.getLastName()).isEqualTo("Admin");
         assertThat(admin.getPhoneNumber()).isEqualTo("01011121314");

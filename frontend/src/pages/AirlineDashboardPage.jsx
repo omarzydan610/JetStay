@@ -1,23 +1,32 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AirlineProfileForm from "../components/airline/AirlineProfileForm";
-import FlightForm from "../components/flights/FlightForm";
+import CreateFlightForm from "../components/flights/CreateFlightForm";
 import { getMyAirline } from "../services/airlineService";
+import { createFlight, updateFlight } from "../services/flightService";
 
 export default function AirlineDashboardPage() {
   const navigate = useNavigate();
-  const [airline, setAirline] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // tickets state
+  const [tickets, setTickets] = useState({
+    economyPrice: "",
+    economySeats: "",
+    businessPrice: "",
+    businessSeats: "",
+    firstPrice: "",
+    firstSeats: "",
+  });
+
+  const [errors, setErrors] = useState({});
 
   useEffect(() => {
     const fetchAirline = async () => {
       try {
         const res = await getMyAirline();
-        setAirline(res.data); // backend returns airline or null
+        console.log("Airline profile fetched:", res);
       } catch (err) {
         console.error("Error fetching airline profile", err);
-        setAirline(null);
       } finally {
         setLoading(false);
       }
@@ -25,82 +34,138 @@ export default function AirlineDashboardPage() {
     fetchAirline();
   }, []);
 
+  const validateAll = (flightFormData) => {
+    const newErrors = {};
+    // validate tickets
+    Object.entries(tickets).forEach(([key, value]) => {
+      if (!value) {
+        newErrors[key] = "Required";
+      }
+    });
+    // validate flight form (basic check)
+    Object.entries(flightFormData).forEach(([key, value]) => {
+      if (!value) {
+        newErrors[key] = "Required";
+      }
+    });
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmitAll = async (flightFormData) => {
+    if (!validateAll(flightFormData)) {
+      return;
+    }
+
+    try {
+      // Only handle flight API
+      if (flightFormData.flightID) {
+        await updateFlight(flightFormData.flightID, flightFormData);
+        console.log("Flight updated:", flightFormData.flightID);
+      } else {
+        await createFlight(flightFormData);
+        console.log("Flight created");
+      }
+      // Tickets are validated but not sent to API
+      console.log("Tickets validated locally:", tickets);
+      alert("Flight submitted successfully (tickets validated locally).");
+    } catch (err) {
+      console.error("Error saving flight", err);
+      alert("Error saving flight");
+    }
+  };
+
   if (loading) {
-    return <p className="text-center mt-10">Loading airline profile...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-white to-gray-100 text-gray-700">
+        <p className="text-xl animate-pulse">Loading airline profile...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-blue-950 to-blue-900 text-white flex flex-col">
-      {/* Top navbar with hamburger */}
-      <header className="bg-blue-900 p-4 flex items-center shadow-md">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="flex flex-col gap-1 p-2 rounded-md bg-blue-800 hover:bg-blue-700 transition"
-        >
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-          <span className="block w-6 h-0.5 bg-white"></span>
-        </button>
-        <h1 className="ml-4 text-xl font-bold">Airline Dashboard</h1>
-      </header>
-
-      {/* Overlay (blur effect) */}
-      {sidebarOpen && (
-        <div
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm z-40 transition"
-        ></div>
-      )}
-
-      {/* Sidebar drawer */}
-      <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-gradient-to-b from-blue-900 to-blue-800 p-6 shadow-lg z-50 transform transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Close (X) icon */}
-        <button
-          onClick={() => setSidebarOpen(false)}
-          className="absolute top-4 right-4 text-white text-2xl hover:text-gray-300 transition"
-        >
-          ✕
-        </button>
-
-        <h2 className="text-2xl font-bold mb-8">Dashboard</h2>
-        <nav className="space-y-4">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-white via-gray-50 to-gray-200 text-gray-800">
+      {/* Top navbar */}
+      <header className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-gray-100 to-gray-200 shadow-md">
+        <h1 className="text-2xl font-extrabold tracking-wide text-gray-900">
+          ✈️ Airline Dashboard
+        </h1>
+        <nav className="flex gap-4">
           <button
-            onClick={() => navigate(`/air-line/${airline?.airlineName}`)}
-            className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
+            onClick={() => navigate("/")}
+            className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition text-gray-800"
           >
             Statistics
           </button>
           <button
-            onClick={() => navigate("/reset-password")}
-            className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
-          >
-            Change Password
-          </button>
-          <button
-            onClick={() => navigate("/air-line/flights")}
-            className="w-full text-left px-4 py-2 rounded-md bg-blue-700 hover:bg-blue-600 transition"
+            onClick={() => navigate("/airline/flights")}
+            className="px-4 py-2 rounded-md bg-gray-100 hover:bg-gray-200 transition text-gray-800"
           >
             Manage Flights
           </button>
         </nav>
-      </aside>
+      </header>
 
-      {/* Main content */}
+      {/* Main content side by side */}
       <main className="flex-1 p-8">
-        {/* Profile + Add Flight side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl">
-            <AirlineProfileForm airline={airline} onSave={setAirline} />
-          </div>
-          <div className="bg-gradient-to-br from-blue-900 to-blue-800 p-6 rounded-lg shadow-xl">
-            <FlightForm clearEditing={() => {}} />
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Flight Form */}
+          <section className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
+              Add / Manage Flights
+            </h2>
+            <CreateFlightForm
+              clearEditing={() => {}}
+              onSubmit={handleSubmitAll} // pass combined submit handler
+              errors={errors}
+            />
+          </section>
+
+          {/* Tickets & Prices */}
+          <section className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">
+              Tickets & Prices
+            </h2>
+            <div className="space-y-4">
+              {[
+                { label: "Economy Price", key: "economyPrice" },
+                { label: "Economy Seats", key: "economySeats" },
+                { label: "Business Price", key: "businessPrice" },
+                { label: "Business Seats", key: "businessSeats" },
+                { label: "First Class Price", key: "firstPrice" },
+                { label: "First Class Seats", key: "firstSeats" },
+              ].map(({ label, key }) => (
+                <div key={key}>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    {label}
+                  </label>
+                  <input
+                    type="number"
+                    value={tickets[key]}
+                    onChange={(e) =>
+                      setTickets({ ...tickets, [key]: e.target.value })
+                    }
+                    className={`border ${
+                      errors[key] ? "border-red-500" : "border-gray-300"
+                    } bg-white text-gray-800 p-3 w-full rounded-md focus:outline-none focus:ring-2 ${
+                      errors[key] ? "focus:ring-red-400" : "focus:ring-blue-400"
+                    } transition`}
+                  />
+                  {errors[key] && (
+                    <p className="text-red-500 text-sm mt-1">{errors[key]}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
+
       </main>
+
+      {/* Footer */}
+      <footer className="bg-gradient-to-r from-gray-100 to-gray-200 text-center py-4 text-sm text-gray-600">
+        © {new Date().getFullYear()} SkyWings Admin — All systems cleared for takeoff
+      </footer>
     </div>
   );
 }
