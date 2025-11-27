@@ -1,9 +1,14 @@
 package com.example.backend.controller.airline_stat;
 
 import com.example.backend.service.airline_stat.AirlineStatService;
+
+import io.jsonwebtoken.Claims;
+
 import com.example.backend.dto.AirlineDTO.AirlineStatsRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,14 +19,12 @@ public class AirlineStatisticsController {
     @Autowired
     private AirlineStatService airlineStatisticsService;
 
-    @GetMapping("/{airlineName}")
-    public ResponseEntity<SuccessResponse<AirlineStatsRequestDTO>> getAirlineStatistics(@PathVariable String airlineName) {
-        AirlineStatsRequestDTO stats = new AirlineStatsRequestDTO.Builder()
-                .airlineName(airlineName)
-                .totalFlights(airlineStatisticsService.getAirlinecount(airlineName))
-                .totalRevenue(airlineStatisticsService.getAirlineRevenue(airlineName)) // placeholder
-                .avgRating(airlineStatisticsService.getAirlineAvgRating(airlineName))
-                .build();
+    @GetMapping("/")
+    public ResponseEntity<SuccessResponse<AirlineStatsRequestDTO>> getAirlineStatistics() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getDetails();
+        AirlineStatsRequestDTO stats = airlineStatisticsService
+                .getAirlineStatistics(claims.get("airline_id", Integer.class));
         return ResponseEntity.ok(SuccessResponse.of("Airline statistics retrieved successfully", stats));
     }
 
