@@ -22,7 +22,7 @@ const DUMMY_TRIP_TYPE_STATS = {
 
 const DUMMY_AIRLINE_DETAILS = [
   {
-    flightId: 1,
+    flightID: 1,
     departureAirport: "Cairo",
     arrivalAirport: "Paris",
     departureDate: new Date().toISOString(),

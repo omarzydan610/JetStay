@@ -1,20 +1,25 @@
 import { useEffect, useState, useCallback } from "react";
-import { getFlights } from "../../services/flightService";
+import { getFlights, updateFlight } from "../../services/flightService";
 import FlightCard from "./FlightCard";
-import FlightForm from "./FlightForm";
+import UpdateFlightForm from "./UpdateFlightForm";
 
 export default function FlightListCards() {
   const [flights, setFlights] = useState([]);
   const [editingFlight, setEditingFlight] = useState(null);
   const [page, setPage] = useState(0);
-  const [size] = useState(9); // cards per page
+  const [size] = useState(9);
   const [totalPages, setTotalPages] = useState(0);
 
+  // Load flights from backend
   const loadFlights = useCallback(async () => {
     try {
       const res = await getFlights(page, size);
-      // Assuming backend returns { message: "...", data: [...], totalPages: N }
-      setFlights(res.data);
+      const flightsWithIDs = res.data.map((f) => ({
+        ...f,
+        departureAirportInt: f.departureAirport?.airportID ?? null,
+        arrivalAirportInt: f.arrivalAirport?.airportID ?? null,
+      }));
+      setFlights(flightsWithIDs);
       if (res.totalPages !== undefined) setTotalPages(res.totalPages);
     } catch (err) {
       console.error("Error loading flights", err);
@@ -25,17 +30,44 @@ export default function FlightListCards() {
     loadFlights();
   }, [loadFlights]);
 
+  // Handle flight update from the form
+  const handleUpdateFlight = async (updatedFlight) => {
+    try {
+      // Update in DB
+      await updateFlight(updatedFlight.flightID, {
+        departureAirportInt: updatedFlight.departureAirportInt,
+        arrivalAirportInt: updatedFlight.arrivalAirportInt,
+        departureDate: updatedFlight.departureDate,
+        arrivalDate: updatedFlight.arrivalDate,
+        status: updatedFlight.status,
+        planeType: updatedFlight.planeType,
+        description: updatedFlight.description,
+      });
+
+      // Update local state
+      setFlights((prevFlights) =>
+        prevFlights.map((f) =>
+          f.flightID === updatedFlight.flightID ? { ...f, ...updatedFlight } : f
+        )
+      );
+
+      setEditingFlight(null);
+    } catch (err) {
+      console.error("Error updating flight:", err);
+    }
+  };
+
   return (
     <div className="relative bg-gradient-to-br from-sky-200 via-white to-gray-100 p-8 rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* Decorative background overlay */}
       <div className="absolute inset-0 bg-plane opacity-10 pointer-events-none"></div>
 
       <div className="relative z-10">
         {editingFlight && (
           <div className="mb-8">
-            <FlightForm
+            <UpdateFlightForm
               editingFlight={editingFlight}
               clearEditing={() => setEditingFlight(null)}
+              onUpdate={handleUpdateFlight}
             />
           </div>
         )}
@@ -47,16 +79,11 @@ export default function FlightListCards() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {flights.map((f) => (
-              <FlightCard
-                key={f.flightId}
-                flight={f}
-                onEdit={setEditingFlight}
-              />
+              <FlightCard key={f.flightID} flight={f} onEdit={setEditingFlight} />
             ))}
           </div>
         )}
 
-        {/* Pagination controls */}
         <div className="flex justify-center gap-6 mt-10">
           <button
             disabled={page === 0}

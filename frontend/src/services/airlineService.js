@@ -20,7 +20,7 @@ export const getMyAirline = async () => {
   let data;
   try {
     const token = authService.getToken();
-    const response = await apiClient.get(`${API_URL}/me`, {
+    const response = await apiClient.get(`${API_URL}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     data = response.data;

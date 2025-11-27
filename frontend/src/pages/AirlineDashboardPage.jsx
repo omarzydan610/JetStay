@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import FlightForm from "../components/flights/FlightForm";
+import CreateFlightForm from "../components/flights/CreateFlightForm";
 import { getMyAirline } from "../services/airlineService";
 import { createFlight, updateFlight } from "../services/flightService";
 
@@ -61,9 +61,9 @@ export default function AirlineDashboardPage() {
 
     try {
       // Only handle flight API
-      if (flightFormData.flightId) {
-        await updateFlight(flightFormData.flightId, flightFormData);
-        console.log("Flight updated:", flightFormData.flightId);
+      if (flightFormData.flightID) {
+        await updateFlight(flightFormData.flightID, flightFormData);
+        console.log("Flight updated:", flightFormData.flightID);
       } else {
         await createFlight(flightFormData);
         console.log("Flight created");
@@ -116,7 +116,7 @@ export default function AirlineDashboardPage() {
             <h2 className="text-xl font-bold mb-4 text-gray-900">
               Add / Manage Flights
             </h2>
-            <FlightForm
+            <CreateFlightForm
               clearEditing={() => {}}
               onSubmit={handleSubmitAll} // pass combined submit handler
               errors={errors}
@@ -160,16 +160,6 @@ export default function AirlineDashboardPage() {
               ))}
             </div>
           </section>
-        </div>
-
-        {/* Submit button under both cards */}
-        <div className="flex justify-center mt-10">
-          <button
-            onClick={handleSubmitAll}
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-500 transition-transform duration-300 hover:scale-105"
-          >
-            Submit All
-          </button>
         </div>
 
       </main>

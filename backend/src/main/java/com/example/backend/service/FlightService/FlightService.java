@@ -112,9 +112,9 @@ public class FlightService {
         existingFlight.setArrivalAirport(arrivalAirport);
         existingFlight.setDescription(updatedFlight.getDescription());
         existingFlight.setPlaneType(updatedFlight.getPlaneType());
-        if (updatedFlight.getStatus() == "PENDING") {
+        if ("PENDING".equals(updatedFlight.getStatus())) {
             existingFlight.setStatus(Flight.FlightStatus.PENDING);
-        } else if (updatedFlight.getStatus() == "CANCELLED") {
+        } else if ("CANCELLED".equals(updatedFlight.getStatus())) {
             existingFlight.setStatus(Flight.FlightStatus.CANCELLED);
         } else {
             existingFlight.setStatus(Flight.FlightStatus.ON_TIME);

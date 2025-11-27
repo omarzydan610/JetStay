@@ -1,7 +1,7 @@
 import apiClient from "./axiosConfig.js";
 import authService from "./AuthServices/authService.js";
 
-const API_URL = "/api/flight/";
+const API_URL = "http://localhost:8080/api/flight/";
 
 export const getFlights = async (page = 0, size = 10) => {
   const token = authService.getToken();
@@ -19,14 +19,17 @@ export const createFlight = async (flightData) => {
   const res = await apiClient.post(`${API_URL}add`, flightData, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log("Created flight:", res.data);
   return res.data;
 };
 
 export const updateFlight = async (id, flightData) => {
+  console.log("Updating flight ID:", id, "with data:", flightData);
   const token = authService.getToken();
   const res = await apiClient.patch(`${API_URL}update/${id}`, flightData, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  console.log("Updated flight:", res.data);
   return res.data;
 };
 
