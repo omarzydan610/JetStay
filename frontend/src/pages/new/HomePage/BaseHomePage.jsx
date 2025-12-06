@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../../contexts/AppContext";
 import Navbar from "../../../components/new/Navbar";
 import HotelHomePage from "./HotelHomePage";
-import AirlineHomePage from "./AirlineHomePage";
+import AirlineHomePage from "./Airline/AirlineHomePage";
 
 function BaseHomePage() {
   const navigate = useNavigate();
