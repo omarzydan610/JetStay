@@ -5,6 +5,7 @@ import FlightListSection from "../../../../components/HomePages/Airline/HomePage
 
 function AirlineHomePage() {
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState("");
 
   useEffect(() => {
