@@ -1,0 +1,47 @@
+@keyframes flyAcrossUp {
+  0% {
+    transform: translate(900%, 500%);   /* far right + below screen */
+  }
+  100% {
+    transform: translate(-400%, -200%);  /* far left + above screen */
+  }
+}
+
+.animate-fly-up {
+  animation: flyAcrossUp 5s linear infinite;
+}
+
+/* Animated blue <-> dark blue sweeping diagonally */
+
+.animated-bg {
+  background: linear-gradient(135deg, #03164b, #005df3);
+  background-size: 200% 200%;
+  animation: sweepBlue 6s ease-in-out infinite alternate;
+}
+
+@keyframes sweepBlue {
+  0% {
+    background-position: 100% 100%; /* bottom-right */
+  }
+  100% {
+    background-position: 0% 0%; /* top-left */
+  }
+}
+
+@keyframes planeMove {
+  0% {
+    transform: translate(500%, 500%);   /* far right + below screen */
+
+  }
+  100% {
+    transform: translate(-500%, -500%);  /* far left + above screen */
+  }
+}
+
+.bg-plane {
+  background-image: url('../assets/plane.png'); /* put your plane image in public/images */
+  background-repeat: no-repeat;
+  background-size: 500px auto; /* adjust plane size */
+  animation: planeMove 10s linear infinite;
+}
+

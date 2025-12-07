@@ -1,0 +1,29 @@
+package com.example.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "hotel_amenities")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class HotelAmenity {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @Column(name = "amenity_id")
+  private Integer amenityID;
+
+  @ManyToOne
+  @JoinColumn(name = "hotel_id", nullable = false)
+  private Hotel hotel;
+
+  @Column(name = "amenity_name", nullable = false)
+  private String amenityName;
+
+  @Column(name = "price", nullable = false)
+  private Float price;
+}
