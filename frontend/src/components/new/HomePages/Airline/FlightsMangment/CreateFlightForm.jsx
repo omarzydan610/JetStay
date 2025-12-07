@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { createFlight } from "../../../../../services/flightService";
-import { getCountries, getCities, getAirports } from "../../../../../services/airportService";
+import {
+  getCountries,
+  getCities,
+  getAirports,
+} from "../../../../../services/airportService";
 import FormField from "./FormField";
 import PrimaryButton from "../PrimaryButton";
 
@@ -15,7 +19,7 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
     arrivalAirportInt: "",
     departureDate: "",
     arrivalDate: "",
-    status: "PENDING",
+    status: "ON_TIME",
     planeType: "",
     description: "",
   });
@@ -48,7 +52,8 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
       const res = await getCities(country);
       setState((prev) => ({
         ...prev,
-        [type === "departure" ? "departureCities" : "arrivalCities"]: res.data || [],
+        [type === "departure" ? "departureCities" : "arrivalCities"]:
+          res.data || [],
       }));
     } catch (err) {
       console.error("Error loading cities:", err);
@@ -60,7 +65,8 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
       const res = await getAirports(country, city);
       setState((prev) => ({
         ...prev,
-        [type === "departure" ? "departureAirports" : "arrivalAirports"]: res.data || [],
+        [type === "departure" ? "departureAirports" : "arrivalAirports"]:
+          res.data || [],
       }));
     } catch (err) {
       console.error("Error loading airports:", err);
@@ -106,13 +112,23 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
 
   const validateForm = () => {
     const errors = {};
-    if (!form.departureAirportInt) errors.departureAirportInt = "Departure airport required";
-    if (!form.arrivalAirportInt) errors.arrivalAirportInt = "Arrival airport required";
+    if (!form.departureAirportInt)
+      errors.departureAirportInt = "Departure airport required";
+    if (!form.arrivalAirportInt)
+      errors.arrivalAirportInt = "Arrival airport required";
     if (!form.departureDate) errors.departureDate = "Departure date required";
     if (!form.arrivalDate) errors.arrivalDate = "Arrival date required";
     if (!form.planeType) errors.planeType = "Plane type required";
     if (new Date(form.departureDate) >= new Date(form.arrivalDate)) {
       errors.arrivalDate = "Arrival must be after departure";
+    }
+    if (
+      form.departureAirportInt &&
+      form.arrivalAirportInt &&
+      form.departureAirportInt === form.arrivalAirportInt
+    ) {
+      errors.arrivalAirportInt =
+        "Arrival airport must be different from departure airport";
     }
     setState((prev) => ({ ...prev, errors }));
     return Object.keys(errors).length === 0;
@@ -226,7 +242,7 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
               <option value="">Select departure airport</option>
               {state.departureAirports.map((a) => (
                 <option key={a.airportID} value={a.airportID}>
-                  {a.airportName} ({a.airportCode})
+                  {a.airportName}
                 </option>
               ))}
             </select>
@@ -281,7 +297,7 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
               <option value="">Select arrival airport</option>
               {state.arrivalAirports.map((a) => (
                 <option key={a.airportID} value={a.airportID}>
-                  {a.airportName} ({a.airportCode})
+                  {a.airportName}
                 </option>
               ))}
             </select>
@@ -291,10 +307,15 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
 
       {/* Flight Details Section */}
       <div className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">📊 Flight Details</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          📊 Flight Details
+        </h3>
 
         <div className="grid grid-cols-2 gap-4">
-          <FormField label="Departure Date & Time" error={state.errors.departureDate}>
+          <FormField
+            label="Departure Date & Time"
+            error={state.errors.departureDate}
+          >
             <input
               type="datetime-local"
               name="departureDate"
@@ -305,7 +326,10 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
             />
           </FormField>
 
-          <FormField label="Arrival Date & Time" error={state.errors.arrivalDate}>
+          <FormField
+            label="Arrival Date & Time"
+            error={state.errors.arrivalDate}
+          >
             <input
               type="datetime-local"
               name="arrivalDate"

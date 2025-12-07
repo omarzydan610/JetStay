@@ -71,7 +71,9 @@ export default function ReadOnlyFlightList() {
           <div className="text-center py-12">
             <p className="text-gray-500 text-lg mb-4">No flights available</p>
             <PrimaryButton
-              onClick={() => navigate("/airline/add-flight")}
+              onClick={() =>
+                navigate("/airline/manage-flights", { state: { tab: "add" } })
+              }
               label="+ Create Your First Flight"
               icon="✨"
             />

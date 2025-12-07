@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import CreateFlightForm from "./CreateFlightForm";
-import { getMyAirline } from "../../../../../services/airlineService";
-import { createFlight, updateFlight } from "../../../../../services/flightService";
+import {
+  createFlight,
+  updateFlight,
+} from "../../../../../services/flightService";
 import GlassCard from "../GlassCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import TicketClassForm from "./TicketClassForm";
 
 export default function AddFlightSection() {
-  const [loading, setLoading] = useState(true);
+  const [loading] = useState(false);
   const [errors, setErrors] = useState({});
   const [tickets, setTickets] = useState({
     economyPrice: "",
@@ -18,19 +20,6 @@ export default function AddFlightSection() {
     firstPrice: "",
     firstSeats: "",
   });
-
-  useEffect(() => {
-    const fetchAirline = async () => {
-      try {
-        await getMyAirline();
-      } catch (err) {
-        console.error("Error fetching airline profile", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchAirline();
-  }, []);
 
   const validateAll = (flightFormData) => {
     const newErrors = {};

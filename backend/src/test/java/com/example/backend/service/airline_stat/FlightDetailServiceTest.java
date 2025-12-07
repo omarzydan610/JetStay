@@ -4,6 +4,8 @@ import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.entity.*;
 import com.example.backend.entity.Flight.FlightStatus;
 import com.example.backend.repository.*;
+import com.example.backend.service.AirlineService.FlightDetailService;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

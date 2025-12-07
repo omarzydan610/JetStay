@@ -3,33 +3,13 @@ import authService from "./AuthServices/authService.js";
 
 const API_URL = "/api/airline";
 
-// Dummy data to always return in finally
+// Dummy data for fallback
 const DUMMY_AIRLINE = {
   airlineId: 1,
   airlineName: "SkyWings",
   airlineNationality: "Egyptian",
   airlineRate: 4.5,
   logoUrl: "https://via.placeholder.com/100",
-};
-
-/**
- * Fetch current airline information
- * Always returns dummy data in finally
- */
-export const getMyAirline = async () => {
-  let data;
-  try {
-    const token = authService.getToken();
-    const response = await apiClient.get(`${API_URL}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    data = response.data;
-    console.log("Airline data fetched:", data);
-  } catch (error) {
-    console.error("Error fetching airline data:", error);
-    return data || DUMMY_AIRLINE;
-
-  }
 };
 
 /**
@@ -60,12 +40,16 @@ export const saveAirline = async (airline, logoFile) => {
     savedData = response.data;
   } catch (error) {
     console.error("Error saving airline data:", error);
-      return savedData || {
-      ...DUMMY_AIRLINE,
-      airlineName: airline.airlineName,
-      airlineNationality: airline.airlineNationality,
-      airlineRate: airline.airlineRate ?? DUMMY_AIRLINE.airlineRate,
-      logoUrl: logoFile ? URL.createObjectURL(logoFile) : DUMMY_AIRLINE.logoUrl,
-    };
+    return (
+      savedData || {
+        ...DUMMY_AIRLINE,
+        airlineName: airline.airlineName,
+        airlineNationality: airline.airlineNationality,
+        airlineRate: airline.airlineRate ?? DUMMY_AIRLINE.airlineRate,
+        logoUrl: logoFile
+          ? URL.createObjectURL(logoFile)
+          : DUMMY_AIRLINE.logoUrl,
+      }
+    );
   }
 };

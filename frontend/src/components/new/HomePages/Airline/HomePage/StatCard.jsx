@@ -1,6 +1,11 @@
 import { motion } from "framer-motion";
 
 export default function StatCard({ label, value }) {
+  // Skip rendering if value is an object (nested data)
+  if (typeof value === "object" && value !== null) {
+    return null;
+  }
+
   return (
     <motion.div
       className="flex flex-col items-center p-4 rounded-xl bg-gradient-to-br from-sky-50 to-cyan-50 border border-sky-200 hover:border-sky-400 transition-colors"

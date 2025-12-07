@@ -6,6 +6,7 @@ export default function EditableFlightCard({
   onEdit,
   onDelete,
   isDeleting,
+  isEditMode = false,
 }) {
   const [isHovering, setIsHovering] = useState(false);
 
@@ -17,8 +18,8 @@ export default function EditableFlightCard({
       animate={{ opacity: 1, scale: 1 }}
       className="group relative bg-gradient-to-br from-sky-50 to-cyan-50 border-2 border-sky-200 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
     >
-      {/* Action Buttons Overlay */}
-      {isHovering && (
+      {/* Action Buttons Overlay - Only show if NOT in edit mode */}
+      {isHovering && !isEditMode && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -130,8 +131,8 @@ export default function EditableFlightCard({
           </div>
         </div>
 
-        {/* Hover hint */}
-        {!isHovering && (
+        {/* Hover hint - Only show if NOT in edit mode */}
+        {!isHovering && !isEditMode && (
           <div className="text-center mt-4 pt-4 border-t border-sky-200">
             <p className="text-sky-600 text-xs font-semibold opacity-60">
               Hover to edit or delete

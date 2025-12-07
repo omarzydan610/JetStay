@@ -8,7 +8,6 @@ import ResetPasswordPage from "./pages/new/AuthPages/ResetPasswordPage";
 import BaseHomePage from "./pages/new/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/new/ProtectedRoute";
 import BaseProfile from "./pages/new/Profiles/BaseProfile";
-import AirlineHomePage from "./pages/new/HomePage/Airline/AirlineHomePage";
 import FlightManagementPage from "./pages/new/HomePage/Airline/FlightManagementPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -35,7 +34,6 @@ function App() {
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/profile" element={<BaseProfile />} />
-          <Route path="/airline/dashboard" element={<AirlineHomePage />} />
           <Route
             path="/airline/manage-flights"
             element={<FlightManagementPage />}

@@ -5,24 +5,11 @@ import StatisticsSection from "../../../../components/new/HomePages/Airline/Home
 import FlightListSection from "../../../../components/new/HomePages/Airline/HomePage/FlightListSection.jsx";
 
 function AirlineHomePage() {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        // Validate data can be fetched
-        await airlineStatService.getAirlineStats();
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-        setError("Failed to fetch airline data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
+    setLoading(false);
   }, []);
 
   const containerVariants = {

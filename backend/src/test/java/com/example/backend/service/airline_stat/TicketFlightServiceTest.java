@@ -5,6 +5,7 @@ import com.example.backend.entity.*;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AirlineService.FlightStatusService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

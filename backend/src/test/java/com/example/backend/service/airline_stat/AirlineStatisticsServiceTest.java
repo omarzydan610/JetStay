@@ -4,6 +4,7 @@ import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AirlineService.AirlineStatisticsService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AirlineStatisticsServiceTest {
 
         @Autowired
-        private AirlineStatService airlineStatisticsService;
+        private AirlineStatisticsService airlineStatisticsService;
 
         @Autowired
         private AirlineRepository airlineRepository;

@@ -1,10 +1,12 @@
-package com.example.backend.service.airline_stat;
+package com.example.backend.service.AirlineService;
 
-import com.example.backend.dto.AirlineDTO.AirlineStatsRequestDTO;
+import com.example.backend.dto.AirlineDTO.AirlineStatisticsResponse;
 import com.example.backend.entity.Airline;
+import com.example.backend.entity.Flight;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.AirlineRepository;
+import com.example.backend.repository.FlightRepository;
 import com.example.backend.strategy.airline_stat.FlightCountStatistics;
 import com.example.backend.strategy.airline_stat.RatingStatistics;
 import com.example.backend.strategy.airline_stat.RevenueStatistics;
@@ -13,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AirlineStatService {
+public class AirlineStatisticsService {
 
     @Autowired
     private StatisticsContext statisticsContext;
@@ -29,6 +31,9 @@ public class AirlineStatService {
 
     @Autowired
     private AirlineRepository airlineRepository;
+
+    @Autowired
+    private FlightRepository flightRepository;
 
     public Double getAirlinecount(String airlineName) {
         validateAirlineExists(airlineName);
@@ -56,19 +61,26 @@ public class AirlineStatService {
             }
         }
     }
-    public AirlineStatsRequestDTO getAirlineStatistics(int airlineID) {
+
+    public AirlineStatisticsResponse getAirlineStatistics(int airlineID) {
         Airline airline = airlineRepository.findById(airlineID).orElse(null);
         if (airline == null) {
             throw new UnauthorizedException("Airline not found for the given ID: " + airlineID);
         }
         String airlineName = airline.getAirlineName();
-        return new AirlineStatsRequestDTO.Builder()
-                .airlineName(airlineName)
+
+        // Get flight status counts
+        long pendingCount = flightRepository.countByAirlineAirlineIDAndStatus(airlineID, Flight.FlightStatus.PENDING);
+        long onTimeCount = flightRepository.countByAirlineAirlineIDAndStatus(airlineID, Flight.FlightStatus.ON_TIME);
+        long cancelledCount = flightRepository.countByAirlineAirlineIDAndStatus(airlineID, Flight.FlightStatus.CANCELLED);
+
+        return new AirlineStatisticsResponse.Builder()
                 .totalFlights(getAirlinecount(airlineName))
                 .totalRevenue(getAirlineRevenue(airlineName))
                 .avgRating(getAirlineAvgRating(airlineName))
+                .pendingCount(pendingCount)
+                .onTimeCount(onTimeCount)
+                .cancelledCount(cancelledCount)
                 .build();
     }
-
-
 }

@@ -6,8 +6,7 @@ import FlightStatusChart from "./FlightStatusChart";
 import SectionHeader from "./SectionHeader";
 
 export default function StatisticsSection() {
-  const [airlineStats, setAirlineStats] = useState(null);
-  const [flightStatus, setFlightStatus] = useState(null);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -16,11 +15,9 @@ export default function StatisticsSection() {
       setLoading(true);
       setError("");
       try {
-        const stats = await airlineStatService.getAirlineStats();
-        setAirlineStats(stats);
-
-        const flights = await airlineStatService.getFlightStatus();
-        setFlightStatus(flights);
+        // Now getAirlineStatistics includes flight status data
+        const combinedStats = await airlineStatService.getAirlineStatistics();
+        setStats(combinedStats);
       } catch (err) {
         console.error("Failed to fetch data:", err);
         setError("Failed to fetch airline data. Please try again.");
@@ -53,8 +50,13 @@ export default function StatisticsSection() {
     );
   }
 
-  const flightData = flightStatus
-    ? Object.entries(flightStatus).map(([key, value]) => ({ name: key, value }))
+  // Extract flight status for the chart
+  const flightStatusData = stats
+    ? [
+        { name: "Pending", value: stats.pendingCount || 0 },
+        { name: "On Time", value: stats.onTimeCount || 0 },
+        { name: "Cancelled", value: stats.cancelledCount || 0 },
+      ]
     : [];
 
   return (
@@ -70,13 +72,13 @@ export default function StatisticsSection() {
       />
 
       {/* Stats Grid */}
-      {airlineStats && (
+      {stats && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <StatsSection airlineStats={airlineStats} />
+          <StatsSection airlineStats={stats} />
         </motion.div>
       )}
 
@@ -86,7 +88,7 @@ export default function StatisticsSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <FlightStatusChart flightData={flightData} />
+        <FlightStatusChart flightData={flightStatusData} />
       </motion.div>
     </motion.div>
   );

@@ -1,4 +1,4 @@
-package com.example.backend.service.airline_stat;
+package com.example.backend.service.AirlineService;
 
 import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.Airline;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class TripTypeStatsService {
+public class TripTypeStatisticsService {
 
     @Autowired
     private TripTypeRepository tripTypeRepository;

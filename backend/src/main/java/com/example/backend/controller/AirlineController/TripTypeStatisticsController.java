@@ -1,11 +1,11 @@
-package com.example.backend.controller.airline_stat;
-
-import com.example.backend.service.airline_stat.TripTypeStatsService;
+package com.example.backend.controller.AirlineController;
 
 import io.jsonwebtoken.Claims;
 
 import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
+import com.example.backend.service.AirlineService.TripTypeStatisticsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TripTypeStatisticsController {
 
     @Autowired
-    private TripTypeStatsService tripTypeStatsService;
+    private TripTypeStatisticsService tripTypeStatsService;
 
     @GetMapping("/")
     public ResponseEntity<SuccessResponse<TripTypeStatsRequestDTO>> getTripTypes() {

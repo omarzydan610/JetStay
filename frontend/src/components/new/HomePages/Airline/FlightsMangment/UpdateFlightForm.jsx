@@ -4,7 +4,11 @@ import { updateFlight } from "../../../../../services/flightService";
 import FormField from "./FormField";
 import PrimaryButton from "../PrimaryButton";
 
-export default function UpdateFlightForm({ editingFlight, clearEditing, onUpdate }) {
+export default function UpdateFlightForm({
+  editingFlight,
+  clearEditing,
+  onUpdate,
+}) {
   const [form, setForm] = useState({
     flightID: null,
     departureAirportInt: "",
@@ -112,7 +116,10 @@ export default function UpdateFlightForm({ editingFlight, clearEditing, onUpdate
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <FormField label="Departure Date & Time" error={state.errors.departureDate}>
+        <FormField
+          label="Departure Date & Time"
+          error={state.errors.departureDate}
+        >
           <input
             type="datetime-local"
             name="departureDate"

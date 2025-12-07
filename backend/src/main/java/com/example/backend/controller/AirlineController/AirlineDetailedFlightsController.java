@@ -1,8 +1,8 @@
-package com.example.backend.controller.airline_stat;
+package com.example.backend.controller.AirlineController;
 
 import com.example.backend.dto.AirlineDTO.FlightsDataRequestDTO;
 import com.example.backend.dto.response.SuccessResponse;
-import com.example.backend.service.airline_stat.FlightDetailService;
+import com.example.backend.service.AirlineService.FlightDetailService;
 
 import io.jsonwebtoken.Claims;
 

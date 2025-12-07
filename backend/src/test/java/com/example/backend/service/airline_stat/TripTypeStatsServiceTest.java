@@ -6,6 +6,7 @@ import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AirlineService.TripTypeStatisticsService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TripTypeStatsServiceTest {
 
         @Autowired
-        private TripTypeStatsService tripTypeStatsService;
+        private TripTypeStatisticsService tripTypeStatsService;
 
         @Autowired
         private AirlineRepository airlineRepository;
