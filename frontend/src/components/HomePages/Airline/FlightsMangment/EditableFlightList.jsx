@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   getFlights,
   deleteFlight,
-} from "../../../../../services/flightService";
+} from "../../../../services/flightService";
 import EditableFlightCard from "./EditableFlightCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import GlassCard from "../GlassCard";

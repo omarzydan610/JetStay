@@ -4,7 +4,7 @@ import CreateFlightForm from "./CreateFlightForm";
 import {
   createFlight,
   updateFlight,
-} from "../../../../../services/flightService";
+} from "../../../../services/flightService";
 import GlassCard from "../GlassCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import TicketClassForm from "./TicketClassForm";

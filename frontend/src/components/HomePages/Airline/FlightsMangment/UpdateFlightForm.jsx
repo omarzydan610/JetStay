@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { updateFlight } from "../../../../../services/flightService";
+import { updateFlight } from "../../../../services/flightService";
 import FormField from "./FormField";
 import PrimaryButton from "../PrimaryButton";
 

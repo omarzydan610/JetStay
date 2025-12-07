@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { createFlight } from "../../../../../services/flightService";
+import { createFlight } from "../../../../services/flightService";
 import {
   getCountries,
   getCities,
   getAirports,
-} from "../../../../../services/airportService";
+} from "../../../../services/airportService";
 import FormField from "./FormField";
 import PrimaryButton from "../PrimaryButton";
 

@@ -2,11 +2,11 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import passwordService from "../../../services/AuthServices/passwordService";
-import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
-import PasswordInput from "../../../components/new/AuthComponents/PasswordInput";
-import ErrorAlert from "../../../components/new/AuthComponents/ErrorAlert";
-import SuccessAlert from "../../../components/new/AuthComponents/SuccessAlert";
-import SubmitButton from "../../../components/new/AuthComponents/SubmitButton";
+import AuthLayout from "../../../components/AuthComponents/AuthLayout";
+import PasswordInput from "../../../components/AuthComponents/PasswordInput";
+import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
+import SuccessAlert from "../../../components/AuthComponents/SuccessAlert";
+import SubmitButton from "../../../components/AuthComponents/SubmitButton";
 
 function ResetPasswordPage() {
   const location = useLocation();

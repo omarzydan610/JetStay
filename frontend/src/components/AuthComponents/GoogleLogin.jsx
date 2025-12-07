@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import authService from "../../../services/AuthServices/authService";
+import authService from "../../services/AuthServices/authService";
 import { useNavigate } from "react-router-dom";
 
 function GoogleLoginButton() {

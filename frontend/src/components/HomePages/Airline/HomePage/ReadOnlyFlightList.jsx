@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getFlights } from "../../../../../services/flightService";
+import { getFlights } from "../../../../services/flightService";
 import ReadOnlyFlightCard from "./ReadOnlyFlightCard";
 import SectionHeader from "./SectionHeader";
 import GlassCard from "../GlassCard";

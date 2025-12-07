@@ -1,4 +1,4 @@
-package com.example.backend.controller.FlightController;
+package com.example.backend.controller.AirlineController;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.FlightDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Flight;
-import com.example.backend.service.FlightService.FlightService;
+import com.example.backend.service.AirlineService.FlightService;
+
 import org.springframework.security.core.Authentication;
 import io.jsonwebtoken.Claims;
 

@@ -2,21 +2,21 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import authService from "../../../services/AuthServices/authService";
-import GoogleLoginButton from "../../../components/new/AuthComponents/GoogleLogin";
-import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
-import FormHeader from "../../../components/new/AuthComponents/FormHeader";
-import SuccessAlert from "../../../components/new/AuthComponents/SuccessAlert";
-import ErrorAlert from "../../../components/new/AuthComponents/ErrorAlert";
-import TextInput from "../../../components/new/AuthComponents/TextInput";
-import EmailInput from "../../../components/new/AuthComponents/EmailInput";
-import PhoneInput from "../../../components/new/AuthComponents/PhoneInput";
-import PasswordInput from "../../../components/new/AuthComponents/PasswordInput";
-import SubmitButton from "../../../components/new/AuthComponents/SubmitButton";
-import DecorativeSidePanel from "../../../components/new/AuthComponents/DecorativeSidePanel";
+import GoogleLoginButton from "../../../components/AuthComponents/GoogleLogin";
+import AuthLayout from "../../../components/AuthComponents/AuthLayout";
+import FormHeader from "../../../components/AuthComponents/FormHeader";
+import SuccessAlert from "../../../components/AuthComponents/SuccessAlert";
+import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
+import TextInput from "../../../components/AuthComponents/TextInput";
+import EmailInput from "../../../components/AuthComponents/EmailInput";
+import PhoneInput from "../../../components/AuthComponents/PhoneInput";
+import PasswordInput from "../../../components/AuthComponents/PasswordInput";
+import SubmitButton from "../../../components/AuthComponents/SubmitButton";
+import DecorativeSidePanel from "../../../components/AuthComponents/DecorativeSidePanel";
 import {
   PlaneIcon,
   LocationIcon,
-} from "../../../components/new/AuthComponents/AnimatedIcons";
+} from "../../../components/AuthComponents/AnimatedIcons";
 import PhoneIcon from "../../../Icons/PhoneIcon";
 import EmailIcon from "../../../Icons/EmailIcon";
 import PassIcon from "../../../Icons/PassIcon";

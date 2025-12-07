@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import passwordService from "../../../services/AuthServices/passwordService";
-import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
-import OtpInput from "../../../components/new/AuthComponents/OtpInput";
-import ErrorAlert from "../../../components/new/AuthComponents/ErrorAlert";
-import SubmitButton from "../../../components/new/AuthComponents/SubmitButton";
+import AuthLayout from "../../../components/AuthComponents/AuthLayout";
+import OtpInput from "../../../components/AuthComponents/OtpInput";
+import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
+import SubmitButton from "../../../components/AuthComponents/SubmitButton";
 
 function VerifyOtpPage() {
   const location = useLocation();

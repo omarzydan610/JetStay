@@ -3,8 +3,8 @@ import EmailInput from "../AuthComponents/EmailInput";
 import PasswordInput from "../AuthComponents/PasswordInput";
 import FileUpload from "./FileUpload";
 import LocationPicker from "./LocationPicker";
-import HotelIcon from "../../../Icons/HotelIcon";
-import PersonIcon from "../../../Icons/PersonIcon";
+import HotelIcon from "../../Icons/HotelIcon";
+import PersonIcon from "../../Icons/PersonIcon";
 
 const HotelFormFields = ({
   formData,

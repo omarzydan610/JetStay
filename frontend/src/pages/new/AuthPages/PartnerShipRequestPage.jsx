@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import AirlineForm from "../../../components/new/PatnershipComponents/AirlineForm";
-import HotelForm from "../../../components/new/PatnershipComponents/HotelForm";
-import AuthLayout from "../../../components/new/AuthComponents/AuthLayout";
+import AirlineForm from "../../../components/PatnershipComponents/AirlineForm";
+import HotelForm from "../../../components/PatnershipComponents/HotelForm";
+import AuthLayout from "../../../components/AuthComponents/AuthLayout";
 import PlaneIcon from "../../../Icons/PlaneIcon";
 import HotelIcon from "../../../Icons/HotelIcon";
 

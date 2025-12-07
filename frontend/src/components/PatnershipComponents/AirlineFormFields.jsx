@@ -2,8 +2,8 @@ import TextInput from "../AuthComponents/TextInput";
 import EmailInput from "../AuthComponents/EmailInput";
 import PasswordInput from "../AuthComponents/PasswordInput";
 import FileUpload from "./FileUpload";
-import Plane from "../../../Icons/PlaneIcon";
-import PersonIcon from "../../../Icons/PersonIcon";
+import Plane from "../../Icons/PlaneIcon";
+import PersonIcon from "../../Icons/PersonIcon";
 
 const AirlineFormFields = ({
   formData,

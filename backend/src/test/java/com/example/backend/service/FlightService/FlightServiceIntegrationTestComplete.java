@@ -1,6 +1,6 @@
 package com.example.backend.service.FlightService;
 
-import com.example.backend.dto.FlightDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
 import com.example.backend.entity.Flight;
@@ -11,6 +11,7 @@ import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AirlineService.FlightService;
 import com.example.backend.service.AuthService.JwtAuthService;
 
 import org.junit.jupiter.api.*;

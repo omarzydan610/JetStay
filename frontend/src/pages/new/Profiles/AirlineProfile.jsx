@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../../contexts/AppContext";
-import AdminInfoSection from "../../../components/new/ProfileComponents/AdminInfoSection";
-import AirlineBusinessInfoSection from "../../../components/new/ProfileComponents/AirlineBusinessInfoSection";
-import AirlineEditModal from "../../../components/new/ProfileComponents/AirlineEditModal";
-import AdminEditModal from "../../../components/new/ProfileComponents/AdminEditModal";
+import AdminInfoSection from "../../../components/ProfileComponents/AdminInfoSection";
+import AirlineBusinessInfoSection from "../../../components/ProfileComponents/AirlineBusinessInfoSection";
+import AirlineEditModal from "../../../components/ProfileComponents/AirlineEditModal";
+import AdminEditModal from "../../../components/ProfileComponents/AdminEditModal";
 import { updateAirlineData } from "../../../services/profiles/airlineProfileService";
 
 function AirlineProfile() {

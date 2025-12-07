@@ -1,4 +1,4 @@
-package com.example.backend.dto.FlightDTO;
+package com.example.backend.dto.AirlineDTO;
 import lombok.Data;
 
 @Data

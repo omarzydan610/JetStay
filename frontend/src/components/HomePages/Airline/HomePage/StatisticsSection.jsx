@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import airlineStatService from "../../../../../services/airlineStats.js";
+import airlineStatService from "../../../../services/airlineStats.js";
 import StatsSection from "./StatsSection";
 import FlightStatusChart from "./FlightStatusChart";
 import SectionHeader from "./SectionHeader";

@@ -1,49 +1,20 @@
-import { useState } from "react";
-import HotelFormFields from "./HotelFormFields";
+import React, { useState } from "react";
+import AirlineFormFields from "./AirlineFormFields";
 import SubmitButton from "./SubmitButton";
-import partnershipService from "../../../services/AuthServices/partnershipService";
+import partnershipService from "../../services/AuthServices/partnershipService";
 import ErrorAlert from "../AuthComponents/ErrorAlert";
 
-// Helper function to normalize longitude to [-180, 180] range
-const normalizeLongitude = (longitude) => {
-  let normalizedLng = parseFloat(longitude);
-
-  // Normalize longitude to be within [-180, 180]
-  while (normalizedLng > 180) {
-    normalizedLng -= 360;
-  }
-  while (normalizedLng < -180) {
-    normalizedLng += 360;
-  }
-
-  return normalizedLng;
-};
-
-// Helper function to normalize latitude to [-90, 90] range
-const normalizeLatitude = (latitude) => {
-  let normalizedLat = parseFloat(latitude);
-
-  // Ensure latitude stays within valid range
-  if (normalizedLat > 90) normalizedLat = 90;
-  if (normalizedLat < -90) normalizedLat = -90;
-
-  return normalizedLat;
-};
-
-const HotelForm = () => {
+const AirlineForm = () => {
   const [formData, setFormData] = useState({
-    hotelName: "",
-    latitude: "",
-    longitude: "",
-    city: "",
-    country: "",
+    airlineName: "",
+    airlineNational: "",
     adminFirstName: "",
     adminLastName: "",
     adminPhone: "",
     managerEmail: "",
     managerPassword: "",
     confirmPassword: "",
-    hotelLogo: null,
+    airlineLogo: null,
   });
 
   const [errors, setErrors] = useState({});
@@ -55,12 +26,10 @@ const HotelForm = () => {
     const newErrors = {};
 
     // Required field validation
-    if (!formData.hotelName.trim())
-      newErrors.hotelName = "Hotel name is required";
-    if (!formData.latitude) newErrors.latitude = "Latitude is required";
-    if (!formData.longitude) newErrors.longitude = "Longitude is required";
-    if (!formData.city.trim()) newErrors.city = "City is required";
-    if (!formData.country.trim()) newErrors.country = "Country is required";
+    if (!formData.airlineName.trim())
+      newErrors.airlineName = "Airline name is required";
+    if (!formData.airlineNational.trim())
+      newErrors.airlineNational = "Airline nationality is required";
     if (!formData.adminFirstName.trim())
       newErrors.adminFirstName = "Admin first name is required";
     if (!formData.adminLastName.trim())
@@ -122,14 +91,6 @@ const HotelForm = () => {
       newErrors.confirmPassword = "Passwords do not match";
     }
 
-    // Coordinate validation - now accepting wider ranges since we'll normalize
-    if (formData.latitude && isNaN(formData.latitude)) {
-      newErrors.latitude = "Latitude must be a valid number";
-    }
-    if (formData.longitude && isNaN(formData.longitude)) {
-      newErrors.longitude = "Longitude must be a valid number";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -162,25 +123,6 @@ const HotelForm = () => {
     }
   };
 
-  const handleLocationChange = (lat, lng) => {
-    // Normalize coordinates before storing
-    const normalizedLat = normalizeLatitude(lat);
-    const normalizedLng = normalizeLongitude(lng);
-
-    setFormData((prev) => ({
-      ...prev,
-      latitude: normalizedLat.toString(),
-      longitude: normalizedLng.toString(),
-    }));
-
-    // Clear coordinate errors
-    setErrors((prev) => ({
-      ...prev,
-      latitude: "",
-      longitude: "",
-    }));
-  };
-
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -189,7 +131,7 @@ const HotelForm = () => {
       if (!validTypes.includes(file.type)) {
         setErrors((prev) => ({
           ...prev,
-          hotelLogo: "Please upload a valid image file (JPEG, PNG, GIF)",
+          airlineLogo: "Please upload a valid image file (JPEG, PNG, GIF)",
         }));
         return;
       }
@@ -198,7 +140,7 @@ const HotelForm = () => {
       if (file.size > 5 * 1024 * 1024) {
         setErrors((prev) => ({
           ...prev,
-          hotelLogo: "File size must be less than 5MB",
+          airlineLogo: "File size must be less than 5MB",
         }));
         return;
       }
@@ -206,13 +148,13 @@ const HotelForm = () => {
       // Clear error if file is valid
       setErrors((prev) => ({
         ...prev,
-        hotelLogo: "",
+        airlineLogo: "",
       }));
 
       // Store the file in formData
       setFormData((prev) => ({
         ...prev,
-        hotelLogo: file,
+        airlineLogo: file,
       }));
     }
   };
@@ -230,17 +172,8 @@ const HotelForm = () => {
       const submissionFormData = new FormData();
 
       // Append all form fields
-      submissionFormData.append("hotelName", formData.hotelName);
-      submissionFormData.append(
-        "latitude",
-        normalizeLatitude(formData.latitude)
-      );
-      submissionFormData.append(
-        "longitude",
-        normalizeLongitude(formData.longitude)
-      );
-      submissionFormData.append("city", formData.city);
-      submissionFormData.append("country", formData.country);
+      submissionFormData.append("airlineName", formData.airlineName);
+      submissionFormData.append("airlineNationality", formData.airlineNational);
       submissionFormData.append("adminFirstName", formData.adminFirstName);
       submissionFormData.append("adminLastName", formData.adminLastName);
       submissionFormData.append("adminPhone", formData.adminPhone);
@@ -248,14 +181,14 @@ const HotelForm = () => {
       submissionFormData.append("managerPassword", formData.managerPassword);
 
       // Append the logo file if it exists
-      if (formData.hotelLogo) {
-        submissionFormData.append("hotelLogo", formData.hotelLogo);
+      if (formData.airlineLogo) {
+        submissionFormData.append("airlineLogo", formData.airlineLogo);
       }
 
-      console.log("Submitting form with file:", formData.hotelLogo);
+      console.log("Submitting form with file:", formData.airlineLogo);
 
       // Submit to backend using the service
-      await partnershipService.submitHotelPartnership(submissionFormData);
+      await partnershipService.submitAirlinePartnership(submissionFormData);
 
       console.log("Submission successful");
 
@@ -264,18 +197,15 @@ const HotelForm = () => {
 
       // Reset form
       setFormData({
-        hotelName: "",
-        latitude: "",
-        longitude: "",
-        city: "",
-        country: "",
+        airlineName: "",
+        airlineNational: "",
         adminFirstName: "",
         adminLastName: "",
         adminPhone: "",
         managerEmail: "",
         managerPassword: "",
         confirmPassword: "",
-        hotelLogo: null,
+        airlineLogo: null,
       });
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -298,7 +228,7 @@ const HotelForm = () => {
           Submission Successful!
         </h3>
         <p className="text-green-700 text-lg">
-          Your hotel registration is waiting for acceptance from the system
+          Your airline registration is waiting for acceptance from the system
           admin. You will be notified once it's approved.
         </p>
       </div>
@@ -309,19 +239,18 @@ const HotelForm = () => {
     <form onSubmit={handleSubmit} className="space-y-6">
       <ErrorAlert message={error} />
 
-      <HotelFormFields
+      <AirlineFormFields
         formData={formData}
         errors={errors}
         handleChange={handleChange}
         handleFileChange={handleFileChange}
-        onLocationChange={handleLocationChange}
       />
 
       <div className="mt-8">
-        <SubmitButton text="Register Hotel" isLoading={loading} />
+        <SubmitButton text="Register Airline" isLoading={loading} />
       </div>
     </form>
   );
 };
 
-export default HotelForm;
+export default AirlineForm;

@@ -1,4 +1,4 @@
-package com.example.backend.service.FlightService;
+package com.example.backend.service.AirlineService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
-import com.example.backend.dto.FlightDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
 import com.example.backend.entity.Flight;

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../../contexts/AppContext";
-import AdminInfoSection from "../../../components/new/ProfileComponents/AdminInfoSection";
-import HotelBusinessInfoSection from "../../../components/new/ProfileComponents/HotelBusinessInfoSection";
-import HotelEditModal from "../../../components/new/ProfileComponents/HotelEditModal";
-import AdminEditModal from "../../../components/new/ProfileComponents/AdminEditModal";
+import AdminInfoSection from "../../../components/ProfileComponents/AdminInfoSection";
+import HotelBusinessInfoSection from "../../../components/ProfileComponents/HotelBusinessInfoSection";
+import HotelEditModal from "../../../components/ProfileComponents/HotelEditModal";
+import AdminEditModal from "../../../components/ProfileComponents/AdminEditModal";
 import { updateHotelData } from "../../../services/profiles/hotelProfileService";
 
 function HotelProfile() {

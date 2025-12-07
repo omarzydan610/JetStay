@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import airlineStatService from "../../../../services/airlineStats";
-import Navbar from "../../../../components/new/Navbar";
-import AddFlightSection from "../../../../components/new/HomePages/Airline/FlightsMangment/AddFlightSection";
-import EditableFlightList from "../../../../components/new/HomePages/Airline/FlightsMangment/EditableFlightList";
-import PrimaryButton from "../../../../components/new/HomePages/Airline/PrimaryButton";
-import GlassCard from "../../../../components/new/HomePages/Airline/GlassCard";
+import Navbar from "../../../../components/Navbar";
+import AddFlightSection from "../../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
+import EditableFlightList from "../../../../components/HomePages/Airline/FlightsMangment/EditableFlightList";
+import PrimaryButton from "../../../../components/HomePages/Airline/PrimaryButton";
+import GlassCard from "../../../../components/HomePages/Airline/GlassCard";
 
 function FlightManagementPage() {
   const navigate = useNavigate();
