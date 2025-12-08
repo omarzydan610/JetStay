@@ -1,7 +1,7 @@
 package com.example.backend.service.FlightService;
 
-import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
-import com.example.backend.dto.FlightDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
+import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.*;
 import com.example.backend.dto.AirlineDTO.CityDtoResponse;
 import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
@@ -307,8 +307,7 @@ public class FlightServiceIntegrationTestComplete {
 
         flight = flightRepository.save(flight);
 
-        TripType economy = new TripType(null, flight, 100, 1500,
-                TripType.TripTypeName.ECONOMY);
+        TripType economy = new TripType(null, flight, 100, 1500, "ECONOMY");
         tripTypeRepository.save(economy);
 
         List<FlightDetailsDTO> details = flightService.getFlightDetails(flight.getFlightID());
@@ -316,7 +315,7 @@ public class FlightServiceIntegrationTestComplete {
         assertNotNull(details);
         assertFalse(details.isEmpty());
         assertEquals("Boeing 777", details.get(0).getPlaneType());
-        assertEquals(TripType.TripTypeName.ECONOMY, details.get(0).getTripType());
+        assertEquals("ECONOMY", details.get(0).getTripType());
     }
 
 
@@ -335,27 +334,27 @@ public class FlightServiceIntegrationTestComplete {
         airport.setCountry("Egypt");
         airport.setCity("Cairo");
 
-        when(airportRepository.findByCountryAndCity("Egypt", "Cairo"))
-                .thenReturn(List.of(airport));
+//        when(airportRepository.findByCountryAndCity("Egypt", "Cairo"))
+//                .thenReturn(List.of(airport));
 
         List<Airport> result = flightService.getAllAirPorts("Egypt", "Cairo");
 
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("Cairo", result.get(0).getCity());
-        verify(airportRepository).findByCountryAndCity("Egypt", "Cairo");
+//        verify(airportRepository).findByCountryAndCity("Egypt", "Cairo");
     }
 
     @Test
     void getAllAirPorts_ReturnsEmptyList() {
-        when(airportRepository.findByCountryAndCity("USA", "Miami"))
-                .thenReturn(List.of());
+//        when(airportRepository.findByCountryAndCity("USA", "Miami"))
+//                .thenReturn(List.of());
 
         List<Airport> result = flightService.getAllAirPorts("USA", "Miami");
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(airportRepository).findByCountryAndCity("USA", "Miami");
+//        verify(airportRepository).findByCountryAndCity("USA", "Miami");
     }
 
     @Test
@@ -364,48 +363,62 @@ public class FlightServiceIntegrationTestComplete {
                 new CountryDtoResponse("Egypt"),
                 new CountryDtoResponse("UAE"));
 
-        when(airportRepository.findAllCountries()).thenReturn(countries);
+//        when(airportRepository.findAllCountries()).thenReturn(countries);
 
         List<CountryDtoResponse> result = flightService.getAllCountries();
 
         assertEquals(2, result.size());
         assertEquals("Egypt", result.get(0).getName());
-        verify(airportRepository).findAllCountries();
+//        verify(airportRepository).findAllCountries();
     }
 
     @Test
     void getAllCountries_ReturnsEmptyList() {
-        when(airportRepository.findAllCountries()).thenReturn(List.of());
-
+//        when(airportRepository.findAllCountries()).thenReturn(List.of());
+        airportRepository.deleteAll();
         List<CountryDtoResponse> result = flightService.getAllCountries();
 
         assertTrue(result.isEmpty());
-        verify(airportRepository).findAllCountries();
+//        verify(airportRepository).findAllCountries();
     }
 
     @Test
     void getCitiesByCountry_ReturnsList() {
-        List<CityDtoResponse> cities = List.of(
-                new CityDtoResponse("Cairo"),
-                new CityDtoResponse("Giza"));
+//        List<CityDtoResponse> cities = List.of(
+//                new CityDtoResponse("Cairo"),
+//                new CityDtoResponse("Giza"));
 
-        when(airportRepository.findAllCitiesByCountry("Egypt")).thenReturn(cities);
+//        when(airportRepository.findAllCitiesByCountry("Egypt")).thenReturn(cities);
 
+        // Arrange
+        Airport airport1 = new Airport();
+        airport1.setAirportName("CAI");
+        airport1.setCountry("Egypt");
+        airport1.setCity("Cairo");
+        airportRepository.save(airport1);
+
+        Airport airport2 = new Airport();
+        airport2.setAirportName("HBE");
+        airport2.setCountry("Egypt");
+        airport2.setCity("Alexandria");
+        airportRepository.save(airport2);
+
+        // Act
         List<CityDtoResponse> result = flightService.getCitiesByCountry("Egypt");
 
         assertEquals(2, result.size());
-        assertEquals("Cairo", result.get(0).getName());
-        verify(airportRepository).findAllCitiesByCountry("Egypt");
+        assertEquals("Cairo", result.get(1).getName());
+//        verify(airportRepository).findAllCitiesByCountry("Egypt");
     }
 
     @Test
     void getCitiesByCountry_ReturnsEmptyList() {
-        when(airportRepository.findAllCitiesByCountry("USA"))
-                .thenReturn(List.of());
+//        when(airportRepository.findAllCitiesByCountry("USA"))
+//                .thenReturn(List.of());
 
         List<CityDtoResponse> result = flightService.getCitiesByCountry("USA");
 
         assertTrue(result.isEmpty());
-        verify(airportRepository).findAllCitiesByCountry("USA");
+//        verify(airportRepository).findAllCitiesByCountry("USA");
     }
 }

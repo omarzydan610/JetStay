@@ -1,4 +1,4 @@
-package com.example.backend.dto.FlightDTO;
+package com.example.backend.dto.AirlineDTO;
 
 import com.example.backend.entity.Flight;
 import com.example.backend.entity.TripType;
@@ -23,7 +23,7 @@ public class FlightDetailsDTO {
     private String arrivalAirportCity;
 
     private String planeType;
-    private TripType.TripTypeName tripType;
+    private String tripType;
     private Integer price;
 
     private String airlineLogoURL;

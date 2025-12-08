@@ -1,6 +1,6 @@
 package com.example.backend.repository;
 
-import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,7 +36,7 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     boolean existsById(Integer flightID);
 
     @Query("""
-        SELECT new com.example.backend.dto.FlightDTO.FlightDetailsDTO(
+        SELECT new com.example.backend.dto.AirlineDTO.FlightDetailsDTO(
             f.departureDate,
             f.arrivalDate,
             f.status,

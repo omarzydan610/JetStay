@@ -1,12 +1,12 @@
 package com.example.backend.controller.FlightControllerTest;
 
 import com.example.backend.controller.TestSecurityConfig;
-import com.example.backend.controller.FlightController.FlightController;
-import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
+import com.example.backend.controller.AirlineController.FlightController;
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.service.AuthService.JwtAuthService;
-import com.example.backend.service.FlightService.FlightService;
+import com.example.backend.service.AirlineService.FlightService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

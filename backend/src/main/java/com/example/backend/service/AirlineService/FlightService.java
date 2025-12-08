@@ -3,7 +3,7 @@ package com.example.backend.service.AirlineService;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
