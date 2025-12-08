@@ -1,5 +1,7 @@
 package com.example.backend.dto.AirlineDTO;
+
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class FlightRequest {
@@ -10,5 +12,6 @@ public class FlightRequest {
     private String status;
     private String description;
     private String planeType;
-    
+    private List<TicketTypeDTO> ticketTypes;
+
 }

@@ -1,4 +1,5 @@
 package com.example.backend.controller.AirlineController;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,11 +65,36 @@ public class FlightController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> getAllFlightForAirLine(@RequestParam(defaultValue = "0") int page , @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<?> getAllFlightForAirLine(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
         Integer airlineID = claims.get("airline_id", Integer.class);
         List<Flight> flights = flightService.getAllFlightForAirLine(airlineID, page, size);
         return ResponseEntity.ok(SuccessResponse.of("Flights retrieved successfully", flights));
+    }
+
+    @GetMapping("/airPorts")
+    public ResponseEntity<?> getAirPorts(@RequestParam String country, @RequestParam String city) {
+        return ResponseEntity.ok(SuccessResponse.of("Airports retrieved successfully",
+                flightService.getAllAirPorts(country, city)));
+    }
+
+    @GetMapping("/countries")
+    public ResponseEntity<?> getCountries() {
+        return ResponseEntity.ok(SuccessResponse.of("Countries retrieved successfully",
+                flightService.getAllCountries()));
+    }
+
+    @GetMapping("/cities")
+    public ResponseEntity<?> getCitiesByCountry(@RequestParam String country) {
+        return ResponseEntity.ok(SuccessResponse.of("Cities retrieved successfully",
+                flightService.getCitiesByCountry(country)));
+    }
+
+    @GetMapping("/ticket-types")
+    public ResponseEntity<?> getTicketTypes() {
+        return ResponseEntity.ok(SuccessResponse.of("Ticket types retrieved successfully",
+                flightService.getTicketTypes()));
     }
 }

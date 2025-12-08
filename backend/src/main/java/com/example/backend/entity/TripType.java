@@ -27,13 +27,6 @@ public class TripType {
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type_name")
-    private TripTypeName typeName;
-
-    public enum TripTypeName {
-        ECONOMY,
-        BUSINESS,
-        FIRST_CLASS
-    }
+    @Column(name = "type_name", nullable = false)
+    private String typeName;
 }

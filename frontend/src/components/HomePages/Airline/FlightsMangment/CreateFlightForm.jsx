@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { createFlight } from "../../../../services/flightService";
 import {
+  createFlight,
   getCountries,
   getCities,
   getAirports,
-} from "../../../../services/airportService";
+} from "../../../../services/flightService";
 import FormField from "./FormField";
 import PrimaryButton from "../PrimaryButton";
+import TicketTypeSelector from "./TicketTypeSelector";
 
 export default function CreateFlightForm({ clearEditing, onSuccess }) {
   const [form, setForm] = useState({
@@ -23,6 +24,8 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
     planeType: "",
     description: "",
   });
+
+  const [selectedTickets, setSelectedTickets] = useState({});
 
   const [state, setState] = useState({
     countries: [],
@@ -130,6 +133,22 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
       errors.arrivalAirportInt =
         "Arrival airport must be different from departure airport";
     }
+
+    // Validate ticket types
+    if (Object.keys(selectedTickets).length === 0) {
+      errors.tickets = "Select at least 1 ticket type";
+    } else {
+      // Validate salary and seats for each selected ticket type
+      Object.entries(selectedTickets).forEach(([typeId, ticketData]) => {
+        if (!ticketData.salary || ticketData.salary <= 0) {
+          errors[`ticket_${typeId}_salary`] = "Price is required";
+        }
+        if (!ticketData.seats || ticketData.seats <= 0) {
+          errors[`ticket_${typeId}_seats`] = "Quantity is required";
+        }
+      });
+    }
+
     setState((prev) => ({ ...prev, errors }));
     return Object.keys(errors).length === 0;
   };
@@ -140,6 +159,15 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
 
     setState((prev) => ({ ...prev, loading: true }));
     try {
+      // Format ticket types for API
+      const ticketTypes = Object.entries(selectedTickets).map(
+        ([typeId, data]) => ({
+          typeName: data.name,
+          price: parseFloat(data.salary),
+          quantity: parseInt(data.seats) || 0,
+        })
+      );
+
       await createFlight({
         departureAirportInt: parseInt(form.departureAirportInt),
         arrivalAirportInt: parseInt(form.arrivalAirportInt),
@@ -148,6 +176,7 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
         status: form.status,
         planeType: form.planeType,
         description: form.description,
+        ticketTypes: ticketTypes,
       });
 
       if (onSuccess) onSuccess();
@@ -161,10 +190,11 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
         arrivalAirportInt: "",
         departureDate: "",
         arrivalDate: "",
-        status: "PENDING",
+        status: "On Time",
         planeType: "",
         description: "",
       });
+      setSelectedTickets({});
     } catch (err) {
       console.error("Error creating flight:", err);
       setState((prev) => ({
@@ -195,114 +225,117 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
         </motion.div>
       )}
 
-      {/* Departure Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">✈️ Departure</h3>
+      {/* Departure & Arrival Sections */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Departure Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">✈️ Departure</h3>
 
-        <FormField label="Country">
-          <select
-            value={form.departureCountry}
-            onChange={(e) => handleCountryChange(e, "departure")}
-            className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
-          >
-            <option value="">Select departure country</option>
-            {state.countries.map((c) => (
-              <option key={c.code} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </FormField>
-
-        {state.departureCities.length > 0 && (
-          <FormField label="City">
+          <FormField label="Country">
             <select
-              value={form.departureCity}
-              onChange={(e) => handleCityChange(e, "departure")}
+              value={form.departureCountry}
+              onChange={(e) => handleCountryChange(e, "departure")}
               className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
             >
-              <option value="">Select departure city</option>
-              {state.departureCities.map((c) => (
-                <option key={c.name} value={c.name}>
+              <option value="">Select departure country</option>
+              {state.countries.map((c) => (
+                <option key={c.code} value={c.name}>
                   {c.name}
                 </option>
               ))}
             </select>
           </FormField>
-        )}
 
-        {state.departureAirports.length > 0 && (
-          <FormField label="Airport" error={state.errors.departureAirportInt}>
+          {state.departureCities.length > 0 && (
+            <FormField label="City">
+              <select
+                value={form.departureCity}
+                onChange={(e) => handleCityChange(e, "departure")}
+                className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
+              >
+                <option value="">Select departure city</option>
+                {state.departureCities.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
+
+          {state.departureAirports.length > 0 && (
+            <FormField label="Airport" error={state.errors.departureAirportInt}>
+              <select
+                name="departureAirportInt"
+                value={form.departureAirportInt}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
+              >
+                <option value="">Select departure airport</option>
+                {state.departureAirports.map((a) => (
+                  <option key={a.airportID} value={a.airportID}>
+                    {a.airportName}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
+        </div>
+
+        {/* Arrival Section */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">📍 Arrival</h3>
+
+          <FormField label="Country">
             <select
-              name="departureAirportInt"
-              value={form.departureAirportInt}
-              onChange={handleChange}
+              value={form.arrivalCountry}
+              onChange={(e) => handleCountryChange(e, "arrival")}
               className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
             >
-              <option value="">Select departure airport</option>
-              {state.departureAirports.map((a) => (
-                <option key={a.airportID} value={a.airportID}>
-                  {a.airportName}
-                </option>
-              ))}
-            </select>
-          </FormField>
-        )}
-      </div>
-
-      {/* Arrival Section */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">📍 Arrival</h3>
-
-        <FormField label="Country">
-          <select
-            value={form.arrivalCountry}
-            onChange={(e) => handleCountryChange(e, "arrival")}
-            className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
-          >
-            <option value="">Select arrival country</option>
-            {state.countries.map((c) => (
-              <option key={c.code} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </FormField>
-
-        {state.arrivalCities.length > 0 && (
-          <FormField label="City">
-            <select
-              value={form.arrivalCity}
-              onChange={(e) => handleCityChange(e, "arrival")}
-              className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
-            >
-              <option value="">Select arrival city</option>
-              {state.arrivalCities.map((c) => (
-                <option key={c.name} value={c.name}>
+              <option value="">Select arrival country</option>
+              {state.countries.map((c) => (
+                <option key={c.code} value={c.name}>
                   {c.name}
                 </option>
               ))}
             </select>
           </FormField>
-        )}
 
-        {state.arrivalAirports.length > 0 && (
-          <FormField label="Airport" error={state.errors.arrivalAirportInt}>
-            <select
-              name="arrivalAirportInt"
-              value={form.arrivalAirportInt}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
-            >
-              <option value="">Select arrival airport</option>
-              {state.arrivalAirports.map((a) => (
-                <option key={a.airportID} value={a.airportID}>
-                  {a.airportName}
-                </option>
-              ))}
-            </select>
-          </FormField>
-        )}
+          {state.arrivalCities.length > 0 && (
+            <FormField label="City">
+              <select
+                value={form.arrivalCity}
+                onChange={(e) => handleCityChange(e, "arrival")}
+                className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
+              >
+                <option value="">Select arrival city</option>
+                {state.arrivalCities.map((c) => (
+                  <option key={c.name} value={c.name}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
+
+          {state.arrivalAirports.length > 0 && (
+            <FormField label="Airport" error={state.errors.arrivalAirportInt}>
+              <select
+                name="arrivalAirportInt"
+                value={form.arrivalAirportInt}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border-2 border-sky-200 rounded-lg focus:border-sky-600 focus:outline-none transition"
+              >
+                <option value="">Select arrival airport</option>
+                {state.arrivalAirports.map((a) => (
+                  <option key={a.airportID} value={a.airportID}>
+                    {a.airportName}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          )}
+        </div>
       </div>
 
       {/* Flight Details Section */}
@@ -376,6 +409,13 @@ export default function CreateFlightForm({ clearEditing, onSuccess }) {
           />
         </FormField>
       </div>
+
+      {/* Ticket Types Section */}
+      <TicketTypeSelector
+        selectedTickets={selectedTickets}
+        onTicketChange={setSelectedTickets}
+        errors={state.errors}
+      />
 
       {/* Action Buttons */}
       <div className="flex gap-4 pt-6">

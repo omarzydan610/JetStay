@@ -82,19 +82,4 @@ public class AirlineDataService {
       throw new BadRequestException("Failed to update airline data: " + e.getMessage());
     }
   }
-
-  public List<Airport> getAllAirPorts(String country , String city) {
-    return airportRepository.findByCountryAndCity(country , city);
-  }
-
-  public List<CountryDtoResponse> getAllCountries() {
-    return airportRepository.findAllCountries();
-  }
-
-  public List<CityDtoResponse> getCitiesByCountry(String countryName) {
-    return airportRepository.findAllCitiesByCountry(countryName);
-  }
-
-
-
 }

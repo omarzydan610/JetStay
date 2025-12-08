@@ -2,7 +2,6 @@ package com.example.backend.service.AirlineService;
 
 import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.Airline;
-import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.TripTypeRepository;
@@ -22,7 +21,7 @@ public class TripTypeStatisticsService {
     @Autowired
     private AirlineRepository airlineRepository;
 
-    public TripTypeStatsRequestDTO getTripTypeStats(int  airlineID) {
+    public TripTypeStatsRequestDTO getTripTypeStats(int airlineID) {
 
         List<Object[]> results;
 
@@ -33,9 +32,9 @@ public class TripTypeStatisticsService {
         }
         String airlineName = airline.getAirlineName();
 
-        Map<TripTypeName, Double> avgMap = new HashMap<>();
+        Map<String, Double> avgMap = new HashMap<>();
         for (Object[] row : results) {
-            TripTypeName typeName = (TripTypeName) row[0];
+            String typeName = (String) row[0];
             Double avgQuantity = ((Number) row[1]).doubleValue();
             avgMap.put(typeName, avgQuantity);
         }
@@ -50,9 +49,9 @@ public class TripTypeStatisticsService {
 
         results = tripTypeRepository.findAverageTicketsByTypeForAllAirlines();
 
-        Map<TripTypeName, Double> avgMap = new HashMap<>();
+        Map<String, Double> avgMap = new HashMap<>();
         for (Object[] row : results) {
-            TripTypeName typeName = (TripTypeName) row[0];
+            String typeName = (String) row[0];
             Double avgQuantity = ((Number) row[1]).doubleValue();
             avgMap.put(typeName, avgQuantity);
         }
@@ -60,6 +59,5 @@ public class TripTypeStatisticsService {
         String name = "All Airlines";
         return new TripTypeStatsRequestDTO(name, avgMap);
     }
-
 
 }

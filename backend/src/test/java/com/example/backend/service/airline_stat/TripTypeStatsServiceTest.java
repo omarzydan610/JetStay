@@ -4,7 +4,6 @@ import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.*;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
-import com.example.backend.entity.TripType.TripTypeName;
 import com.example.backend.entity.Flight.FlightStatus;
 import com.example.backend.service.AirlineService.TripTypeStatisticsService;
 import com.example.backend.service.AuthService.JwtAuthService;
@@ -103,11 +102,11 @@ public class TripTypeStatsServiceTest {
 
                 // 5. Trip Types
                 TripType economy = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 100, 500, TripTypeName.ECONOMY));
+                                .save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
                 TripType business = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 20, 1500, TripTypeName.BUSINESS));
+                                .save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
                 TripType firstClass = tripTypeRepository
-                                .save(new TripType(null, qatarFlight, 10, 3000, TripTypeName.FIRST_CLASS));
+                                .save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
 
                 // 6. Tickets (with non-null user + tripType)
                 FlightTicket emiratesTicket1 = flightTicketRepository.save(new FlightTicket(
@@ -137,7 +136,8 @@ public class TripTypeStatsServiceTest {
         @Test
         public void testGetAverageTicketsPerType() {
 
-                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats(airlineRepository.findAll().get(0).getAirlineID());
+                TripTypeStatsRequestDTO averages = tripTypeStatsService
+                                .getTripTypeStats(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Airline: " + averages.getAirlineName());
                 System.out.println("Averages: " + averages.getAverageTicketsPerType());

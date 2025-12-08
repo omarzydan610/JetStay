@@ -7,15 +7,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import com.example.backend.dto.AirlineDTO.CityDtoResponse;
+import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
 import com.example.backend.dto.AirlineDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.TicketTypeDTO;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
 import com.example.backend.entity.Flight;
+import com.example.backend.entity.TripType;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.FlightRepository;
+import com.example.backend.repository.TripTypeRepository;
 
 @Service
 public class FlightService {
@@ -27,6 +32,9 @@ public class FlightService {
 
     @Autowired
     private AirportRepository airportRepository;
+
+    @Autowired
+    private TripTypeRepository tripTypeRepository;
 
     public Flight getFlightById(int id, int airlineID) {
         Flight flight = flightRepository.findById(id).orElse(null);
@@ -69,8 +77,21 @@ public class FlightService {
         } else {
             newFlight.setStatus(Flight.FlightStatus.ON_TIME);
         }
-        flightRepository.save(newFlight);
-        return flightRepository.save(newFlight);
+        Flight savedFlight = flightRepository.save(newFlight);
+
+        // Save ticket types
+        if (flight.getTicketTypes() != null && !flight.getTicketTypes().isEmpty()) {
+            for (TicketTypeDTO ticketTypeDTO : flight.getTicketTypes()) {
+                TripType tripType = new TripType();
+                tripType.setFlight(savedFlight);
+                tripType.setTypeName(ticketTypeDTO.getTypeName().toLowerCase());
+                tripType.setPrice(ticketTypeDTO.getPrice().intValue());
+                tripType.setQuantity(ticketTypeDTO.getQuantity());
+                tripTypeRepository.save(tripType);
+            }
+        }
+
+        return savedFlight;
     }
 
     public Void deleteFlight(int id, int airlineID) {
@@ -128,4 +149,19 @@ public class FlightService {
         return flightRepository.findByAirlineAirlineID(airlineID, pageRequest);
     }
 
+    public List<Airport> getAllAirPorts(String country, String city) {
+        return airportRepository.findByCountryAndCity(country, city);
+    }
+
+    public List<CountryDtoResponse> getAllCountries() {
+        return airportRepository.findAllCountries();
+    }
+
+    public List<CityDtoResponse> getCitiesByCountry(String countryName) {
+        return airportRepository.findAllCitiesByCountry(countryName);
+    }
+
+    public List<String> getTicketTypes() {
+        return tripTypeRepository.findAllDistinctTicketTypes();
+    }
 }
