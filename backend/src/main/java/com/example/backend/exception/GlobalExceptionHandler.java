@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -132,5 +133,26 @@ public class GlobalExceptionHandler {
         request.getRequestURI());
 
     return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+  // Handle malformed JSON requests
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(
+          HttpMessageNotReadableException ex,
+          HttpServletRequest request) {
+
+    logger.warn("Malformed JSON request at {}: {}", request.getRequestURI(), ex.getMessage());
+
+    String message = "Malformed JSON request";
+    if (!isProduction() && ex.getMostSpecificCause() != null) {
+      message += ": " + ex.getMostSpecificCause().getMessage();
+    }
+
+    ErrorResponse errorResponse = ErrorResponse.of(
+            "Bad Request",
+            message,
+            request.getRequestURI()
+    );
+
+    return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
   }
 }
