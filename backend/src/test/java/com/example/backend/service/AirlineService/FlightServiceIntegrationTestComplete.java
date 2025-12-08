@@ -5,6 +5,7 @@ import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.*;
 import com.example.backend.dto.AirlineDTO.CityDtoResponse;
 import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
@@ -18,6 +19,8 @@ import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AirlineService.FlightService;
+import com.example.backend.entity.*;
+import com.example.backend.repository.*;
 import com.example.backend.service.AuthService.JwtAuthService;
 
 import org.junit.jupiter.api.*;
