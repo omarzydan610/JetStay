@@ -3,6 +3,7 @@ package com.example.backend.service.FlightService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -126,6 +127,13 @@ public class FlightService {
     public List<Flight> getAllFlightForAirLine(int airlineID, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return flightRepository.findByAirlineAirlineID(airlineID, pageRequest);
+    }
+
+    public List<FlightDetailsDTO> getFlightDetails(int flightID){
+        if (!flightRepository.existsById(flightID)) {
+            throw new ResourceNotFoundException("Flight not found with id: " + flightID);
+        }
+        return flightRepository.getFlightDetails(flightID);
     }
 
 }

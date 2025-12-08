@@ -1,5 +1,6 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +32,31 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     long countByStatus(Flight.FlightStatus flightStatus);
 
     List<Flight> findByAirline_AirlineID(Integer airlineId);
+
+    boolean existsById(Integer flightID);
+
+    @Query("""
+        SELECT new com.example.backend.dto.FlightDTO.FlightDetailsDTO(
+            f.departureDate,
+            f.arrivalDate,
+            f.status,
+            dep.airportName,
+            dep.city,
+            arr.airportName,
+            arr.city,
+            f.planeType,
+            tt.typeName,
+            tt.price,
+            al.logoUrl,
+            al.airlineName
+        )
+        FROM Flight f
+        JOIN f.airline al
+        JOIN f.departureAirport dep
+        JOIN f.arrivalAirport arr
+        JOIN TripType tt ON tt.flight = f
+        WHERE f.flightID = :flightId
+    """)
+    List<FlightDetailsDTO> getFlightDetails(@Param("flightId") Integer flightId);
 
 }
