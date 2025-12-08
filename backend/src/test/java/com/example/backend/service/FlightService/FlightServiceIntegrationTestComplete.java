@@ -1,6 +1,8 @@
 package com.example.backend.service.FlightService;
 
-import com.example.backend.dto.FlightDTO.FlightRequest;
+import com.example.backend.dto.AirlineDTO.CityDtoResponse;
+import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
+import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
 import com.example.backend.entity.Flight;
@@ -11,6 +13,7 @@ import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.service.AirlineService.FlightService;
 import com.example.backend.service.AuthService.JwtAuthService;
 
 import org.junit.jupiter.api.*;
@@ -23,6 +26,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -129,8 +134,7 @@ public class FlightServiceIntegrationTestComplete {
                 LocalDateTime.now().plusHours(2),
                 Flight.FlightStatus.PENDING,
                 "Test flight",
-                "Airbus A320"
-        );
+                "Airbus A320");
 
         flight = flightRepository.save(flight);
 
@@ -156,8 +160,7 @@ public class FlightServiceIntegrationTestComplete {
                 LocalDateTime.now().plusHours(3),
                 Flight.FlightStatus.ON_TIME,
                 "Test",
-                "B737"
-        );
+                "B737");
 
         Flight savedFlight = flightRepository.save(flight);
 
@@ -199,8 +202,7 @@ public class FlightServiceIntegrationTestComplete {
                 LocalDateTime.parse("2025-01-01T11:00"),
                 Flight.FlightStatus.ON_TIME,
                 "Old desc",
-                "OldPlane"
-        );
+                "OldPlane");
 
         flight = flightRepository.save(flight);
 
@@ -242,8 +244,7 @@ public class FlightServiceIntegrationTestComplete {
         Flight flight = flightRepository.save(
                 new Flight(null, airline, depAirport, arrAirport,
                         LocalDateTime.now(), LocalDateTime.now().plusHours(2),
-                        Flight.FlightStatus.ON_TIME, "Delete test", "B787")
-        );
+                        Flight.FlightStatus.ON_TIME, "Delete test", "B787"));
 
         flightService.deleteFlight(flight.getFlightID(), airline.getAirlineID());
 
@@ -259,8 +260,7 @@ public class FlightServiceIntegrationTestComplete {
         Flight flight = flightRepository.save(
                 new Flight(null, airline, depAirport, arrAirport,
                         LocalDateTime.now(), LocalDateTime.now().plusHours(1),
-                        Flight.FlightStatus.ON_TIME, "Desc", "Plane")
-        );
+                        Flight.FlightStatus.ON_TIME, "Desc", "Plane"));
 
         assertThrows(UnauthorizedException.class,
                 () -> flightService.deleteFlight(flight.getFlightID(), 12345));
@@ -280,5 +280,87 @@ public class FlightServiceIntegrationTestComplete {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> flightService.addFlight(req, airline.getAirlineID()));
+    }
+
+    @Test
+    void getAllAirPorts_ReturnsList() {
+        Airport airport = new Airport();
+        airport.setAirportID(1);
+        airport.setAirportName("Test Airport");
+        airport.setCountry("Egypt");
+        airport.setCity("Cairo");
+
+        when(airportRepository.findByCountryAndCity("Egypt", "Cairo"))
+                .thenReturn(List.of(airport));
+
+        List<Airport> result = flightService.getAllAirPorts("Egypt", "Cairo");
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals("Cairo", result.get(0).getCity());
+        verify(airportRepository).findByCountryAndCity("Egypt", "Cairo");
+    }
+
+    @Test
+    void getAllAirPorts_ReturnsEmptyList() {
+        when(airportRepository.findByCountryAndCity("USA", "Miami"))
+                .thenReturn(List.of());
+
+        List<Airport> result = flightService.getAllAirPorts("USA", "Miami");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(airportRepository).findByCountryAndCity("USA", "Miami");
+    }
+
+    @Test
+    void getAllCountries_ReturnsList() {
+        List<CountryDtoResponse> countries = List.of(
+                new CountryDtoResponse("Egypt"),
+                new CountryDtoResponse("UAE"));
+
+        when(airportRepository.findAllCountries()).thenReturn(countries);
+
+        List<CountryDtoResponse> result = flightService.getAllCountries();
+
+        assertEquals(2, result.size());
+        assertEquals("Egypt", result.get(0).getName());
+        verify(airportRepository).findAllCountries();
+    }
+
+    @Test
+    void getAllCountries_ReturnsEmptyList() {
+        when(airportRepository.findAllCountries()).thenReturn(List.of());
+
+        List<CountryDtoResponse> result = flightService.getAllCountries();
+
+        assertTrue(result.isEmpty());
+        verify(airportRepository).findAllCountries();
+    }
+
+    @Test
+    void getCitiesByCountry_ReturnsList() {
+        List<CityDtoResponse> cities = List.of(
+                new CityDtoResponse("Cairo"),
+                new CityDtoResponse("Giza"));
+
+        when(airportRepository.findAllCitiesByCountry("Egypt")).thenReturn(cities);
+
+        List<CityDtoResponse> result = flightService.getCitiesByCountry("Egypt");
+
+        assertEquals(2, result.size());
+        assertEquals("Cairo", result.get(0).getName());
+        verify(airportRepository).findAllCitiesByCountry("Egypt");
+    }
+
+    @Test
+    void getCitiesByCountry_ReturnsEmptyList() {
+        when(airportRepository.findAllCitiesByCountry("USA"))
+                .thenReturn(List.of());
+
+        List<CityDtoResponse> result = flightService.getCitiesByCountry("USA");
+
+        assertTrue(result.isEmpty());
+        verify(airportRepository).findAllCitiesByCountry("USA");
     }
 }

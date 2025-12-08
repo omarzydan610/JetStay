@@ -1,16 +1,16 @@
 package com.example.backend.dto.AirlineDTO;
 
-import com.example.backend.entity.TripType.TripTypeName;
 import java.util.Map;
 
 public class TripTypeStatsRequestDTO {
 
     private String airlineName;
-    private Map<TripTypeName, Double> averageTicketsPerType;
+    private Map<String, Double> averageTicketsPerType;
 
-    public TripTypeStatsRequestDTO() {}
+    public TripTypeStatsRequestDTO() {
+    }
 
-    public TripTypeStatsRequestDTO(String airlineName, Map<TripTypeName, Double> averageTicketsPerType) {
+    public TripTypeStatsRequestDTO(String airlineName, Map<String, Double> averageTicketsPerType) {
         this.airlineName = airlineName;
         this.averageTicketsPerType = averageTicketsPerType;
     }
@@ -23,11 +23,11 @@ public class TripTypeStatsRequestDTO {
         this.airlineName = airlineName;
     }
 
-    public Map<TripTypeName, Double> getAverageTicketsPerType() {
+    public Map<String, Double> getAverageTicketsPerType() {
         return averageTicketsPerType;
     }
 
-    public void setAverageTicketsPerType(Map<TripTypeName, Double> averageTicketsPerType) {
+    public void setAverageTicketsPerType(Map<String, Double> averageTicketsPerType) {
         this.averageTicketsPerType = averageTicketsPerType;
     }
 }
