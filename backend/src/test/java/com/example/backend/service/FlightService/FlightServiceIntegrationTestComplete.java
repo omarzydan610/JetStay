@@ -1,16 +1,11 @@
 package com.example.backend.service.FlightService;
 
+import com.example.backend.dto.FlightDTO.FlightDetailsDTO;
 import com.example.backend.dto.FlightDTO.FlightRequest;
-import com.example.backend.entity.Airline;
-import com.example.backend.entity.Airport;
-import com.example.backend.entity.Flight;
-import com.example.backend.entity.User;
+import com.example.backend.entity.*;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
-import com.example.backend.repository.AirlineRepository;
-import com.example.backend.repository.AirportRepository;
-import com.example.backend.repository.FlightRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.repository.*;
 import com.example.backend.service.AuthService.JwtAuthService;
 
 import org.junit.jupiter.api.*;
@@ -43,6 +38,9 @@ public class FlightServiceIntegrationTestComplete {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private TripTypeRepository tripTypeRepository;
 
     @MockBean
     private JwtAuthService jwtAuthService;
@@ -280,5 +278,43 @@ public class FlightServiceIntegrationTestComplete {
 
         assertThrows(ResourceNotFoundException.class,
                 () -> flightService.addFlight(req, airline.getAirlineID()));
+    }
+
+
+    @Test
+    @Order(10)
+    void testGetFlightDetailsSuccess() {
+        Flight flight = new Flight(
+                null,
+                airline,
+                depAirport,
+                arrAirport,
+                LocalDateTime.parse("2025-03-10T08:00"),
+                LocalDateTime.parse("2025-03-10T10:00"),
+                Flight.FlightStatus.ON_TIME,
+                "Direct Flight",
+                "Boeing 777"
+        );
+
+        flight = flightRepository.save(flight);
+
+        TripType economy = new TripType(null, flight, 100, 1500,
+                TripType.TripTypeName.ECONOMY);
+        tripTypeRepository.save(economy);
+
+        List<FlightDetailsDTO> details = flightService.getFlightDetails(flight.getFlightID());
+
+        assertNotNull(details);
+        assertFalse(details.isEmpty());
+        assertEquals("Boeing 777", details.get(0).getPlaneType());
+        assertEquals(TripType.TripTypeName.ECONOMY, details.get(0).getTripType());
+    }
+
+
+    @Test
+    @Order(11)
+    void testGetFlightDetailsNotFound() {
+        assertThrows(ResourceNotFoundException.class,
+                () -> flightService.getFlightDetails(99999));
     }
 }
