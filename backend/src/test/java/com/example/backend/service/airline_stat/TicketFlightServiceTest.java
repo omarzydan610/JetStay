@@ -5,6 +5,7 @@ import com.example.backend.entity.*;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
 import com.example.backend.entity.Flight.FlightStatus;
+import com.example.backend.service.AirlineService.FlightStatusService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -81,9 +82,11 @@ public class TicketFlightServiceTest {
 
                 // 3. Airlines (with non-null admin)
                 Airline emirates = airlineRepository.save(
-                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(), Airline.Status.ACTIVE));
+                                new Airline(null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2,
+                                                LocalDateTime.now(), Airline.Status.ACTIVE));
                 Airline qatar = airlineRepository.save(
-                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(), Airline.Status.INACTIVE  ));
+                                new Airline(null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0,
+                                                LocalDateTime.now(), Airline.Status.INACTIVE));
 
                 // 4. Flights
                 Flight emiratesFlight = flightRepository.save(new Flight(
@@ -98,12 +101,9 @@ public class TicketFlightServiceTest {
                                 FlightStatus.PENDING, "DOH → DXB", "Airbus A350"));
 
                 // 5. Trip Types
-                TripType economy = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 100, 500, TripType.TripTypeName.ECONOMY));
-                TripType business = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 20, 1500, TripType.TripTypeName.BUSINESS));
-                TripType firstClass = tripTypeRepository
-                                .save(new TripType(null, qatarFlight, 10, 3000, TripType.TripTypeName.FIRST_CLASS));
+                TripType economy = tripTypeRepository.save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
+                TripType business = tripTypeRepository.save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
+                TripType firstClass = tripTypeRepository.save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
 
                 // 6. Tickets (with non-null user + tripType)
                 FlightTicket emiratesTicket1 = flightTicketRepository.save(new FlightTicket(
@@ -142,8 +142,9 @@ public class TicketFlightServiceTest {
 
         @Test
         public void testGetTicketsAndFlightSummary_SpecificAirline() {
-        
-                FlightStatusRequestDTO result = service.getTicketsAndFlightSummary(airlineRepository.findAll().get(0).getAirlineID());
+
+                FlightStatusRequestDTO result = service
+                                .getTicketsAndFlightSummary(airlineRepository.findAll().get(0).getAirlineID());
 
                 System.out.println("Pending Flights: " + result.getPendingCount());
                 System.out.println("On-Time Flights: " + result.getOnTimeCount());
