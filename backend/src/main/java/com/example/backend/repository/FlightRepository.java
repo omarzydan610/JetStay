@@ -37,7 +37,7 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     boolean existsById(Integer flightID);
 
     @Query("""
-        SELECT new com.example.backend.dto.FlightDTO.FlightDetailsDTO(
+        SELECT new com.example.backend.dto.AirlineDTO.FlightDetailsDTO(
             f.departureDate,
             f.arrivalDate,
             f.status,
