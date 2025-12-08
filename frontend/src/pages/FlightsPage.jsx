@@ -17,7 +17,7 @@ export default function FlightsPage() {
         <FlightListCards />
       </div>
 
-      {/* Add here just foe test until Serach page done */}
+      {/* Add here just for test until Search page done */}
       <FlightDetailsCard id={1} /> 
 
       {/* Action buttons */}
