@@ -72,13 +72,14 @@ input FlightFilterDTO {
     tripTypePriceLte: Float
 }
 
+
 # ============================
 # Queries
 # ============================
 
 type Query {
     # Get flights with optional filters
-    flights(filter: FlightFilterDTO): [Flight]
+    flights(filter: FlightFilterDTO, page: Int, size: Int): [Flight]
     # Get lists of supporting types
     airlines: [Airline]
     airports: [Airport]
