@@ -1,28 +1,28 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import authService from "../../../services/AuthServices/authService";
-import GoogleLoginButton from "../../../components/AuthComponents/GoogleLogin";
-import AuthLayout from "../../../components/AuthComponents/AuthLayout";
-import FormHeader from "../../../components/AuthComponents/FormHeader";
-import SuccessAlert from "../../../components/AuthComponents/SuccessAlert";
-import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
-import TextInput from "../../../components/AuthComponents/TextInput";
-import EmailInput from "../../../components/AuthComponents/EmailInput";
-import PhoneInput from "../../../components/AuthComponents/PhoneInput";
-import PasswordInput from "../../../components/AuthComponents/PasswordInput";
-import SubmitButton from "../../../components/AuthComponents/SubmitButton";
-import DecorativeSidePanel from "../../../components/AuthComponents/DecorativeSidePanel";
+import authService from "../../services/AuthServices/authService";
+import GoogleLoginButton from "../../components/AuthComponents/GoogleLogin";
+import AuthLayout from "../../components/AuthComponents/AuthLayout";
+import FormHeader from "../../components/AuthComponents/FormHeader";
+import SuccessAlert from "../../components/AuthComponents/SuccessAlert";
+import ErrorAlert from "../../components/AuthComponents/ErrorAlert";
+import TextInput from "../../components/AuthComponents/TextInput";
+import EmailInput from "../../components/AuthComponents/EmailInput";
+import PhoneInput from "../../components/AuthComponents/PhoneInput";
+import PasswordInput from "../../components/AuthComponents/PasswordInput";
+import SubmitButton from "../../components/AuthComponents/SubmitButton";
+import DecorativeSidePanel from "../../components/AuthComponents/DecorativeSidePanel";
 import {
   PlaneIcon,
   LocationIcon,
-} from "../../../components/AuthComponents/AnimatedIcons";
-import PhoneIcon from "../../../Icons/PhoneIcon";
-import EmailIcon from "../../../Icons/EmailIcon";
-import PassIcon from "../../../Icons/PassIcon";
-import InputIcon from "../../../Icons/inputIcon";
-import Showpass from "../../../Icons/Showpass";
-import Hidepass from "../../../Icons/Hidepass";
+} from "../../components/AuthComponents/AnimatedIcons";
+import PhoneIcon from "../../Icons/PhoneIcon";
+import EmailIcon from "../../Icons/EmailIcon";
+import PassIcon from "../../Icons/PassIcon";
+import InputIcon from "../../Icons/inputIcon";
+import Showpass from "../../Icons/Showpass";
+import Hidepass from "../../Icons/Hidepass";
 
 function AuthPage() {
   const navigate = useNavigate();

@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { useAppContext } from "../../../contexts/AppContext";
-import AdminInfoSection from "../../../components/ProfileComponents/AdminInfoSection";
-import AirlineBusinessInfoSection from "../../../components/ProfileComponents/AirlineBusinessInfoSection";
-import AirlineEditModal from "../../../components/ProfileComponents/AirlineEditModal";
-import AdminEditModal from "../../../components/ProfileComponents/AdminEditModal";
-import { updateAirlineData } from "../../../services/profiles/airlineProfileService";
+import { useAppContext } from "../../contexts/AppContext";
+import AdminInfoSection from "../../components/ProfileComponents/AdminInfoSection";
+import HotelBusinessInfoSection from "../../components/ProfileComponents/HotelBusinessInfoSection";
+import HotelEditModal from "../../components/ProfileComponents/HotelEditModal";
+import AdminEditModal from "../../components/ProfileComponents/AdminEditModal";
+import { updateHotelData } from "../../services/profiles/hotelProfileService";
 
-function AirlineProfile() {
-  const { userData, businessData, updateBusinessData} =
-    useAppContext();
+function HotelProfile() {
+  const { userData, businessData, updateBusinessData } = useAppContext();
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [businessModalError, setBusinessModalError] = useState(null);
@@ -26,9 +25,12 @@ function AirlineProfile() {
   const handleSaveBusiness = async (formData) => {
     try {
       setBusinessModalError(null);
-      const response = await updateAirlineData({
+      const response = await updateHotelData({
         name: formData.name,
-        nationality: formData.nationality,
+        city: formData.city,
+        country: formData.country,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         logoUrl: formData.logoUrl,
       });
       updateBusinessData(response);
@@ -36,7 +38,7 @@ function AirlineProfile() {
     } catch (error) {
       console.error("Error updating business data:", error);
       setBusinessModalError(
-        "Failed to update airline information. Please try again."
+        "Failed to update hotel information. Please try again."
       );
       throw error;
     }
@@ -80,7 +82,7 @@ function AirlineProfile() {
         className="space-y-8"
       >
         {/* Business Information Section */}
-        <AirlineBusinessInfoSection
+        <HotelBusinessInfoSection
           businessData={businessData}
           onEdit={handleEditBusiness}
           isEditing={isEditingBusiness}
@@ -94,7 +96,7 @@ function AirlineProfile() {
         />
 
         {/* Edit Modals */}
-        <AirlineEditModal
+        <HotelEditModal
           isOpen={isEditingBusiness}
           onClose={handleCloseBusinessModal}
           businessData={businessData}
@@ -114,4 +116,4 @@ function AirlineProfile() {
   );
 }
 
-export default AirlineProfile;
+export default HotelProfile;

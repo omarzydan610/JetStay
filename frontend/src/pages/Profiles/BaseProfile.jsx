@@ -1,24 +1,18 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAppContext } from "../../../contexts/AppContext";
-import Navbar from "../../../components/Navbar";
-import HotelHomePage from "./HotelHomePage";
-import AirlineHomePage from "./Airline/AirlineHomePage";
+import { useAppContext } from "../../contexts/AppContext";
+import Navbar from "../../components/Navbar";
+import HotelProfile from "./HotelProfile";
+import AirlineProfile from "./AirlineProfile";
 
-function BaseHomePage() {
+function BaseProfile() {
   const navigate = useNavigate();
-  const { userData, businessData, loading, error, fetchUserAndBusinessData } =
+  const { userData, loading, error, fetchUserAndBusinessData } =
     useAppContext();
 
   useEffect(() => {
     const fetchData = async () => {
-      if (
-        !userData ||
-        ((userData.Role === "HOTEL_ADMIN" ||
-          userData.Role === "AIRLINE_ADMIN") &&
-          !businessData)
-      )
-        await fetchUserAndBusinessData();
+      await fetchUserAndBusinessData();
     };
     fetchData();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -30,7 +24,7 @@ function BaseHomePage() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-sky-600 mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading user data...</p>
+            <p className="text-gray-600">Loading profile...</p>
           </div>
         </div>
       </div>
@@ -46,10 +40,10 @@ function BaseHomePage() {
             <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
             <p className="text-gray-600 mb-6">{error}</p>
             <button
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/")}
               className="bg-gradient-to-r from-sky-600 to-cyan-600 text-white px-4 py-2 rounded hover:from-sky-700 hover:to-cyan-700 transition-all duration-200"
             >
-              Go to Login
+              Go to Home
             </button>
           </div>
         </div>
@@ -59,17 +53,17 @@ function BaseHomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50 to-cyan-50">
-      {/* NavBar */}
       <Navbar />
-      {/* HomePage Based on Role */}
+
+      {/* Profile Based on Role */}
       {userData.role === "HOTEL_ADMIN" ? (
-        <HotelHomePage />
+        <HotelProfile />
       ) : userData.role === "AIRLINE_ADMIN" ? (
-        <AirlineHomePage />
+        <AirlineProfile />
       ) : userData.role === "SYSTEM_ADMIN" ? (
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to the System Admin Home Page
+            Welcome to the System Admin Profile
           </h1>
           {/* System admin specific content goes here */}
         </div>
@@ -85,4 +79,4 @@ function BaseHomePage() {
   );
 }
 
-export default BaseHomePage;
+export default BaseProfile;

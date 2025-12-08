@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./contexts/AppContext";
-import AuthPage from "./pages/new/AuthPages/AuthPage";
-import PartnerShipRequestPage from "./pages/new/AuthPages/PartnerShipRequestPage";
-import ForgotPasswordPage from "./pages/new/AuthPages/ForgotPasswordPage";
-import VerifyOtpPage from "./pages/new/AuthPages/VerifyOtpPage";
-import ResetPasswordPage from "./pages/new/AuthPages/ResetPasswordPage";
-import BaseHomePage from "./pages/new/HomePage/BaseHomePage";
+import AuthPage from "./pages/AuthPages/AuthPage";
+import PartnerShipRequestPage from "./pages/AuthPages/PartnerShipRequestPage";
+import ForgotPasswordPage from "./pages/AuthPages/ForgotPasswordPage";
+import VerifyOtpPage from "./pages/AuthPages/VerifyOtpPage";
+import ResetPasswordPage from "./pages/AuthPages/ResetPasswordPage";
+import BaseHomePage from "./pages/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
-import BaseProfile from "./pages/new/Profiles/BaseProfile";
-import FlightManagementPage from "./pages/new/HomePage/Airline/FlightManagementPage";
+import BaseProfile from "./pages/Profiles/BaseProfile";
+import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

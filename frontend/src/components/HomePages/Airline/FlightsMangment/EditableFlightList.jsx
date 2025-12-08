@@ -1,9 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import {
-  getFlights,
-  deleteFlight,
-} from "../../../../services/flightService";
+import { toast } from "react-toastify";
+import { getFlights, deleteFlight } from "../../../../services/flightService";
 import EditableFlightCard from "./EditableFlightCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import GlassCard from "../GlassCard";
@@ -61,10 +59,10 @@ export default function EditableFlightList() {
         setFlights((prevFlights) =>
           prevFlights.filter((f) => f.flightID !== flightID)
         );
-        alert("Flight deleted successfully!");
+        toast.success("Flight deleted successfully!");
       } catch (err) {
         console.error("Error deleting flight:", err);
-        alert("Error deleting flight. Please try again.");
+        toast.error("Error deleting flight. Please try again.");
       } finally {
         setDeletingId(null);
       }

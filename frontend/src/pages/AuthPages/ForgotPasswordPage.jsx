@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import passwordService from "../../../services/AuthServices/passwordService";
-import AuthLayout from "../../../components/AuthComponents/AuthLayout";
-import EmailInput from "../../../components/AuthComponents/EmailInput";
-import SuccessAlert from "../../../components/AuthComponents/SuccessAlert";
-import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
-import SubmitButton from "../../../components/AuthComponents/SubmitButton";
-import EmailIcon from "../../../Icons/EmailIcon";
+import passwordService from "../../services/AuthServices/passwordService";
+import AuthLayout from "../../components/AuthComponents/AuthLayout";
+import EmailInput from "../../components/AuthComponents/EmailInput";
+import SuccessAlert from "../../components/AuthComponents/SuccessAlert";
+import ErrorAlert from "../../components/AuthComponents/ErrorAlert";
+import SubmitButton from "../../components/AuthComponents/SubmitButton";
+import EmailIcon from "../../Icons/EmailIcon";
 
 function ResetPasswordPage() {
   const navigate = useNavigate();

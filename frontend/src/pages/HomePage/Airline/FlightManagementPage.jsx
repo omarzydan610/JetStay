@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import airlineStatService from "../../../../services/airlineStats";
-import Navbar from "../../../../components/Navbar";
-import AddFlightSection from "../../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
-import EditableFlightList from "../../../../components/HomePages/Airline/FlightsMangment/EditableFlightList";
-import PrimaryButton from "../../../../components/HomePages/Airline/PrimaryButton";
-import GlassCard from "../../../../components/HomePages/Airline/GlassCard";
+import airlineStatService from "../../../services/airlineStats";
+import { useAppContext } from "../../../contexts/AppContext";
+import Navbar from "../../../components/Navbar";
+import AddFlightSection from "../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
+import EditableFlightList from "../../../components/HomePages/Airline/FlightsMangment/EditableFlightList";
+import PrimaryButton from "../../../components/HomePages/Airline/PrimaryButton";
+import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 
 function FlightManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userData, fetchUserAndBusinessData } = useAppContext();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState(location.state?.tab || "manage");
@@ -20,6 +22,9 @@ function FlightManagementPage() {
       setLoading(true);
       setError("");
       try {
+        if (!userData) {
+          await fetchUserAndBusinessData();
+        }
         await airlineStatService.getAirlineStatistics();
       } catch (err) {
         console.error("Failed to fetch data:", err);
@@ -29,7 +34,7 @@ function FlightManagementPage() {
       }
     };
     fetchData();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const containerVariants = {
     hidden: { opacity: 0 },

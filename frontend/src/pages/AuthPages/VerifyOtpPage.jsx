@@ -1,39 +1,28 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import passwordService from "../../../services/AuthServices/passwordService";
-import AuthLayout from "../../../components/AuthComponents/AuthLayout";
-import PasswordInput from "../../../components/AuthComponents/PasswordInput";
-import ErrorAlert from "../../../components/AuthComponents/ErrorAlert";
-import SuccessAlert from "../../../components/AuthComponents/SuccessAlert";
-import SubmitButton from "../../../components/AuthComponents/SubmitButton";
+import passwordService from "../../services/AuthServices/passwordService";
+import AuthLayout from "../../components/AuthComponents/AuthLayout";
+import OtpInput from "../../components/AuthComponents/OtpInput";
+import ErrorAlert from "../../components/AuthComponents/ErrorAlert";
+import SubmitButton from "../../components/AuthComponents/SubmitButton";
 
-function ResetPasswordPage() {
+function VerifyOtpPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || "";
-  const resetToken = location.state?.resetToken || "";
 
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({});
 
-  const validatePassword = (passwordValue) => {
-    if (passwordValue.length < 8) {
-      return "Password must be at least 8 characters long.";
+  const validateOtp = (otpValue) => {
+    if (otpValue.length !== 6) {
+      return "OTP must be 6 digits.";
     }
-    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(passwordValue)) {
-      return "Password must contain at least one uppercase letter, one lowercase letter, and one number.";
-    }
-    return null;
-  };
-
-  const validateConfirmPassword = (confirmPasswordValue) => {
-    if (confirmPasswordValue !== password) {
-      return "Passwords do not match.";
+    if (!/^\d{6}$/.test(otpValue)) {
+      return "OTP must contain only digits.";
     }
     return null;
   };
@@ -41,45 +30,42 @@ function ResetPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
 
-    // Validate passwords
-    const passwordError = validatePassword(password);
-    const confirmPasswordError = validateConfirmPassword(confirmPassword);
-
-    if (passwordError) {
-      setError(passwordError);
-      return;
-    }
-
-    if (confirmPasswordError) {
-      setError(confirmPasswordError);
+    // Validate OTP
+    const otpError = validateOtp(otp);
+    if (otpError) {
+      setError(otpError);
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await passwordService.resetPassword(
-        email,
-        resetToken,
-        password
-      );
-      setSuccess(response.data?.message || response.message || "Password reset successfully!");
-
-      // Redirect to login after a short delay
-      setTimeout(() => {
-        navigate("/auth");
-      }, 500);
+      const response = await passwordService.verifyOtp(email, otp);
+      if (response.data?.resetToken) {
+        // Navigate to password change page with the reset token
+        navigate("/reset-password", {
+          state: {
+            email,
+            resetToken: response.data.resetToken,
+          },
+        });
+      } else {
+        setError(
+          response.data?.message || response.message || "Failed to verify OTP"
+        );
+      }
     } catch (err) {
       if (err.response) {
         const message = err.response.data?.message || err.response.data?.error;
         if (err.response.status === 400) {
-          setError(message || "Invalid or expired reset token.");
+          setError(message || "Invalid OTP.");
         } else if (err.response.status === 404) {
-          setError(message || "Reset token not found.");
+          setError(
+            message || "OTP not found or expired. Please request a new one."
+          );
         } else {
-          setError(message || "Failed to reset password. Please try again.");
+          setError(message || "An error occurred. Please try again.");
         }
       } else if (err.request) {
         setError("Network error. Please check your connection and try again.");
@@ -91,19 +77,11 @@ function ResetPasswordPage() {
     }
   };
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
+  const handleBlur = () => {
+    setTouched({ ...touched, otp: true });
   };
 
-  const handleConfirmPasswordChange = (e) => {
-    setConfirmPassword(e.target.value);
-  };
-
-  const handleBlur = (field) => {
-    setTouched({ ...touched, [field]: true });
-  };
-
-  if (!email || !resetToken) {
+  if (!email) {
     return (
       <AuthLayout
         formContent={
@@ -117,7 +95,7 @@ function ResetPasswordPage() {
               Invalid Access
             </h1>
             <p className="text-gray-600 mb-6">
-              Please verify your OTP first to reset your password.
+              Please request a password reset from the forgot password page.
             </p>
             <button
               onClick={() => navigate("/forgot-password")}
@@ -153,54 +131,39 @@ function ResetPasswordPage() {
       <div className="relative p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-sky-500 to-cyan-500 bg-clip-text text-transparent mb-2">
-            Reset Password
+            Verify OTP
           </h1>
           <p className="text-gray-600 text-sm">
-            Enter your new password for <strong>{email}</strong>
+            Enter the 6-digit code sent to <strong>{email}</strong>
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <PasswordInput
-            label="New Password"
-            name="password"
-            value={password}
-            onChange={handlePasswordChange}
-            onBlur={() => handleBlur("password")}
+          <OtpInput
+            label="OTP Code"
+            value={otp}
+            onChange={setOtp}
+            onBlur={handleBlur}
             error={error}
-            touched={touched.password}
-            placeholder="Enter new password"
-          />
-
-          <PasswordInput
-            label="Confirm New Password"
-            name="confirmPassword"
-            value={confirmPassword}
-            onChange={handleConfirmPasswordChange}
-            onBlur={() => handleBlur("confirmPassword")}
-            error={error}
-            touched={touched.confirmPassword}
-            placeholder="Confirm new password"
+            touched={touched.otp}
           />
 
           <ErrorAlert message={error} />
 
-          <SuccessAlert message={success} />
-
           <SubmitButton
             onClick={handleSubmit}
             isLoading={loading}
-            loadingText="Resetting..."
-            text="Reset Password"
+            loadingText="Verifying..."
+            text="Verify OTP"
           />
 
           <div className="text-center">
             <button
               type="button"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/forgot-password")}
               className="text-sm text-sky-600 hover:text-sky-700 font-medium hover:underline focus:outline-none focus:underline"
             >
-              Back to Login
+              Request New OTP
             </button>
           </div>
         </form>
@@ -217,4 +180,4 @@ function ResetPasswordPage() {
   );
 }
 
-export default ResetPasswordPage;
+export default VerifyOtpPage;

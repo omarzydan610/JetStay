@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import StatisticsSection from "../../../../components/HomePages/Airline/HomePage/StatisticsSection.jsx";
-import FlightListSection from "../../../../components/HomePages/Airline/HomePage/FlightListSection.jsx";
+import StatisticsSection from "../../../components/HomePages/Airline/HomePage/StatisticsSection.jsx";
+import FlightListSection from "../../../components/HomePages/Airline/HomePage/FlightListSection.jsx";
 
 function AirlineHomePage() {
   const [loading, setLoading] = useState(false);
