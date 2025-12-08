@@ -162,8 +162,15 @@
   <scope>test</scope>
 </dependency>
 
+        <!-- Spring Boot GraphQL Starter -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-graphql</artifactId>
+        </dependency>
 
-	</dependencies>
+
+
+    </dependencies>
 
 	<build>
 		<plugins>
