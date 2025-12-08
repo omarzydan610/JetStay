@@ -1,0 +1,18 @@
+type Airline {
+    id: ID
+    name: String
+    price: Float
+    rating: Float
+    airlineNationality: String
+}
+
+input AirlineFilter {
+    ratingGte: Float
+    ratingLte: Float
+    airlineNationalityContains: String
+    nameContains: String
+}
+
+type Query {
+    airlines(filter: AirlineFilter): [Airline]
+}
