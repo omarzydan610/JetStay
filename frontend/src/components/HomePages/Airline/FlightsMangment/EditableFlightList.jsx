@@ -1,11 +1,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { getFlights, deleteFlight } from "../../../../services/flightService";
+import {
+  getFlights,
+  deleteFlight,
+} from "../../../../services/Airline/flightsService";
 import EditableFlightCard from "./EditableFlightCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import GlassCard from "../GlassCard";
 import UpdateFlightForm from "./UpdateFlightForm";
+import ConfirmDeleteModal from "../../../HomePages/Shared/ConfirmDeleteModal";
 
 export default function EditableFlightList() {
   const [flights, setFlights] = useState([]);
@@ -15,6 +19,8 @@ export default function EditableFlightList() {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [flightToDelete, setFlightToDelete] = useState(null);
 
   const loadFlights = useCallback(async () => {
     try {
@@ -52,20 +58,26 @@ export default function EditableFlightList() {
   };
 
   const handleDeleteFlight = async (flightID) => {
-    if (window.confirm("Are you sure you want to delete this flight?")) {
-      try {
-        setDeletingId(flightID);
-        await deleteFlight(flightID);
-        setFlights((prevFlights) =>
-          prevFlights.filter((f) => f.flightID !== flightID)
-        );
-        toast.success("Flight deleted successfully!");
-      } catch (err) {
-        console.error("Error deleting flight:", err);
-        toast.error("Error deleting flight. Please try again.");
-      } finally {
-        setDeletingId(null);
-      }
+    setFlightToDelete(flightID);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!flightToDelete) return;
+    try {
+      setDeletingId(flightToDelete);
+      await deleteFlight(flightToDelete);
+      setFlights((prevFlights) =>
+        prevFlights.filter((f) => f.flightID !== flightToDelete)
+      );
+      toast.success("Flight deleted successfully!");
+      setShowDeleteModal(false);
+      setFlightToDelete(null);
+    } catch (err) {
+      console.error("Error deleting flight:", err);
+      toast.error("Error deleting flight. Please try again.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -182,6 +194,19 @@ export default function EditableFlightList() {
           )}
         </GlassCard>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        title="Confirm Deletion"
+        message="Are you sure you want to delete this flight? This action cannot be undone."
+        onConfirm={confirmDelete}
+        onCancel={() => {
+          setShowDeleteModal(false);
+          setFlightToDelete(null);
+        }}
+        isLoading={deletingId !== null}
+      />
     </motion.div>
   );
 }

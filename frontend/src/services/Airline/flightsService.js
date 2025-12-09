@@ -1,5 +1,5 @@
-import apiClient from "./axiosConfig.js";
-import authService from "./AuthServices/authService.js";
+import apiClient from "../axiosConfig.js";
+import authService from "../AuthServices/authService.js";
 import { toast } from "react-toastify";
 
 const API_URL = "http://localhost:8080/api/flight";

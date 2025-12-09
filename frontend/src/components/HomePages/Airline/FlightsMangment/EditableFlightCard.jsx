@@ -130,15 +130,6 @@ export default function EditableFlightCard({
             </p>
           </div>
         </div>
-
-        {/* Hover hint - Only show if NOT in edit mode */}
-        {!isHovering && !isEditMode && (
-          <div className="text-center mt-4 pt-4 border-t border-sky-200">
-            <p className="text-sky-600 text-xs font-semibold opacity-60">
-              Hover to edit or delete
-            </p>
-          </div>
-        )}
       </div>
     </motion.div>
   );

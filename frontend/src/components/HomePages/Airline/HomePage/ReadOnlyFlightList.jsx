@@ -1,10 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { getFlights } from "../../../../services/flightService";
+import { getFlights } from "../../../../services/Airline/flightsService";
 import ReadOnlyFlightCard from "./ReadOnlyFlightCard";
 import SectionHeader from "./SectionHeader";
 import GlassCard from "../GlassCard";
-import PrimaryButton from "../PrimaryButton";
+import PrimaryButton from "../../PrimaryButton";
 import { useNavigate } from "react-router-dom";
 
 export default function ReadOnlyFlightList() {

@@ -5,9 +5,9 @@ import {
   getCountries,
   getCities,
   getAirports,
-} from "../../../../services/flightService";
+} from "../../../../services/Airline/flightsService";
 import FormField from "./FormField";
-import PrimaryButton from "../PrimaryButton";
+import PrimaryButton from "../../PrimaryButton";
 import TicketTypeSelector from "./TicketTypeSelector";
 
 export default function CreateFlightForm({ clearEditing, onSuccess }) {

@@ -1,14 +1,24 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import roomsService from "../../../../services/HotelServices/roomsService";
 import ReadOnlyRoomCard from "./ReadOnlyRoomCard";
 
 export default function ReadOnlyRoomList({ loading }) {
   const [rooms, setRooms] = useState([]);
 
   useEffect(() => {
-    // Placeholder: Load rooms from service
-    // For now, show empty state
-    setRooms([]);
+    const fetchRooms = async () => {
+      try {
+        const data = await roomsService.getAllRooms();
+        setRooms(data);
+      } catch (error) {
+        console.error("Error loading rooms:", error);
+        toast.error("Failed to load rooms");
+      }
+    };
+
+    fetchRooms();
   }, []);
 
   if (loading) {
@@ -41,10 +51,17 @@ export default function ReadOnlyRoomList({ loading }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="space-y-4"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
     >
-      {rooms.map((room) => (
-        <ReadOnlyRoomCard key={room.roomID} room={room} />
+      {rooms.map((room, index) => (
+        <motion.div
+          key={room.roomTypeID}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.1 }}
+        >
+          <ReadOnlyRoomCard room={room} />
+        </motion.div>
       ))}
     </motion.div>
   );
