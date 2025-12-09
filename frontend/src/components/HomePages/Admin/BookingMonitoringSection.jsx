@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
@@ -107,6 +107,9 @@ export default function BookingMonitoringSection() {
   const [loading, setLoading] = useState(false);
   const [monitoringData, setMonitoringData] = useState(null);
   const [error, setError] = useState(null);
+  const [selectedHotelId, setSelectedHotelId] = useState(0);
+  const [hotels, setHotels] = useState([]);
+  const [loadingHotels, setLoadingHotels] = useState(false);
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -116,6 +119,23 @@ export default function BookingMonitoringSection() {
       transition: { duration: 0.5 },
     },
   };
+
+  useEffect(() => {
+    const fetchHotels = async () => {
+      setLoadingHotels(true);
+      try {
+        const hotelsData = await adminMonitoringService.getAllHotels();
+        setHotels(hotelsData || []);
+      } catch (err) {
+        console.error("Error fetching hotels:", err);
+        toast.error("Failed to load hotels list");
+      } finally {
+        setLoadingHotels(false);
+      }
+    };
+
+    fetchHotels();
+  }, []);
 
   const loadMockData = () => {
     setLoading(true);
@@ -142,7 +162,7 @@ export default function BookingMonitoringSection() {
 
     setLoading(true);
     try {
-      const data = await adminMonitoringService.getBookingMonitoring(startDate, endDate);
+      const data = await adminMonitoringService.getBookingMonitoring(startDate, endDate, selectedHotelId);
 
       if (!data) {
         setError("No data received from server");
@@ -198,8 +218,26 @@ export default function BookingMonitoringSection() {
       {/* Date Range Picker */}
       <motion.div variants={itemVariants}>
         <GlassCard>
-          <h3 className="text-xl font-bold text-gray-900 mb-4">Select Date Range</h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">Filter Bookings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select Hotel
+              </label>
+              <select
+                value={selectedHotelId}
+                onChange={(e) => setSelectedHotelId(Number(e.target.value))}
+                disabled={loadingHotels}
+                className="w-full px-4 py-2 rounded-lg border border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+              >
+                <option value={0}>All Hotels</option>
+                {hotels.map((hotel) => (
+                  <option key={hotel.id} value={hotel.id}>
+                    {hotel.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Start Date
