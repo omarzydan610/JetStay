@@ -104,4 +104,5 @@ public class FlightController {
         List<FlightDetailsDTO> flightDetailsDTOS = flightService.getFlightDetails(id);
         return ResponseEntity.ok(SuccessResponse.of("Flight Details retrieved successfully", flightDetailsDTOS));
     }
+
 }

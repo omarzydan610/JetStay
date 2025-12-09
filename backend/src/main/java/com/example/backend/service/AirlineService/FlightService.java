@@ -150,7 +150,7 @@ public class FlightService {
         return flightRepository.findByAirlineAirlineID(airlineID, pageRequest);
     }
 
-    public List<FlightDetailsDTO> getFlightDetails(int flightID){
+    public List<FlightDetailsDTO> getFlightDetails(int flightID) {
         if (!flightRepository.existsById(flightID)) {
             throw new ResourceNotFoundException("Flight not found with id: " + flightID);
         }

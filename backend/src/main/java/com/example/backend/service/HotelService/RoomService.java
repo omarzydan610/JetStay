@@ -1,4 +1,4 @@
-package com.example.backend.service.Hotel_data;
+package com.example.backend.service.HotelService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 
 @Service
-public class RoomTypeService {
+public class RoomService {
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 

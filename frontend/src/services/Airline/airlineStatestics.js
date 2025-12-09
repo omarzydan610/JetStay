@@ -1,5 +1,5 @@
-import apiClient from "./axiosConfig.js";
-import authService from "./AuthServices/authService";
+import apiClient from "../axiosConfig.js";
+import authService from "../AuthServices/authService.js";
 
 /**
  * Airline Statistics Service

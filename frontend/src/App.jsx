@@ -9,6 +9,7 @@ import BaseHomePage from "./pages/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import BaseProfile from "./pages/Profiles/BaseProfile";
 import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
+import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -38,6 +39,7 @@ function App() {
             path="/airline/manage-flights"
             element={<FlightManagementPage />}
           />
+          <Route path="/hotel/manage-rooms" element={<HotelManagementPage />} />
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={2500} />

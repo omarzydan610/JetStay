@@ -1,5 +1,6 @@
 package com.example.backend.repository;
 
+
 import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
 import org.springframework.data.jpa.repository.JpaRepository;

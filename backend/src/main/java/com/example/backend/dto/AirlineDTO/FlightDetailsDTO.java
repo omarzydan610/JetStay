@@ -1,7 +1,6 @@
 package com.example.backend.dto.AirlineDTO;
 
 import com.example.backend.entity.Flight;
-import com.example.backend.entity.TripType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,11 +1,10 @@
-package com.example.backend.service.FlightService;
+package com.example.backend.service.AirlineService;
 
 import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.*;
 import com.example.backend.dto.AirlineDTO.CityDtoResponse;
 import com.example.backend.dto.AirlineDTO.CountryDtoResponse;
-import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Airport;
 import com.example.backend.entity.Flight;
@@ -17,7 +16,6 @@ import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.repository.UserRepository;
-import com.example.backend.service.AirlineService.FlightService;
 import com.example.backend.service.AuthService.JwtAuthService;
 
 import org.junit.jupiter.api.*;
@@ -30,8 +28,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -288,7 +284,6 @@ public class FlightServiceIntegrationTestComplete {
         assertThrows(ResourceNotFoundException.class,
                 () -> flightService.addFlight(req, airline.getAirlineID()));
     }
-
 
     @Test
     @Order(10)
