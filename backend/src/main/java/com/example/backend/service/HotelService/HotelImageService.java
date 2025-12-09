@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
-
 import java.io.IOException;
 
 @Service
@@ -27,18 +26,17 @@ public class HotelImageService {
     private static final String BASE_FOLDER = "jetstay";
 
     @Transactional
-    public HotelImage addHotelImage(Integer hotelId, MultipartFile file) throws IOException {
-        // 1. Validate Hotel Exists
-        Hotel hotel = hotelRepository.findById(hotelId)
-                .orElseThrow(() -> new RuntimeException("Hotel not found with ID: " + hotelId));
+    public HotelImage addHotelImageForAdmin(String adminEmail, MultipartFile file) throws IOException {
+        Hotel hotel = hotelRepository.findByAdmin_Email(adminEmail)
+                .orElseThrow(() -> new RuntimeException("No Hotel found for admin: " + adminEmail));
 
-        // 2. Prepare Path: jetstay/hotels/hotel_{id}
+        Integer hotelId = hotel.getHotelID();
+
+
         String folderPath = BASE_FOLDER + "/hotels/hotel_" + hotelId + "/photos";
 
-        // 3. Upload using the Uploader Utility
         String imageUrl = hotelImagesUploader.uploadToCloudinary(file, folderPath);
 
-        // 4. Save to Database
         HotelImage hotelImage = new HotelImage();
         hotelImage.setHotel(hotel);
         hotelImage.setImageUrl(imageUrl);
@@ -47,18 +45,24 @@ public class HotelImageService {
     }
 
     @Transactional
-    public void deleteHotelImage(Integer imageId) throws IOException {
+    public void deleteHotelImageForAdmin(Integer imageId, String adminEmail) throws IOException {
         HotelImage image = hotelImageRepository.findById(imageId)
                 .orElseThrow(() -> new RuntimeException("Image not found with ID: " + imageId));
 
-        // 1. Delete from Cloudinary using the Uploader Utility
+        String ownerEmail = image.getHotel().getAdmin().getEmail();
+        if (!ownerEmail.equals(adminEmail)) {
+            throw new RuntimeException("Unauthorized: You do not own this image");
+        }
+
         hotelImagesUploader.deleteFromCloudinary(image.getImageUrl());
 
-        // 2. Delete from Database
         hotelImageRepository.delete(image);
     }
 
-    public List<HotelImage> getHotelImages(Integer hotelId) {
-        return hotelImageRepository.findByHotelHotelID(hotelId);
+    public List<HotelImage> getHotelImagesForAdmin(String adminEmail) {
+        Hotel hotel = hotelRepository.findByAdmin_Email(adminEmail)
+                .orElseThrow(() -> new RuntimeException("No Hotel found for admin: " + adminEmail));
+        
+        return hotelImageRepository.findByHotelHotelID(hotel.getHotelID());
     }
 }
