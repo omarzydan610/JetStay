@@ -19,6 +19,9 @@ public class TripTypeBatchLoader implements MappedBatchLoader<Integer, TripType>
     @Override
     public CompletableFuture<Map<Integer, TripType>> load(Set<Integer> keys) {
 
+        System.out.println("Fetching tripTypes from DB: " + keys);
+
+
         return CompletableFuture.supplyAsync(() ->
                 repo.findAllById(keys)
                         .stream()

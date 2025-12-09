@@ -19,6 +19,7 @@ public class AirlineBatchLoader implements MappedBatchLoader<Integer, Airline> {
 
     @Override
     public CompletableFuture<Map<Integer, Airline>> load(Set<Integer> keys) {
+        System.out.println("Fetching airlines from DB: " + keys);
 
         return CompletableFuture.supplyAsync(() ->
                 repo.findAllById(keys)

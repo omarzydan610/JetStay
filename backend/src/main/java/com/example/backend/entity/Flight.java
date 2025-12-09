@@ -20,7 +20,7 @@ public class Flight {
   @Column(name = "flight_id")
   private Integer flightID;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "airline_id", nullable = false)
   private Airline airline;
 
@@ -28,7 +28,7 @@ public class Flight {
   @JoinColumn(name = "departure_airport_id", nullable = false)
   private Airport departureAirport;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "arrival_airport_id", nullable = false)
   private Airport arrivalAirport;
 
