@@ -6,6 +6,7 @@ import HotelProfile from "./HotelProfile";
 import AirlineProfile from "./AirlineProfile";
 import UserProfile from "./UserProfile";
 
+
 function BaseProfile() {
   const navigate = useNavigate();
   const { userData, loading, error, fetchUserAndBusinessData } =

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../contexts/AppContext";
 import UserInfoSection from "../../components/ProfileComponents/UserInfoSection"; 
@@ -10,7 +10,13 @@ function UserProfile() {
   const { userData, updateUserData } = useAppContext();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+  
+  useEffect(() => {
+    if (sessionStorage.getItem("showUpdateToast")) {
+      toast.success("Profile updated successfully!");
+      sessionStorage.removeItem("showUpdateToast");
+    }
+  }, []);
 
   const handleSaveUser = async (formData) => {
     setLoading(true);
@@ -27,7 +33,9 @@ function UserProfile() {
       
       setIsEditModalOpen(false);
       toast.success("Profile updated successfully!");
-
+      sessionStorage.setItem("showUpdateToast", "true");
+      window.location.reload();
+      
     } catch (error) {
       console.error("Failed to update profile", error);
       toast.error("Failed to update profile. Please try again.");

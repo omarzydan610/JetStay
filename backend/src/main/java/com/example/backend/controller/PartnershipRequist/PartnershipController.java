@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import com.example.backend.dto.response.ErrorResponse;
+import org.springframework.http.HttpStatus;
 
 @RestController
 @RequestMapping("/api/partnership")
@@ -19,14 +21,24 @@ public class PartnershipController {
     private PartnershipService partnershipService;
 
     @PostMapping("/airline")
-    public ResponseEntity<SuccessResponse<Void>> submitAirline(@ModelAttribute AirlinePartnershipRequest request) {
-        partnershipService.submitAirlinePartnership(request);
-        return ResponseEntity.ok(SuccessResponse.of("Airline partnership request submitted successfully"));
+    public ResponseEntity<?> submitAirline(@ModelAttribute AirlinePartnershipRequest request) {
+        try {
+            partnershipService.submitAirlinePartnership(request);
+            return ResponseEntity.ok(SuccessResponse.of("Airline partnership request submitted successfully"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponse.of("Request Failed", e.getMessage(), "/api/partnership/airline"));
+        }
     }
 
     @PostMapping("/hotel")
-    public ResponseEntity<SuccessResponse<Void>> submitHotel(@ModelAttribute HotelPartnershipRequest request) {
-        partnershipService.submitHotelPartnership(request);
-        return ResponseEntity.ok(SuccessResponse.of("Hotel partnership request submitted successfully"));
+    public ResponseEntity<?> submitHotel(@ModelAttribute HotelPartnershipRequest request) {
+        try{
+            partnershipService.submitHotelPartnership(request);
+            return ResponseEntity.ok(SuccessResponse.of("Hotel partnership request submitted successfully"));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ErrorResponse.of("Request Failed", e.getMessage(), "/api/partnership/hotel"));
+        }
     }
 }
