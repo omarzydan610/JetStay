@@ -114,3 +114,16 @@ export async function getTicketTypes() {
   console.log("Fetched ticket types:", res.data);
   return res.data;
 }
+
+export const getFlightDetails = async (id) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}details/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to fetch flight details");
+    throw error;
+  }
+};

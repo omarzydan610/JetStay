@@ -1,5 +1,6 @@
 package com.example.backend.controller.AuthController;
 
+import com.example.backend.controller.TestSecurityConfig;
 import com.example.backend.dto.AuthDTO.LoginDTO;
 import com.example.backend.service.AuthService.AuthService;
 import com.example.backend.service.AuthService.JwtAuthService;
@@ -7,12 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -94,14 +91,3 @@ class AuthControllerTest {
 
 }
 
-// Test security configuration
-@EnableWebSecurity
-class TestSecurityConfig {
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
-        return http.build();
-    }
-}
