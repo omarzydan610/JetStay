@@ -74,6 +74,24 @@ public class FlightGraphQLService {
                     }
                 })
 
+                // Arrival date filters
+                .filter(f -> {
+                    if (filter.getArrivalDateGte() == null) return true;
+                    try {
+                        return f.getArrivalDate().isAfter(LocalDateTime.parse(filter.getArrivalDateGte()).minusSeconds(1));
+                    } catch (DateTimeParseException e) {
+                        throw new BadRequestException("Invalid departureDateGte format");
+                    }
+                })
+                .filter(f -> {
+                    if (filter.getArrivalDateLte() == null) return true;
+                    try {
+                        return f.getArrivalDate().isBefore(LocalDateTime.parse(filter.getArrivalDateLte()).plusSeconds(1));
+                    } catch (DateTimeParseException e) {
+                        throw new BadRequestException("Invalid arrivalDateLte format");
+                    }
+                })
+
                 // TripType filters
                 .filter(f -> {
                     if ((filter.getTripTypeNameContains() == null) &&

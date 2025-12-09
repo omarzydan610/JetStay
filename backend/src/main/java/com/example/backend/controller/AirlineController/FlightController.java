@@ -68,8 +68,11 @@ public class FlightController {
     public ResponseEntity<?> getAllFlightForAirLine(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("here");
         Claims claims = (Claims) auth.getCredentials();
         Integer airlineID = claims.get("airline_id", Integer.class);
+        System.out.println("here");
+
         List<Flight> flights = flightService.getAllFlightForAirLine(airlineID, page, size);
         return ResponseEntity.ok(SuccessResponse.of("Flights retrieved successfully", flights));
     }
