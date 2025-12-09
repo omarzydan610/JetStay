@@ -10,7 +10,7 @@ import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.RoomType;
-import com.example.backend.service.Hotel_data.RoomTypeService;
+import com.example.backend.service.HotelService.RoomService;
 
 import io.jsonwebtoken.Claims;
 
@@ -21,7 +21,7 @@ import java.util.List;
 public class RoomController {
 
         @Autowired
-        private RoomTypeService roomTypeService;
+        private RoomService roomTypeService;
 
         // Get room types for a hotel
         @GetMapping("/")

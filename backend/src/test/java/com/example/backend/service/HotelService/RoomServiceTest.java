@@ -1,4 +1,4 @@
-package com.example.backend.service.HotelData;
+package com.example.backend.service.HotelService;
 
 import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.entity.Hotel;
@@ -10,7 +10,6 @@ import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.JwtAuthService;
-import com.example.backend.service.Hotel_data.RoomTypeService;
 
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @Transactional
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class RoomTypeServiceTest {
+public class RoomServiceTest {
 
     @Autowired
-    private RoomTypeService roomTypeService;
+    private RoomService roomTypeService;
 
     @Autowired
     private RoomTypeRepository roomTypeRepository;

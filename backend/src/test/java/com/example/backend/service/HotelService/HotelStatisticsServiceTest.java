@@ -32,7 +32,7 @@ class HotelStatisticsServiceTest {
   private RoomTypeRepository roomTypeRepository;
 
   @InjectMocks
-  private HotelStatisticsService hotelStatisticsService;
+  private HotelDataService hotelDataService;
 
   private Hotel hotel;
   private RoomType singleRoom;
@@ -79,7 +79,7 @@ class HotelStatisticsServiceTest {
     when(roomTypeRepository.findByHotel(hotel)).thenReturn(roomTypes);
 
     // Act
-    HotelStatisticsResponse result = hotelStatisticsService.getAllStatistics(hotelID);
+    HotelStatisticsResponse result = hotelDataService.getStatistics(hotelID);
 
     // Assert
     assertNotNull(result);
@@ -110,7 +110,7 @@ class HotelStatisticsServiceTest {
     when(roomTypeRepository.findByHotel(hotel)).thenReturn(Arrays.asList());
 
     // Act
-    HotelStatisticsResponse result = hotelStatisticsService.getAllStatistics(hotelID);
+    HotelStatisticsResponse result = hotelDataService.getStatistics(hotelID);
 
     // Assert
     assertNotNull(result);
@@ -129,7 +129,7 @@ class HotelStatisticsServiceTest {
 
     // Act & Assert
     assertThrows(UnauthorizedException.class, () -> {
-      hotelStatisticsService.getAllStatistics(hotelID);
+      hotelDataService.getStatistics(hotelID);
     });
 
     verify(hotelRepository, times(1)).findById(hotelID);
@@ -144,7 +144,7 @@ class HotelStatisticsServiceTest {
     when(roomTypeRepository.findByHotel(hotel)).thenReturn(roomTypes);
 
     // Act
-    HotelStatisticsResponse result = hotelStatisticsService.getAllStatistics(hotelID);
+    HotelStatisticsResponse result = hotelDataService.getStatistics(hotelID);
 
     // Assert
     Integer expectedTotal = singleRoom.getQuantity() + doubleRoom.getQuantity() + suiteRoom.getQuantity();
@@ -160,7 +160,7 @@ class HotelStatisticsServiceTest {
     when(roomTypeRepository.findByHotel(hotel)).thenReturn(roomTypes);
 
     // Act
-    HotelStatisticsResponse result = hotelStatisticsService.getAllStatistics(hotelID);
+    HotelStatisticsResponse result = hotelDataService.getStatistics(hotelID);
 
     // Assert
     List<RoomTypeStatisticsDTO> stats = result.getRoomTypes();
