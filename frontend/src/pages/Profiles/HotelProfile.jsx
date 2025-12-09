@@ -15,7 +15,6 @@ function HotelProfile() {
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [businessModalError, setBusinessModalError] = useState(null);
   const [adminModalError, setAdminModalError] = useState(null);
-  const [loading, setLoading] = useState(false);
   useEffect(() => {
       if (sessionStorage.getItem("showUpdateToast")) {
         toast.success("Profile updated successfully!");
@@ -54,7 +53,6 @@ function HotelProfile() {
   };
 
   const handleSaveAdmin = async (formData) => {
-    setLoading(true);
     let data = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -73,8 +71,6 @@ function HotelProfile() {
     } catch (error) {
       console.error("Failed to update profile", error);
       toast.error("Failed to update profile. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 

@@ -9,7 +9,6 @@ import { toast } from "react-toastify";
 function UserProfile() {
   const { userData, updateUserData } = useAppContext();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
   
   useEffect(() => {
     if (sessionStorage.getItem("showUpdateToast")) {
@@ -19,7 +18,6 @@ function UserProfile() {
   }, []);
 
   const handleSaveUser = async (formData) => {
-    setLoading(true);
     let data = {
         firstName: formData.firstName,
         lastName: formData.lastName,
@@ -39,8 +37,6 @@ function UserProfile() {
     } catch (error) {
       console.error("Failed to update profile", error);
       toast.error("Failed to update profile. Please try again.");
-    } finally {
-      setLoading(false);
     }
   };
 
