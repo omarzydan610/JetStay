@@ -30,6 +30,7 @@ export const getFlights = async (page = 0, size = 10) => {
 export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
   try {
     const token = authService.getToken();
+    
 
     const query = `
       query Flights($filter: FlightFilterDTO, $page: Int, $size: Int) {
@@ -63,6 +64,7 @@ export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
     `;
 
     const variables = { filter, page, size };
+    console.log(size)
 
     const res = await apiClient.post(
       `/graphql`,

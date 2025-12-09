@@ -1,9 +1,11 @@
 package com.example.backend.service.AirlineService;
 
+import com.example.backend.dto.AirlineDTO.FlightFilterDTO;
 import com.example.backend.entity.Flight;
-import com.example.backend.dto.FlightDTO.FlightFilterDTO;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.FlightRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,11 +16,13 @@ import java.util.List;
 public class FlightGraphQLService {
 
     public List<Flight> filterFlights(FlightFilterDTO filter, FlightRepository flightRepository, int page, int size) {
-        List<Flight> allFlights = flightRepository.findAll();
+        Pageable pageable = PageRequest.of(page, size);
+        List<Flight> pageFlights = flightRepository.findAll(pageable).getContent();
 
-        if (filter == null) return allFlights;
+        System.out.println("Page: "+ page+ "Size: "+ size);
+        if (filter == null) return pageFlights;
 
-        List<Flight> filteredFlights = allFlights.stream()
+        return pageFlights.stream()
                 // Airline filters
                 .filter(f -> filter.getAirlineNameContains() == null ||
                         f.getAirline().getAirlineName().toLowerCase()
@@ -112,12 +116,5 @@ public class FlightGraphQLService {
                     );
                 })
                 .toList();
-
-        int fromIndex = page * size;
-        int toIndex = Math.min(fromIndex + size, filteredFlights.size());
-
-        if (fromIndex >= filteredFlights.size()) return List.of(); // no more pages
-
-        return filteredFlights.subList(fromIndex, toIndex);
     }
 }

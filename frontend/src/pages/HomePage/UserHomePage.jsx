@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 export default function UserHomePage() {
   const [flights, setFlights] = useState([]);
   const [page, setPage] = useState(0);
-  const [size, setSize] = useState(6);
+  const size = 2;
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [lastFetchedPage, setLastFetchedPage] = useState(-1);
@@ -191,7 +191,6 @@ export default function UserHomePage() {
 
       if (flightsData.length === 0) {
         toast.info("No more flights");
-        return;
       }
 
       const flightsWithIDs = flightsData.map((f) => ({
@@ -369,24 +368,6 @@ export default function UserHomePage() {
                 />
             </div>
             </div>
-
-
-
-
-
-            {/* PAGE SIZE */}
-            <div className="flex items-center gap-3 mt-4">
-              <label className="text-sm text-gray-600">Per page</label>
-              <select
-                value={size}
-                onChange={(e) => setSize(Number(e.target.value))}
-                className="px-3 py-2 border rounded-md bg-white/60"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={30}>30</option>
-              </select>
-            </div>
           </div>
         </GlassCard>
 
@@ -420,7 +401,8 @@ export default function UserHomePage() {
                     </div>
                   ))}
                 </div>
-
+              </>
+            )}
                 {/* PAGINATION */}
                 <div className="flex justify-center gap-4 mt-8">
                   <button
@@ -436,15 +418,13 @@ export default function UserHomePage() {
                   </span>
 
                   <button
-                    disabled={totalPages > 0 && page >= totalPages - 1}
+                    disabled={flights.length === 0}
                     onClick={handleNext}
                     className="px-4 py-2 bg-gradient-to-r from-sky-600 to-cyan-600 text-white rounded-lg disabled:opacity-50"
                   >
                     Next →
                   </button>
                 </div>
-              </>
-            )}
           </div>
         </GlassCard>
       </div>

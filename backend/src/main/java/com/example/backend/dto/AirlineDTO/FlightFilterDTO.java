@@ -1,4 +1,4 @@
-package com.example.backend.dto.FlightDTO;
+package com.example.backend.dto.AirlineDTO;
 
 import com.example.backend.entity.Flight.FlightStatus;
 import com.example.backend.entity.TripType;

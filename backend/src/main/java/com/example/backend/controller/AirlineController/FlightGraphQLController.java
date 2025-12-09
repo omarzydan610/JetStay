@@ -1,6 +1,6 @@
 package com.example.backend.controller.AirlineController;
 
-import com.example.backend.dto.FlightDTO.FlightFilterDTO;
+import com.example.backend.dto.AirlineDTO.FlightFilterDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.repository.FlightRepository;
 import com.example.backend.service.AirlineService.FlightGraphQLService;
