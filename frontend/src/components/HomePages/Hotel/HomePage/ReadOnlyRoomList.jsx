@@ -28,7 +28,9 @@ export default function ReadOnlyRoomList({ loading }) {
       >
         <div className="text-center">
           <p className="text-gray-500 text-lg">No rooms available yet</p>
-          <p className="text-gray-400 text-sm">Create your first room to get started</p>
+          <p className="text-gray-400 text-sm">
+            Create your first room to get started
+          </p>
         </div>
       </motion.div>
     );

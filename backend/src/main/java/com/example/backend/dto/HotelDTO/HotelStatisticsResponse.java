@@ -9,16 +9,16 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class HotelStatisticsResponse {
+  private Integer totalRooms;
+  private Integer occupiedRooms;
+  private List<RoomTypeStatisticsDTO> roomTypes;
+
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  public static class RoomTypeStatisticsDTO {
+    private String name;
     private Integer totalRooms;
     private Integer occupiedRooms;
-    private List<RoomTypeStatisticsDTO> roomTypes;
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class RoomTypeStatisticsDTO {
-        private String name;
-        private Integer totalRooms;
-        private Integer occupiedRooms;
-    }
+  }
 }

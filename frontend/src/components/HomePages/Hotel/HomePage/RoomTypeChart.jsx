@@ -1,11 +1,5 @@
 import { motion } from "framer-motion";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 const COLORS = ["#0284c7", "#06b6d4"];
 
@@ -63,7 +57,10 @@ export default function RoomTypeChart({ roomTypeData }) {
                       outerRadius={60}
                     >
                       {chartData.map((entry, index) => (
-                        <Cell key={index} fill={COLORS[index % COLORS.length]} />
+                        <Cell
+                          key={index}
+                          fill={COLORS[index % COLORS.length]}
+                        />
                       ))}
                     </Pie>
                     <Tooltip
