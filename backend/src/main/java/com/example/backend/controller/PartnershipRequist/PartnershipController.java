@@ -19,13 +19,13 @@ public class PartnershipController {
     private PartnershipService partnershipService;
 
     @PostMapping("/airline")
-    public ResponseEntity<SuccessResponse<Void>> submitAirline(@ModelAttribute AirlinePartnershipRequest request) {
+    public ResponseEntity<?> submitAirline(@ModelAttribute AirlinePartnershipRequest request) {
         partnershipService.submitAirlinePartnership(request);
         return ResponseEntity.ok(SuccessResponse.of("Airline partnership request submitted successfully"));
     }
 
     @PostMapping("/hotel")
-    public ResponseEntity<SuccessResponse<Void>> submitHotel(@ModelAttribute HotelPartnershipRequest request) {
+    public ResponseEntity<?> submitHotel(@ModelAttribute HotelPartnershipRequest request) {
         partnershipService.submitHotelPartnership(request);
         return ResponseEntity.ok(SuccessResponse.of("Hotel partnership request submitted successfully"));
     }

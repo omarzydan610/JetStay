@@ -107,9 +107,9 @@ const HotelForm = () => {
       if (password.length < 8) {
         newErrors.managerPassword =
           "Password must be at least 8 characters long";
-      } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
         newErrors.managerPassword =
-          "Password must contain both letters and numbers";
+          "Password must contain uppercase, lowercase letters and numbers";
       }
     }
 
@@ -280,7 +280,7 @@ const HotelForm = () => {
     } catch (error) {
       console.error("Error submitting form:", error);
       setError(
-        error.message ||
+        error.response.data.message ||
           "Failed to submit partnership request. Please try again."
       );
     } finally {

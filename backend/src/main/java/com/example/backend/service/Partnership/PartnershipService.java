@@ -70,7 +70,13 @@ public class PartnershipService {
                 request.getAdminPhone());
 
         // Use AuthService to sign up the admin
-        authService.SignUp(airlineAdmin, User.UserRole.AIRLINE_ADMIN);
+        try {
+            authService.SignUp(airlineAdmin, User.UserRole.AIRLINE_ADMIN);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to create airline admin user", e);
+        }
 
         User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
                 .orElseThrow(() -> new InternalServerErrorException("Failed to retrieve saved admin user"));
@@ -110,7 +116,13 @@ public class PartnershipService {
                 request.getManagerPassword(),
                 request.getAdminPhone());
 
-        authService.SignUp(hotelAdmin, User.UserRole.HOTEL_ADMIN);
+        try{
+            authService.SignUp(hotelAdmin, User.UserRole.HOTEL_ADMIN);
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new InternalServerErrorException("Failed to create airline admin user", e);
+        }
 
         User savedAdmin = userRepository.findByEmail(request.getManagerEmail())
                 .orElseThrow(() -> new InternalServerErrorException("Failed to retrieve saved admin user"));
