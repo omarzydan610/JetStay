@@ -39,7 +39,7 @@ public class UserDataService {
     return userDataResponse;
   }
 
-  public User getUserFromToken(String authorizationHeader) {
+  private User getUserFromToken(String authorizationHeader) {
     String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
     String userEmail = jwtAuthService.extractEmail(token);
     User user = userRepository.findByEmail(userEmail)
