@@ -12,4 +12,10 @@ public class RoomTypeRequest {
     private int quantity;
     private int numberOfGuests;
 
+    public void setPrice(double price) {
+        this.price = (float) price;
+    }
+    public void setCapacity(int capacity) {
+        this.numberOfGuests = capacity;
+    }
 }
