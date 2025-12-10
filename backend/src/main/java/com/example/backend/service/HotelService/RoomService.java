@@ -2,15 +2,20 @@ package com.example.backend.service.HotelService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.io.IOException;
+
 
 import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.entity.Hotel;
+import com.example.backend.entity.RoomImage;
 import com.example.backend.entity.RoomType;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomTypeRepository;
+import com.example.backend.repository.RoomImageRepository;
 
 @Service
 public class RoomService {
@@ -19,6 +24,14 @@ public class RoomService {
 
     @Autowired
     private HotelRepository hotelRepository;
+
+    @Autowired
+    private RoomImageRepository roomImageRepository;
+
+    @Autowired
+    private HotelImagesUploader hotelImagesUploader;
+    
+    
 
     public RoomType getRoomTypeById(int hotelId, int roomTypeId) {
         try {
@@ -95,6 +108,16 @@ public class RoomService {
             }
             if (roomType.getHotel().getHotelID() != hotelId) {
                 throw new UnauthorizedException("Room type with ID: " + roomTypeId + " does not belong to Hotel with ID: " + hotelId);
+            }
+            List<RoomImage> images = roomImageRepository.findByRoomTypeRoomTypeID(roomTypeId);
+            
+            for (RoomImage image : images) {
+                try {
+                    hotelImagesUploader.deleteFromCloudinary(image.getImageUrl());
+                } catch (IOException e) {
+                    System.err.println("Failed to delete image from Cloudinary: " + image.getImageUrl());
+                }
+                roomImageRepository.delete(image);
             }
             roomTypeRepository.deleteById(roomTypeId);
         } catch (Exception e) {

@@ -48,26 +48,26 @@ function HotelProfile() {
     }
   };
 
-const handleDeleteClick = (imageId) => {
-    setImageToDelete(imageId); 
-    setIsDeleteModalOpen(true);
-  };
-const confirmDeleteImage = async () => {
-    if (!imageToDelete) return;
+  const handleDeleteClick = (imageId) => {
+      setImageToDelete(imageId); 
+      setIsDeleteModalOpen(true);
+    };
+  const confirmDeleteImage = async () => {
+      if (!imageToDelete) return;
 
-    try {
-      await hotelImageService.deleteHotelImage(imageToDelete);
-      
-      setHotelImages((prev) => prev.filter((img) => img.imageID !== imageToDelete));
-      
-      setIsDeleteModalOpen(false);
-      setImageToDelete(null);
-    } catch (error) {
-      console.error("Error deleting image:", error);
-      alert("Failed to delete image.");
-      setIsDeleteModalOpen(false);
-    }
-  };
+      try {
+        await hotelImageService.deleteHotelImage(imageToDelete);
+        
+        setHotelImages((prev) => prev.filter((img) => img.imageID !== imageToDelete));
+        
+        setIsDeleteModalOpen(false);
+        setImageToDelete(null);
+      } catch (error) {
+        console.error("Error deleting image:", error);
+        alert("Failed to delete image.");
+        setIsDeleteModalOpen(false);
+      }
+    };
 
   const handleEditBusiness = () => {
     setIsEditingBusiness(true);

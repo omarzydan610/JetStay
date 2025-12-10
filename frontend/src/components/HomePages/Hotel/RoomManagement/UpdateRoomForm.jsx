@@ -1,7 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import hotelDataService from "../../../../services/HotelServices/roomsService";
+
+const ImageCard = ({ imageUrl, imageId, onDelete }) => (
+  <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-md group">
+    <img
+      src={imageUrl}
+      alt="Room"
+      className="w-full h-full object-cover"
+    />
+    <button
+      onClick={() => onDelete(imageId)}
+      className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-bold"
+      title="Delete Image"
+    >
+      Delete
+    </button>
+  </div>
+);
 
 export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
   const [formData, setFormData] = useState({
@@ -13,6 +30,30 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  // 2. New state for images and image upload loading
+  const [roomImages, setRoomImages] = useState([]);
+  const [imageLoading, setImageLoading] = useState(false);
+
+
+  // 3. useEffect to fetch images on component mount
+  useEffect(() => {
+    fetchRoomImages();
+  }, []);
+
+  const fetchRoomImages = async () => {
+    try {
+      setImageLoading(true);
+      const images = await hotelDataService.getRoomImages(room.roomTypeID);
+      // Assuming images structure is [{ imageID, imageUrl }]
+      setRoomImages(images);
+    } catch (err) {
+      console.error("Error fetching room images:", err);
+      toast.error("Failed to load room images.");
+    } finally {
+      setImageLoading(false);
+    }
+  };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -49,6 +90,7 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
   };
 
   const handleSubmit = async (e) => {
+    // ... (Your existing handleSubmit logic remains here)
     e.preventDefault();
 
     if (!validateForm()) {
@@ -73,6 +115,46 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
       toast.error("Failed to update room. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 4. Function to handle image upload
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setImageLoading(true);
+      const newImage = await hotelDataService.uploadRoomImage(
+        room.roomTypeID,
+        file
+      );
+      if (newImage) {
+        setRoomImages((prev) => [...prev, newImage]);
+        toast.success("Image uploaded successfully!");
+      }
+    } catch (error) {
+      toast.error("Failed to upload image. Max file size may be exceeded.");
+    } finally {
+      setImageLoading(false);
+      // Reset file input value to allow uploading the same file again if needed
+      e.target.value = null;
+    }
+  };
+
+  // 5. Function to handle image deletion
+  const handleDeleteImage = async (imageId) => {
+    if (!window.confirm("Are you sure you want to delete this image?")) return;
+
+    try {
+      setImageLoading(true);
+      await hotelDataService.deleteRoomImage(imageId);
+      setRoomImages((prev) => prev.filter((img) => img.imageID !== imageId));
+      toast.success("Image deleted successfully!");
+    } catch (error) {
+      toast.error("Failed to delete image.");
+    } finally {
+      setImageLoading(false);
     }
   };
 
@@ -176,6 +258,50 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
           placeholder="Room description and amenities"
           rows="4"
         />
+      </div>
+
+      {/* 6. Image Management Section (The new part) */}
+      <div className="pt-6 border-t border-gray-200">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4 flex justify-between items-center">
+          Room Images
+          <label
+            htmlFor="image-upload-input"
+            className={`px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-colors ${
+              imageLoading
+                ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+                : "bg-cyan-500 text-white hover:bg-cyan-600"
+            }`}
+          >
+            {imageLoading ? "Uploading..." : "Add Image"}
+          </label>
+          <input
+            id="image-upload-input"
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={imageLoading}
+            className="hidden"
+          />
+        </h3>
+
+        <div className="flex flex-wrap gap-4 min-h-[100px] border p-4 rounded-lg bg-gray-50">
+          {imageLoading && roomImages.length === 0 ? (
+            <p className="text-gray-500">Loading images...</p>
+          ) : roomImages.length === 0 ? (
+            <p className="text-gray-500">
+              No images added yet. Click 'Add Image' to upload.
+            </p>
+          ) : (
+            roomImages.map((image) => (
+              <ImageCard
+                key={image.imageID}
+                imageUrl={image.imageUrl}
+                imageId={image.imageID}
+                onDelete={handleDeleteImage}
+              />
+            ))
+          )}
+        </div>
       </div>
 
       <div className="flex gap-4 pt-6">

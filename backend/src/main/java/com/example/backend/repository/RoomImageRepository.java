@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface RoomImageRepository extends JpaRepository<RoomImage, Integer> {
     List<RoomImage> findByRoomTypeRoomTypeID(Integer roomTypeId);
+    
 }

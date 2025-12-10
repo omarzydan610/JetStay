@@ -13,6 +13,9 @@ export default function CreateRoomForm({ onSuccess }) {
     description: "",
   });
 
+  // State for images
+  const [images, setImages] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -28,6 +31,12 @@ export default function CreateRoomForm({ onSuccess }) {
         [name]: "",
       }));
     }
+  };
+
+  // Handle Image Selection
+  const handleImageChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setImages(selectedFiles);
   };
 
   const validateForm = () => {
@@ -68,8 +77,24 @@ export default function CreateRoomForm({ onSuccess }) {
         description: form.description,
       };
 
-      await roomsService.addRoom(roomData);
-      toast.success("Room created successfully!");
+      // 1. Create the Room first
+      const createdRoomResponse = await roomsService.addRoom(roomData);
+
+      // 2. Upload Images if any (requires the new room ID)
+      // ملاحظة: نحتاج أن يعيد الباك إند كائن الغرفة المخلوقة للحصول على ID
+      // سنفترض أن createdRoomResponse يحتوي على بيانات الغرفة الآن
+      if (images.length > 0 && createdRoomResponse && createdRoomResponse.roomTypeID) {
+        const roomTypeId = createdRoomResponse.roomTypeID;
+        
+        // Upload all images in parallel
+        await Promise.all(
+          images.map((image) => roomsService.uploadRoomImage(roomTypeId, image))
+        );
+      }
+
+      toast.success("Room created and images uploaded successfully!");
+      
+      // Reset Form
       setForm({
         roomTypeName: "",
         price: "",
@@ -77,13 +102,14 @@ export default function CreateRoomForm({ onSuccess }) {
         numberOfGuests: "",
         description: "",
       });
-      // Call the success callback to switch to manage tab
+      setImages([]);
+
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
       console.error("Error creating room:", err);
-      toast.error("Failed to create room. Please try again.");
+      toast.error("Failed to create room completely. Please check details.");
     } finally {
       setLoading(false);
     }
@@ -218,6 +244,29 @@ export default function CreateRoomForm({ onSuccess }) {
         />
       </motion.div>
 
+      {/* Image Upload Section */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.32 }}
+      >
+        <label className="block text-sm font-semibold text-gray-700 mb-2">
+          Room Images
+        </label>
+        <input
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleImageChange}
+          className="w-full px-4 py-2 rounded-lg border-2 border-dashed border-sky-300 bg-sky-50 text-gray-600 focus:outline-none focus:border-sky-600 cursor-pointer"
+        />
+        {images.length > 0 && (
+          <p className="text-sm text-green-600 mt-2">
+            {images.length} image(s) selected
+          </p>
+        )}
+      </motion.div>
+
       {/* Submit Button */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -226,7 +275,7 @@ export default function CreateRoomForm({ onSuccess }) {
         className="flex gap-3"
       >
         <PrimaryButton
-          label={loading ? "Creating..." : "✓ Create Room"}
+          label={loading ? "Creating & Uploading..." : "✓ Create Room"}
           type="submit"
           disabled={loading}
         />
