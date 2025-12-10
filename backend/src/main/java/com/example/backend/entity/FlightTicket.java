@@ -14,6 +14,25 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class FlightTicket {
 
+    public FlightTicket(
+            Integer ticketId,
+            Flight flight,
+            Airline airline,
+            LocalDate flightDate,
+            User user,
+            TripType tripType,
+            Float price,
+            Boolean isPaid) {
+        this.ticketId = ticketId;
+        this.flight = flight;
+        this.airline = airline;
+        this.flightDate = flightDate;
+        this.user = user;
+        this.tripType = tripType;
+        this.price = price;
+        this.isPaid = isPaid;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ticket_id")
@@ -47,7 +66,7 @@ public class FlightTicket {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
-     @PrePersist
+    @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDate.now();
     }
