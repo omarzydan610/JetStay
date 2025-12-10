@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
 import { getAirlinesByFilter } from '../../services/SystemAdminService/dashboardService';
 import { activateAirline, deactivateAirline } from '../../services/SystemAdminService/changeStatusService';
 
 
-const AirlineManagement = () => {         // Fix Nationality HardCoded 
+const AirlineManagement = () => {         // Need to Fix Nationality HardCoded 
 
     const [airlines, setAirlines] = useState([]);
     const [airlineSearch, setAirlineSearch] = useState('');
@@ -25,7 +25,7 @@ const AirlineManagement = () => {         // Fix Nationality HardCoded
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchAirlines = async () => {
+    const fetchAirlines = useCallback(async () => {
         try {
 
             const body = {
@@ -47,11 +47,12 @@ const AirlineManagement = () => {         // Fix Nationality HardCoded
             console.error("Error fetching airlines:", error);
             toast.error("Failed to fetch airlines");
         }
-    };
+    }, [airlineSearch, airlineNationalityFilter, airlineStatusFilter, airlinePage, airlineRowsPerPage]);
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         fetchAirlines();
-    }, [airlinePage, airlineRowsPerPage, airlineSearch, airlineNationalityFilter, airlineStatusFilter]);
+    }, [fetchAirlines]);
 
 
     const resetAirlineFilters = () => {

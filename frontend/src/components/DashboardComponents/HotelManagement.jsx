@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  useCallback } from "react";
 import { RotateCcw, X } from "lucide-react";
 import { toast } from "react-toastify";
 import { getHotelsByFilter } from "../../services/SystemAdminService/dashboardService";
 import { activateHotel, deactivateHotel } from "../../services/SystemAdminService/changeStatusService";
 
-const HotelManagement = () => {   
+const HotelManagement = () => {
 
     const [hotels, setHotels] = useState([]);
 
@@ -27,8 +27,7 @@ const HotelManagement = () => {
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-    const fetchHotels = async () => {
+    const fetchHotels = useCallback(async () => {
         try {
 
             const body = {
@@ -49,11 +48,11 @@ const HotelManagement = () => {
         } catch (error) {
             console.error("Error fetching hotels:", error);
         }
-    };
+    }, [hotelSearch, hotelStatusFilter, hotelCountryFilter, hotelCityFilter, hotelPage, hotelRowsPerPage]);
 
     useEffect(() => {
         fetchHotels();
-    }, [hotelPage, hotelSearch, hotelStatusFilter, hotelCountryFilter, hotelCityFilter]);
+    }, [fetchHotels]);
 
 
     const activateHotelStatus = async (hotelId) => {
@@ -320,11 +319,10 @@ const HotelManagement = () => {
                             <button
                                 onClick={handleConfirm}
                                 disabled={isSubmitting || (modalAction === "deactivate" && !deactivationReason.trim())}
-                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    modalAction === "activate"
+                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${modalAction === "activate"
                                         ? "bg-green-600 hover:bg-green-700"
                                         : "bg-red-600 hover:bg-red-700"
-                                }`}
+                                    }`}
                             >
                                 {isSubmitting ? "Processing..." : (modalAction === "activate" ? "Activate" : "Deactivate")}
                             </button>

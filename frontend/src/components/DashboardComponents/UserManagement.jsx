@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
 import { getUsersByFilter } from '../../services/SystemAdminService/dashboardService';
@@ -24,7 +24,7 @@ const UserManagement = () => {
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         try {
             const data = {
                 search: userSearch || null,
@@ -43,12 +43,11 @@ const UserManagement = () => {
         } catch (error) {
             console.error("Error fetching users:", error);
         }
-    };
+    }, [userSearch, userRoleFilter, userStatusFilter, userPage, userRowsPerPage]);
 
-    // Fetch on load & when filters change
     useEffect(() => {
         fetchUsers();
-    }, [userPage, userSearch, userRoleFilter, userStatusFilter]);
+    }, [fetchUsers]);
 
     const activateUserStatus = async (email) => {
         try {
