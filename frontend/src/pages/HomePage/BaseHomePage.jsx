@@ -5,6 +5,7 @@ import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
 import UserHomePage from "./UserHomePage";
+import SystemAdminHomePage from "./Admin/SystemAdminHomePage";
 
 function BaseHomePage() {
   const navigate = useNavigate();
@@ -15,8 +16,8 @@ function BaseHomePage() {
     const fetchData = async () => {
       if (
         !userData ||
-        ((userData.Role === "HOTEL_ADMIN" ||
-          userData.Role === "AIRLINE_ADMIN") &&
+        ((userData?.Role === "HOTEL_ADMIN" ||
+          userData?.Role === "AIRLINE_ADMIN") &&
           !businessData)
       )
         await fetchUserAndBusinessData();
@@ -77,14 +78,10 @@ function BaseHomePage() {
         </div>
       ) : userData.role === "HOTEL_ADMIN" ? (
         <HotelHomePage />
-      ) : userData.role === "AIRLINE_ADMIN" ? (
+      ) : userData?.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
-      ) : userData.role === "SYSTEM_ADMIN" ? (
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to the System Admin Home Page
-          </h1>
-        </div>
+      ) : userData?.role === "SYSTEM_ADMIN" ? (
+        <SystemAdminHomePage />
       ) : (
         <UserHomePage />
       )}

@@ -1,7 +1,9 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.AdminDTO.PartnerShipNameResponse;
 import com.example.backend.entity.Airline;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -28,4 +30,8 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
     Airline findByAirlineName(String airlineName);
 
     Optional<Airline> findByAdminUserID(Integer userID);
+    @Query("SELECT new com.example.backend.dto.AdminDTO.PartnerShipNameResponse(a.airlineID, a.airlineName) FROM Airline a")
+    List<PartnerShipNameResponse> findAllAirline();
+
+    
 }

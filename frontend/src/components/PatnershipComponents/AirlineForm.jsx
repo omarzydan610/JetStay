@@ -76,9 +76,9 @@ const AirlineForm = () => {
       if (password.length < 8) {
         newErrors.managerPassword =
           "Password must be at least 8 characters long";
-      } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+      }else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
         newErrors.managerPassword =
-          "Password must contain both letters and numbers";
+          "Password must contain uppercase, lowercase letters and numbers";
       }
     }
 
@@ -185,8 +185,6 @@ const AirlineForm = () => {
         submissionFormData.append("airlineLogo", formData.airlineLogo);
       }
 
-      console.log("Submitting form with file:", formData.airlineLogo);
-
       // Submit to backend using the service
       await partnershipService.submitAirlinePartnership(submissionFormData);
 
@@ -210,7 +208,7 @@ const AirlineForm = () => {
     } catch (error) {
       console.error("Error submitting form:", error);
       setError(
-        error.message ||
+        error.response.data.message ||
           "Failed to submit partnership request. Please try again."
       );
     } finally {
