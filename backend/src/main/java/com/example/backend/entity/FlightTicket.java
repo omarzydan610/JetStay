@@ -44,4 +44,11 @@ public class FlightTicket {
     @Column(name = "is_paid")
     private Boolean isPaid;
 
+    @Column(name = "created_at")
+    private LocalDate createdAt;
+
+     @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDate.now();
+    }
 }
