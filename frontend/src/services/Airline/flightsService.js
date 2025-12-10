@@ -19,6 +19,91 @@ export const getFlights = async (page = 0, size = 10) => {
   }
 };
 
+/**
+ * GraphQL-based flights query. This keeps the original REST `getFlights` intact
+ * while providing a way to pass rich `filter` objects to the backend GraphQL API.
+ *
+ * Note: GraphQL endpoint is assumed to be available at `/graphql` on the
+ * configured API base URL. The returned shape is `{ data: [...] }` to remain
+ * similar to the REST variant used elsewhere.
+ */
+export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
+  try {
+    const token = authService.getToken();
+    
+
+    const query = `
+      query Flights($filter: FlightFilterDTO, $page: Int, $size: Int) {
+        flights(filter: $filter, page: $page, size: $size) {
+          flightID
+          status
+          planeType
+          departureDate
+          arrivalDate
+          departureAirport {
+            airportName
+            city
+            country
+          }
+          arrivalAirport {
+            airportName
+            city
+            country
+          }
+          airline {
+            airlineName
+            airlineRate
+            airlineNationality
+          }
+          tripsTypes {
+            typeName
+            price
+          }
+        }
+      }
+    `;
+
+    const variables = { filter, page, size };
+    console.log(size)
+
+    const res = await apiClient.post(
+      `/graphql`,
+      { query, variables },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.data && res.data.errors) {
+      console.error("GraphQL errors:", res.data.errors);
+      toast.error("Failed to load flights (GraphQL)");
+      throw new Error("GraphQL query error");
+    }
+    console.log(res.data.data)
+
+    // GraphQL can return either:
+    // 1) an array directly in `data.flights` or
+    // 2) a paginated object like `data.flights = { content: [...], totalPages, totalElements }`.
+    const flightsPayload = res.data?.data?.flights;
+
+    if (!flightsPayload) return { data: [] };
+
+    // Case: paginated object
+    if (typeof flightsPayload === "object" && Array.isArray(flightsPayload.content)) {
+      return { data: flightsPayload.content, totalPages: flightsPayload.totalPages };
+    }
+
+    // Case: direct array
+    if (Array.isArray(flightsPayload)) {
+      return { data: flightsPayload };
+    }
+
+    // Fallback
+    return { data: [] };
+  } catch (error) {
+    toast.error("Failed to load flights (GraphQL)");
+    throw error;
+  }
+};
+
 export const createFlight = async (flightData) => {
   try {
     const token = authService.getToken();

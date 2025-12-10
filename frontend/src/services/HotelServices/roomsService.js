@@ -58,8 +58,65 @@ const roomsService = {
   // Delete room type
   deleteRoom: async (id) => {
     try {
+      const response = await axios.delete(`${API_BASE_URL}/delete/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+      });
+      return response.data || null;
+    } catch (error) {
+      console.error("Error deleting room:", error);
+      throw error;
+    }
+  },
+
+  // 1. Get images for a specific room type
+  getRoomImages: async (roomTypeId) => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/${roomTypeId}/images`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+        }
+      );
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Error fetching room images:", error);
+      return [];
+    }
+  },
+
+  // 2. Upload an image for a room type
+  uploadRoomImage: async (roomTypeId, file) => {
+    const formData = new FormData();
+    formData.append("file", file); // Must match @RequestParam("file") in backend
+
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/${roomTypeId}/images/add`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            "Content-Type": "multipart/form-data", // Crucial for file uploads
+          },
+        }
+      );
+      return response.data?.data || null;
+    } catch (error) {
+      console.error("Error uploading room image:", error);
+      throw error;
+    }
+  },
+
+  // 3. Delete a specific image
+  deleteRoomImage: async (imageId) => {
+    try {
+      console.log("Deleting image with ID:", imageId);
       const response = await axios.delete(
-        `${API_BASE_URL}/delete/${id}`,
+        `${API_BASE_URL}/images/delete/${imageId}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
@@ -68,7 +125,7 @@ const roomsService = {
       );
       return response.data || null;
     } catch (error) {
-      console.error("Error deleting room:", error);
+      console.error("Error deleting room image:", error);
       throw error;
     }
   },

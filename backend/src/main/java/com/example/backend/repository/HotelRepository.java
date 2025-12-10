@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
   Optional<Hotel> findByAdminUserID(Integer userID);
+  Optional<Hotel> findByAdmin_Email(String email);
 
   @Query("SELECT h FROM Hotel h WHERE " +
           "(:search IS NULL OR :search = '' OR " +

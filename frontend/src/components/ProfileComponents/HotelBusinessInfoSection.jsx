@@ -1,12 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Building, Star, Users, MapPin, Hotel, Edit2 } from "lucide-react";
+import {
+  Building,
+  Star,
+  Users,
+  MapPin,
+  Hotel,
+  Edit2,
+  Plus,
+  Trash2,
+  Image as ImageIcon,
+} from "lucide-react";
 
-function HotelBusinessInfoSection({ businessData, onEdit, isEditing = false }) {
+function HotelBusinessInfoSection({
+  businessData,
+  onEdit,
+  isEditing = false,
+  hotelImages = [],
+  onAddImage,
+  onDeleteImage,
+}) {
   const [logoError, setLogoError] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleLogoError = () => {
     setLogoError(true);
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && onAddImage) {
+      onAddImage(file);
+    }
+    // Reset input so the same file can be selected again if needed
+    event.target.value = "";
   };
 
   return (
@@ -36,7 +67,7 @@ function HotelBusinessInfoSection({ businessData, onEdit, isEditing = false }) {
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Left Side - Big Logo Circle */}
         <div className="flex justify-center lg:justify-start">
           <motion.div
@@ -124,6 +155,76 @@ function HotelBusinessInfoSection({ businessData, onEdit, isEditing = false }) {
                 Total customer reviews
               </div>
             </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* ================= New Gallery Section ================= */}
+      <div className="border-t border-gray-100 pt-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <ImageIcon className="w-6 h-6 text-sky-600" />
+            <h3 className="text-xl font-bold text-gray-900">Hotel Gallery</h3>
+          </div>
+
+          <div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="hidden"
+              accept="image/*"
+            />
+            <motion.button
+              onClick={handleUploadClick}
+              className="flex items-center space-x-2 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg transition-colors duration-200 shadow-sm"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-medium">Add Image</span>
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Scrollable Image Container */}
+        <div className="relative">
+          <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-thin scrollbar-thumb-sky-200 scrollbar-track-gray-50">
+            {hotelImages && hotelImages.length > 0 ? (
+              hotelImages.map((image) => (
+                <motion.div
+                  key={image.imageID}
+                  className="group relative flex-shrink-0 w-64 h-48 rounded-xl overflow-hidden shadow-md border border-gray-100 bg-gray-50"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <img
+                    src={image.imageUrl}
+                    alt="Hotel Room"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  
+                  {/* Delete Overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <motion.button
+                      onClick={() => onDeleteImage(image.imageID)}
+                      className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 shadow-lg"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      title="Delete Image"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </motion.button>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              <div className="w-full py-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 text-gray-400">
+                <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No images added yet</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
