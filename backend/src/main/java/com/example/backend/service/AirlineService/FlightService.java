@@ -3,6 +3,7 @@ package com.example.backend.service.AirlineService;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.example.backend.cache.FlightCacheManager;
 import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -37,8 +38,14 @@ public class FlightService {
     @Autowired
     private TripTypeRepository tripTypeRepository;
 
+    @Autowired
+    private FlightCacheManager flightCacheManager;
+
     public Flight getFlightById(int id, int airlineID) {
-        Flight flight = flightRepository.findById(id).orElse(null);
+        Flight flight;
+        flight = flightCacheManager.getFlightById(id);
+        if (flight != null) return flight;
+        flight = flightRepository.findById(id).orElse(null);
         if (flight == null) {
             throw new ResourceNotFoundException("Flight not found with id: " + id);
         }
@@ -96,6 +103,7 @@ public class FlightService {
     }
 
     public Void deleteFlight(int id, int airlineID) {
+        flightCacheManager.evictFlightCompletely(id);
         Flight flight = flightRepository.findById(id).orElse(null);
         if (flight == null) {
             throw new ResourceNotFoundException("Flight not found with id: " + id);
@@ -108,6 +116,7 @@ public class FlightService {
     }
 
     public Void updateFlight(int flightID, FlightRequest updatedFlight, int airlineID) {
+        flightCacheManager.evictFlightById(flightID);
         Flight existingFlight = flightRepository.findById(flightID).orElse(null);
         if (existingFlight == null) {
             throw new ResourceNotFoundException("Flight not found with id: " + flightID);

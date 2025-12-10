@@ -4,6 +4,7 @@ import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
+import UserHomePage from "./UserHomePage";
 import SystemAdminHomePage from "./Admin/SystemAdminHomePage";
 
 function BaseHomePage() {
@@ -60,25 +61,33 @@ function BaseHomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50 to-cyan-50">
-      {/* NavBar */}
       <Navbar />
-      {/* HomePage Based on Role */}
-      {userData?.role === "HOTEL_ADMIN" ? (
+
+      {/* Guard against null userData */}
+      {!userData ? (
+        <div className="p-8">
+          <h1 className="text-2xl font-bold text-gray-800">
+            No user data found
+          </h1>
+          <button
+            onClick={() => navigate("/auth")}
+            className="bg-gradient-to-r from-sky-600 to-cyan-600 text-white px-4 py-2 rounded hover:from-sky-700 hover:to-cyan-700 transition-all duration-200 mt-4"
+          >
+            Go to Login
+          </button>
+        </div>
+      ) : userData.role === "HOTEL_ADMIN" ? (
         <HotelHomePage />
       ) : userData?.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
       ) : userData?.role === "SYSTEM_ADMIN" ? (
         <SystemAdminHomePage />
       ) : (
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to JetStay
-          </h1>
-          {/* General user content goes here */}
-        </div>
+        <UserHomePage />
       )}
     </div>
   );
+
 }
 
 export default BaseHomePage;

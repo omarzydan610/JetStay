@@ -1,0 +1,87 @@
+# ============================
+# Flight Related Types
+# ============================
+
+type Flight {
+    flightID: ID
+    airline: Airline
+    departureAirport: Airport
+    arrivalAirport: Airport
+    departureDate: String
+    arrivalDate: String
+    status: FlightStatus
+    description: String
+    planeType: String
+    tripsTypes: [TripType]
+}
+
+type Airline {
+    airlineName: String
+    airlineRate: Float
+    airlineNationality: String
+}
+
+type Airport {
+    airportName: String
+    country: String
+    city: String
+}
+
+type TripType {
+    typeName: TripTypeName
+    quantity: Int
+    price: Float
+}
+
+enum TripTypeName {
+ECONOMY,
+BUSINESS,
+FIRST_CLASS
+}
+
+enum FlightStatus {
+    PENDING
+    ON_TIME
+    CANCELLED
+}
+
+# ============================
+# Filters (name-based)
+# ============================
+
+input FlightFilterDTO {
+    airLineId: Int
+    airlineNameContains: String
+    airlineRatingGte: Float
+    airlineRatingLte: Float
+    airlineNationalityContains: String
+    departureAirportNameContains: String
+    arrivalAirportNameContains: String
+    departureCityContains: String        # <-- new
+    departureCountryContains: String     # <-- new
+    arrivalCityContains: String          # <-- new
+    arrivalCountryContains: String       # <-- new
+    departureDateGte: String
+    departureDateLte: String
+    arrivalDateGte: String
+    arrivalDateLte: String
+    status: FlightStatus
+    planeTypeContains: String
+    tripTypeNameContains: String         # filter by name (ECONOMY, BUSINESS…)
+    tripTypePriceGte: Float
+    tripTypePriceLte: Float
+}
+
+
+# ============================
+# Queries
+# ============================
+
+type Query {
+    # Get flights with optional filters
+    flights(filter: FlightFilterDTO, page: Int, size: Int): [Flight]
+    # Get lists of supporting types
+    airlines: [Airline]
+    airports: [Airport]
+    tripTypes: [TripType]
+}
