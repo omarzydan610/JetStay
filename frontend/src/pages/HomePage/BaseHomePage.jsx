@@ -4,6 +4,7 @@ import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
+import AdminDashboard from "../SystemAdminDashboard";
 
 function BaseHomePage() {
   const navigate = useNavigate();
@@ -67,12 +68,7 @@ function BaseHomePage() {
       ) : userData.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
       ) : userData.role === "SYSTEM_ADMIN" ? (
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to the System Admin Home Page
-          </h1>
-          {/* System admin specific content goes here */}
-        </div>
+        <AdminDashboard />
       ) : (
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-800">

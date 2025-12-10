@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
 import { getAirlinesByFilter } from '../../services/SystemAdminService/dashboardService';
+import { activateAirline, deactivateAirline } from '../../services/SystemAdminService/changeStatusService';
 
 
-const AirlineManagement = () => {         // Fix Pagination && Fix Nationality HardCoded  && Add toggleAirlineStatus functionalty
+const AirlineManagement = () => {         // Fix Nationality HardCoded 
 
     const [airlines, setAirlines] = useState([]);
     const [airlineSearch, setAirlineSearch] = useState('');
@@ -12,10 +13,17 @@ const AirlineManagement = () => {         // Fix Pagination && Fix Nationality H
     const [airlineStatusFilter, setAirlineStatusFilter] = useState('');
 
     const [airlinePage, setAirlinePage] = useState(0); 
-    const [airlineRowsPerPage, setAirlineRowsPerPage] = useState(5);
+    const [airlineRowsPerPage] = useState(5);
 
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
+
+    // Modal state
+    const [showModal, setShowModal] = useState(false);
+    const [modalAction, setModalAction] = useState(null); // 'activate' or 'deactivate'
+    const [selectedAirlineId, setSelectedAirlineId] = useState(null);
+    const [deactivationReason, setDeactivationReason] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const fetchAirlines = async () => {
         try {
@@ -54,9 +62,59 @@ const AirlineManagement = () => {         // Fix Pagination && Fix Nationality H
         fetchAirlines();
     };
 
+    const activateAirlineStatus = async (airlineId) => {
+        try {
+            await activateAirline(airlineId);
+            toast.success("Airline activated successfully");
+            fetchAirlines();
+        } catch (error) {
+            console.error("Error activating airline:", error);
+            toast.error("Failed to activate airline");
+        }
+    };
 
-    const toggleAirlineStatus = (id) => {
-        toast.warn("API for toggle airline status not implemented yet!");
+    const deactivateAirlineStatus = async (airlineId, reason) => {
+        try {
+            await deactivateAirline(airlineId, reason);
+            toast.success("Airline deactivated successfully");
+            fetchAirlines();
+        } catch (error) {
+            console.error("Error deactivating airline:", error);
+            toast.error("Failed to deactivate airline");
+        }
+    };
+
+    const openModal = (action, airlineId) => {
+        setModalAction(action);
+        setSelectedAirlineId(airlineId);
+        setDeactivationReason('');
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setModalAction(null);
+        setSelectedAirlineId(null);
+        setDeactivationReason('');
+    };
+
+    const handleConfirm = async () => {
+        if (modalAction === 'deactivate' && !deactivationReason.trim()) {
+            toast.error("Please provide a reason for deactivation");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            if (modalAction === 'activate') {
+                await activateAirlineStatus(selectedAirlineId);
+            } else if (modalAction === 'deactivate') {
+                await deactivateAirlineStatus(selectedAirlineId, deactivationReason);
+            }
+            closeModal();
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -134,7 +192,7 @@ const AirlineManagement = () => {         // Fix Pagination && Fix Nationality H
                                 </td>
                                 <td className="px-6 py-4 text-sm">
                                     <button
-                                        onClick={() => toggleAirlineStatus(airline.id)}
+                                        onClick={() => openModal(airline.status === 'ACTIVE' ? 'deactivate' : 'activate', airline.id)}
                                         className={`px-4 py-2 rounded-lg text-white transition-colors ${airline.status === 'ACTIVE' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                                     >
                                         {airline.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
@@ -169,6 +227,76 @@ const AirlineManagement = () => {         // Fix Pagination && Fix Nationality H
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {modalAction === 'activate' ? 'Activate Airline' : 'Deactivate Airline'}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6">
+                            <p className="text-gray-600 mb-4">
+                                {modalAction === 'activate'
+                                    ? 'Are you sure you want to activate this airline?'
+                                    : 'Are you sure you want to deactivate this airline?'}
+                            </p>
+
+                            {/* Deactivation Reason Input */}
+                            {modalAction === 'deactivate' && (
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Reason for Deactivation *
+                                    </label>
+                                    <textarea
+                                        value={deactivationReason}
+                                        onChange={(e) => setDeactivationReason(e.target.value)}
+                                        placeholder="Please provide a reason for deactivating this airline"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                                        rows="4"
+                                    />
+                                    {!deactivationReason.trim() && (
+                                        <p className="text-red-500 text-xs mt-1">Reason is required</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="flex gap-3 p-6 border-t border-gray-200">
+                            <button
+                                onClick={closeModal}
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirm}
+                                disabled={isSubmitting || (modalAction === 'deactivate' && !deactivationReason.trim())}
+                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    modalAction === 'activate'
+                                        ? 'bg-green-600 hover:bg-green-700'
+                                        : 'bg-red-600 hover:bg-red-700'
+                                }`}
+                            >
+                                {isSubmitting ? 'Processing...' : (modalAction === 'activate' ? 'Activate' : 'Deactivate')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

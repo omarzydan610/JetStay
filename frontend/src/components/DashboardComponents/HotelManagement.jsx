@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, X } from "lucide-react";
+import { toast } from "react-toastify";
 import { getHotelsByFilter } from "../../services/SystemAdminService/dashboardService";
+import { activateHotel, deactivateHotel } from "../../services/SystemAdminService/changeStatusService";
 
-const HotelManagement = () => {    // Fix pagination && Add togglHotelStatus functionalty
+const HotelManagement = () => {   
 
     const [hotels, setHotels] = useState([]);
 
@@ -17,6 +19,13 @@ const HotelManagement = () => {    // Fix pagination && Add togglHotelStatus fun
 
     const [totalHotels, setTotalHotels] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+
+    // Modal state
+    const [showModal, setShowModal] = useState(false);
+    const [modalAction, setModalAction] = useState(null); // 'activate' or 'deactivate'
+    const [selectedHotelId, setSelectedHotelId] = useState(null);
+    const [deactivationReason, setDeactivationReason] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
 
     const fetchHotels = async () => {
@@ -46,15 +55,60 @@ const HotelManagement = () => {    // Fix pagination && Add togglHotelStatus fun
         fetchHotels();
     }, [hotelPage, hotelSearch, hotelStatusFilter, hotelCountryFilter, hotelCityFilter]);
 
-    // Toggle status (UI Only)
-    const toggleHotelStatus = (id) => {
-        setHotels(
-            hotels.map((hotel) =>
-                hotel.id === id
-                    ? { ...hotel, status: hotel.status === "ACTIVE" ? "INACTIVE" : "ACTIVE" }
-                    : hotel
-            )
-        );
+
+    const activateHotelStatus = async (hotelId) => {
+        try {
+            await activateHotel(hotelId);
+            toast.success("Hotel activated successfully");
+            fetchHotels();
+        } catch (error) {
+            console.error("Error activating hotel:", error);
+            toast.error("Failed to activate hotel");
+        }
+    };
+
+    const deactivateHotelStatus = async (hotelId, reason) => {
+        try {
+            await deactivateHotel(hotelId, reason);
+            toast.success("Hotel deactivated successfully");
+            fetchHotels();
+        } catch (error) {
+            console.error("Error deactivating hotel:", error);
+            toast.error("Failed to deactivate hotel");
+        }
+    };
+
+    const openModal = (action, hotelId) => {
+        setModalAction(action);
+        setSelectedHotelId(hotelId);
+        setDeactivationReason('');
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setModalAction(null);
+        setSelectedHotelId(null);
+        setDeactivationReason('');
+    };
+
+    const handleConfirm = async () => {
+        if (modalAction === 'deactivate' && !deactivationReason.trim()) {
+            toast.error("Please provide a reason for deactivation");
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            if (modalAction === 'activate') {
+                await activateHotelStatus(selectedHotelId);
+            } else if (modalAction === 'deactivate') {
+                await deactivateHotelStatus(selectedHotelId, deactivationReason);
+            }
+            closeModal();
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     // Reset Filters
@@ -167,7 +221,7 @@ const HotelManagement = () => {    // Fix pagination && Add togglHotelStatus fun
 
                                 <td className="px-6 py-4 text-sm">
                                     <button
-                                        onClick={() => toggleHotelStatus(hotel.id)}
+                                        onClick={() => openModal(hotel.status === "ACTIVE" ? "deactivate" : "activate", hotel.id)}
                                         className={`px-4 py-2 rounded-lg text-white transition-colors ${hotel.status === "ACTIVE"
                                             ? "bg-red-600 hover:bg-red-700"
                                             : "bg-green-600 hover:bg-green-700"
@@ -208,6 +262,76 @@ const HotelManagement = () => {    // Fix pagination && Add togglHotelStatus fun
                     </div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+                        {/* Modal Header */}
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-900">
+                                {modalAction === "activate" ? "Activate Hotel" : "Deactivate Hotel"}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        {/* Modal Body */}
+                        <div className="p-6">
+                            <p className="text-gray-600 mb-4">
+                                {modalAction === "activate"
+                                    ? "Are you sure you want to activate this hotel?"
+                                    : "Are you sure you want to deactivate this hotel?"}
+                            </p>
+
+                            {/* Deactivation Reason Input */}
+                            {modalAction === "deactivate" && (
+                                <div className="mb-6">
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Reason for Deactivation *
+                                    </label>
+                                    <textarea
+                                        value={deactivationReason}
+                                        onChange={(e) => setDeactivationReason(e.target.value)}
+                                        placeholder="Please provide a reason for deactivating this hotel"
+                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                                        rows="4"
+                                    />
+                                    {!deactivationReason.trim() && (
+                                        <p className="text-red-500 text-xs mt-1">Reason is required</p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="flex gap-3 p-6 border-t border-gray-200">
+                            <button
+                                onClick={closeModal}
+                                disabled={isSubmitting}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirm}
+                                disabled={isSubmitting || (modalAction === "deactivate" && !deactivationReason.trim())}
+                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                                    modalAction === "activate"
+                                        ? "bg-green-600 hover:bg-green-700"
+                                        : "bg-red-600 hover:bg-red-700"
+                                }`}
+                            >
+                                {isSubmitting ? "Processing..." : (modalAction === "activate" ? "Activate" : "Deactivate")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
