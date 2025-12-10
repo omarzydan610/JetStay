@@ -82,7 +82,7 @@ public class AirlineDataService {
       if (request.getLogoUrl() != null)
         airline.setLogoUrl(request.getLogoUrl());
       airlineRepository.save(airline);
-      flightCacheManager.evictAll();
+      if (flightCacheManager != null) flightCacheManager.evictAll();
     } catch (Exception e) {
       throw new BadRequestException("Failed to update airline data: " + e.getMessage());
     }
