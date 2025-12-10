@@ -3,6 +3,7 @@ package com.example.backend.service.AirlineService;
 import java.util.List;
 
 
+import com.example.backend.cache.FlightCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,9 @@ public class AirlineDataService {
   private AirlineRepository airlineRepository;
   @Autowired
   private AirportRepository airportRepository;
+
+  @Autowired
+  private FlightCacheManager flightCacheManager;
 
   public AirlineDataResponse getData(String authorizationHeader) {
     String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
@@ -78,6 +82,7 @@ public class AirlineDataService {
       if (request.getLogoUrl() != null)
         airline.setLogoUrl(request.getLogoUrl());
       airlineRepository.save(airline);
+      flightCacheManager.evictAll();
     } catch (Exception e) {
       throw new BadRequestException("Failed to update airline data: " + e.getMessage());
     }

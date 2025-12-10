@@ -1,9 +1,11 @@
 package com.example.backend.service.AirlineService;
 
+import com.example.backend.cache.FlightCacheManager;
 import com.example.backend.dto.AirlineDTO.FlightFilterDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.FlightRepository;
+import com.github.benmanes.caffeine.cache.Cache;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,11 +17,15 @@ import java.util.List;
 @Service
 public class FlightGraphQLService {
 
-    public List<Flight> filterFlights(FlightFilterDTO filter, FlightRepository flightRepository, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        List<Flight> pageFlights = flightRepository.findAll(pageable).getContent();
+    private final FlightCacheManager cacheManager;
 
-        System.out.println("Page: "+ page+ "Size: "+ size);
+    public FlightGraphQLService(FlightCacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
+
+    public List<Flight> filterFlights(FlightFilterDTO filter, FlightRepository flightRepository, int page, int size) {
+        List<Flight> pageFlights = getFlightsPaginated(flightRepository, page, size);
+
         if (filter == null) return pageFlights;
 
         return pageFlights.stream()
@@ -84,7 +90,7 @@ public class FlightGraphQLService {
                     try {
                         return f.getArrivalDate().isAfter(LocalDateTime.parse(filter.getArrivalDateGte()).minusSeconds(1));
                     } catch (DateTimeParseException e) {
-                        throw new BadRequestException("Invalid departureDateGte format");
+                        throw new BadRequestException("Invalid arrivalDateGte format");
                     }
                 })
                 .filter(f -> {
@@ -117,4 +123,26 @@ public class FlightGraphQLService {
                 })
                 .toList();
     }
+
+    public List<Flight> getFlightsPaginated(FlightRepository flightRepository, int page, int size) {
+        String pageKey = page + "_" + size;
+        List<Flight> cachedPage = cacheManager.getFlightsPage(pageKey);
+        if (cachedPage != null){
+            System.out.println("Cached!");
+            return cachedPage;
+        }
+        System.out.println("Not Cached!");
+
+
+        Pageable pageable = PageRequest.of(page, size);
+        List<Flight> pageFlights = flightRepository.findAll(pageable).getContent();
+
+        for (Flight flight : pageFlights) {
+            cacheManager.putFlightById(flight.getFlightID(), flight);
+        }
+
+        cacheManager.putFlightsPage(pageKey, pageFlights);
+        return pageFlights;
+    }
+
 }
