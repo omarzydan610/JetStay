@@ -1,7 +1,10 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.AdminDTO.PartnerShipNameResponse;
 import com.example.backend.entity.Hotel;
+import com.google.api.client.http.MultipartContent.Part;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.example.backend.entity.User;
@@ -36,5 +39,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
 
   @Query("SELECT h.admin FROM Hotel h WHERE h.hotelID = :hotelID")
   Optional<User> findAdminByHotelID(@Param("hotelID") Integer hotelID);
+  @Query("SELECT new com.example.backend.dto.AdminDTO.PartnerShipNameResponse(h.hotelID, h.hotelName) FROM Hotel h")
+  List<PartnerShipNameResponse> findAllHotel();
 
 }

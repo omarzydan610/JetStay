@@ -15,8 +15,8 @@ function BaseHomePage() {
     const fetchData = async () => {
       if (
         !userData ||
-        ((userData.Role === "HOTEL_ADMIN" ||
-          userData.Role === "AIRLINE_ADMIN") &&
+        ((userData?.Role === "HOTEL_ADMIN" ||
+          userData?.Role === "AIRLINE_ADMIN") &&
           !businessData)
       )
         await fetchUserAndBusinessData();
@@ -63,9 +63,9 @@ function BaseHomePage() {
       {/* NavBar */}
       <Navbar />
       {/* HomePage Based on Role */}
-      {userData.role === "HOTEL_ADMIN" ? (
+      {userData?.role === "HOTEL_ADMIN" ? (
         <HotelHomePage />
-      ) : userData.role === "AIRLINE_ADMIN" ? (
+      ) : userData?.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
       ) : userData.role === "SYSTEM_ADMIN" ? (
         <AdminDashboard />

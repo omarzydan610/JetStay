@@ -5,12 +5,15 @@ import com.example.backend.service.AuthService.JwtAuthService;
 import io.jsonwebtoken.Claims;
 
 import java.io.IOException;
+import java.util.List;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -58,10 +61,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
                 if (jwtService.isTokenValid(token, userDetails)) {
+                    // 1. Extract role from JWT claims
+                    String role = claims.get("roles", String.class);
+
+                    // 2. Convert to Spring Security authority
+                    List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+
+                    // 3. Create authentication token with authorities
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
-                            claims, 
-                            userDetails.getAuthorities());
+                            claims,
+                            authorities);
+
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
