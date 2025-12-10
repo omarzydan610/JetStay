@@ -49,6 +49,7 @@ export default function BookingMonitoringPage() {
     try {
       const data = await adminMonitoringService.getBookingMonitoring(startDate, endDate);
       setMonitoringData(data);
+      console.log("hshshhshshshssh",monitoringData)
       toast.success("Booking data loaded successfully");
     } catch (error) {
       toast.error("Failed to fetch booking monitoring data");
@@ -157,8 +158,8 @@ export default function BookingMonitoringPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <StatCard label="Total Bookings" value={monitoringData.totalBookings || 0} />
               <StatCard label="Total Revenue" value={`$${monitoringData.totalRevenue?.toFixed(2) || 0}`} />
-              <StatCard label="Total Guests" value={monitoringData.occupancyMetrics?.totalGuests || 0} />
-              <StatCard label="Rooms Booked" value={monitoringData.occupancyMetrics?.totalRoomsBooked || 0} />
+              <StatCard label="Total Guests" value={monitoringData?.totalGuests || 0} />
+              <StatCard label="Rooms Booked" value={monitoringData?.totalRoomsBooked || 0} />
             </div>
           </motion.div>
         )}

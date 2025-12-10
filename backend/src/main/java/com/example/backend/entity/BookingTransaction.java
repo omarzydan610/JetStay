@@ -57,10 +57,20 @@ public class BookingTransaction {
     @Column(name = "check_out")
     private LocalDate checkOut;
 
+    @Column(name = "booking_date")
+    private LocalDate bookingDate;
+
     public enum Status {
         PENDING,
         CONFIRMED,
         CANCELLED,
         COMPLETED
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.bookingDate = LocalDate.now();
+        this.isPaid = false;
+        this.status = Status.PENDING;
     }
 }
