@@ -3,6 +3,7 @@ package com.example.backend.controller.AdminController;
 import com.example.backend.controller.TestSecurityConfig;
 import com.example.backend.dto.AdminDTO.BookingMonitoringResponse;
 import com.example.backend.dto.AdminDTO.PartnerShipNameResponse;
+import com.example.backend.service.AdminService.AdminMonitorFlight;
 import com.example.backend.service.AdminService.AdminService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @Import(TestSecurityConfig.class)
@@ -25,6 +28,7 @@ import static org.mockito.Mockito.*;
 @DisplayName("Admin Controller - Booking Endpoint Tests")
 class AdminControllerBookingTest {
 
+    
     @Autowired
     private MockMvc mockMvc;
 
@@ -32,8 +36,10 @@ class AdminControllerBookingTest {
     private AdminService adminService;
 
     @MockBean
-    private JwtAuthService jwtAuthService;
+    private AdminMonitorFlight adminMonitorFlight;
 
+    @MockBean
+    private JwtAuthService jwtAuthService;  
     @Test
     @DisplayName("Monitor bookings - all hotels - success")
     void testMonitorBookings_AllHotels_Success() throws Exception {

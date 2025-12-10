@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.AdminDTO.FlightMonitoringResponse;
 import com.example.backend.repository.FlightTicketRepository;
 import com.example.backend.repository.TicketPaymentRepository;
 
-
+@Service
 public class AdminMonitorFlight {
 
  @Autowired
