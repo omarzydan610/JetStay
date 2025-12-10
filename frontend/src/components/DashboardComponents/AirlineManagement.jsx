@@ -1,18 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
-import { getAirlinesByFilter } from '../../services/SystemAdminService/dashboardService';
+import { getAirlinesByFilter, getAirlineAdmin } from '../../services/SystemAdminService/dashboardService';
 import { activateAirline, deactivateAirline } from '../../services/SystemAdminService/changeStatusService';
 
 
-const AirlineManagement = () => {         // Need to Fix Nationality HardCoded 
+const AirlineManagement = () => {        
 
     const [airlines, setAirlines] = useState([]);
     const [airlineSearch, setAirlineSearch] = useState('');
     const [airlineNationalityFilter, setAirlineNationalityFilter] = useState('');
     const [airlineStatusFilter, setAirlineStatusFilter] = useState('');
 
-    const [airlinePage, setAirlinePage] = useState(0); 
+    const [airlinePage, setAirlinePage] = useState(0);
     const [airlineRowsPerPage] = useState(5);
 
     const [totalPages, setTotalPages] = useState(1);
@@ -24,6 +24,12 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
     const [selectedAirlineId, setSelectedAirlineId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Airline admin details modal state
+    const [adminDetails, setAdminDetails] = useState(null);
+    const [showAdminModal, setShowAdminModal] = useState(false);
+    const [adminLoading, setAdminLoading] = useState(false);
+    const [adminError, setAdminError] = useState(null);
 
     const fetchAirlines = useCallback(async () => {
         try {
@@ -49,7 +55,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
         }
     }, [airlineSearch, airlineNationalityFilter, airlineStatusFilter, airlinePage, airlineRowsPerPage]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     useEffect(() => {
         fetchAirlines();
     }, [fetchAirlines]);
@@ -82,6 +88,23 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
         } catch (error) {
             console.error("Error deactivating airline:", error);
             toast.error("Failed to deactivate airline");
+        }
+    };
+
+    const handleRowClick = async (airlineId) => {
+        setAdminError(null);
+        setAdminDetails(null);
+        setAdminLoading(true);
+        try {
+            const res = await getAirlineAdmin(airlineId);
+            const admin = res && res.data ? res.data : null;
+            setAdminDetails(admin);
+            setShowAdminModal(true);
+        } catch (error) {
+            console.error('Error fetching airline admin details:', error);
+            setAdminError('Failed to load admin details');
+        } finally {
+            setAdminLoading(false);
         }
     };
 
@@ -142,15 +165,13 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                         <option value="INACTIVE">INACTIVE</option>
                     </select>
 
-                    <select
+                    <input
+                        type="text"
+                        placeholder="Nationality"
                         value={airlineNationalityFilter}
                         onChange={(e) => setAirlineNationalityFilter(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="">All Nationalites</option>
-                        <option value="Qatar">Qatar</option>
-                        <option value="USA">USA</option>
-                    </select>
+                    />
 
                     <div className="flex gap-2">
                         <button
@@ -178,7 +199,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                     </thead>
                     <tbody className="divide-y divide-gray-200">
                         {airlines.map((airline) => (
-                            <tr key={airline.id} className="hover:bg-gray-50">
+                            <tr key={airline.id} className="hover:bg-gray-50 cursor-pointer" onClick={() => handleRowClick(airline.id)}>
                                 <td className="px-6 py-4 text-sm text-gray-900">{airline.id}</td>
                                 <td className="px-6 py-4">
                                     <img src={airline.logoURL} alt={airline.name} className="w-10 h-10 rounded" />
@@ -193,7 +214,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                                 </td>
                                 <td className="px-6 py-4 text-sm">
                                     <button
-                                        onClick={() => openModal(airline.status === 'ACTIVE' ? 'deactivate' : 'activate', airline.id)}
+                                        onClick={(e) => { e.stopPropagation(); openModal(airline.status === 'ACTIVE' ? 'deactivate' : 'activate', airline.id); }}
                                         className={`px-4 py-2 rounded-lg text-white transition-colors ${airline.status === 'ACTIVE' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                                     >
                                         {airline.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
@@ -286,13 +307,73 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                             <button
                                 onClick={handleConfirm}
                                 disabled={isSubmitting || (modalAction === 'deactivate' && !deactivationReason.trim())}
-                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                                    modalAction === 'activate'
+                                className={`flex-1 px-4 py-2 rounded-lg text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${modalAction === 'activate'
                                         ? 'bg-green-600 hover:bg-green-700'
                                         : 'bg-red-600 hover:bg-red-700'
-                                }`}
+                                    }`}
                             >
                                 {isSubmitting ? 'Processing...' : (modalAction === 'activate' ? 'Activate' : 'Deactivate')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Airline Admin Details Modal */}
+            {showAdminModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-900">Airline Admin Details</h3>
+                            <button
+                                onClick={() => { setShowAdminModal(false); setAdminDetails(null); }}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {adminLoading && (
+                                <p className="text-gray-600">Loading admin details...</p>
+                            )}
+
+                            {adminError && (
+                                <p className="text-red-500">{adminError}</p>
+                            )}
+
+                            {!adminLoading && adminDetails && (
+                                <div className="space-y-3">
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Name: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.firstName} {adminDetails.lastName}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Email: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.email}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Phone: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.phoneNumber}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Role: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.role}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Status: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.status}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3 p-6 border-t border-gray-200">
+                            <button
+                                onClick={() => { setShowAdminModal(false); setAdminDetails(null); }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                            >
+                                Close
                             </button>
                         </div>
                     </div>

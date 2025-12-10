@@ -1,7 +1,7 @@
 import React, { useState, useEffect,  useCallback } from "react";
 import { RotateCcw, X } from "lucide-react";
 import { toast } from "react-toastify";
-import { getHotelsByFilter } from "../../services/SystemAdminService/dashboardService";
+import { getHotelsByFilter, getHotelAdmin } from "../../services/SystemAdminService/dashboardService";
 import { activateHotel, deactivateHotel } from "../../services/SystemAdminService/changeStatusService";
 
 const HotelManagement = () => {
@@ -26,6 +26,12 @@ const HotelManagement = () => {
     const [selectedHotelId, setSelectedHotelId] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Hotel admin details modal state
+    const [adminDetails, setAdminDetails] = useState(null);
+    const [showAdminModal, setShowAdminModal] = useState(false);
+    const [adminLoading, setAdminLoading] = useState(false);
+    const [adminError, setAdminError] = useState(null);
 
     const fetchHotels = useCallback(async () => {
         try {
@@ -110,6 +116,25 @@ const HotelManagement = () => {
         }
     };
 
+    const handleHotelRowClick = async (hotelId) => {
+        setAdminError(null);
+        setAdminDetails(null);
+        setAdminLoading(true);
+        try {
+            const res = await getHotelAdmin(hotelId);
+            // service returns { success, message, data }
+            const admin = res && res.data ? res.data : null;
+            setAdminDetails(admin);
+            setShowAdminModal(true);
+        } catch (error) {
+            console.error('Error fetching hotel admin details:', error);
+            setAdminError('Failed to load admin details');
+            toast.error('Failed to load admin details');
+        } finally {
+            setAdminLoading(false);
+        }
+    };
+
     // Reset Filters
     const resetHotelFilters = () => {
         setHotelSearch("");
@@ -190,7 +215,7 @@ const HotelManagement = () => {
 
                     <tbody className="divide-y divide-gray-200">
                         {hotels.map((hotel) => (
-                            <tr key={hotel.id} className="hover:bg-gray-50 transition-colors">
+                            <tr key={hotel.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleHotelRowClick(hotel.id)}>
                                 <td className="px-6 py-4 text-sm text-gray-900">{hotel.id}</td>
 
                                 <td className="px-6 py-4">
@@ -220,7 +245,7 @@ const HotelManagement = () => {
 
                                 <td className="px-6 py-4 text-sm">
                                     <button
-                                        onClick={() => openModal(hotel.status === "ACTIVE" ? "deactivate" : "activate", hotel.id)}
+                                        onClick={(e) => { e.stopPropagation(); openModal(hotel.status === "ACTIVE" ? "deactivate" : "activate", hotel.id); }}
                                         className={`px-4 py-2 rounded-lg text-white transition-colors ${hotel.status === "ACTIVE"
                                             ? "bg-red-600 hover:bg-red-700"
                                             : "bg-green-600 hover:bg-green-700"
@@ -325,6 +350,67 @@ const HotelManagement = () => {
                                     }`}
                             >
                                 {isSubmitting ? "Processing..." : (modalAction === "activate" ? "Activate" : "Deactivate")}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Hotel Admin Details Modal */}
+            {showAdminModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg max-w-md w-full mx-4">
+                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-900">Hotel Admin Details</h3>
+                            <button
+                                onClick={() => { setShowAdminModal(false); setAdminDetails(null); }}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="p-6">
+                            {adminLoading && (
+                                <p className="text-gray-600">Loading admin details...</p>
+                            )}
+
+                            {adminError && (
+                                <p className="text-red-500">{adminError}</p>
+                            )}
+
+                            {!adminLoading && adminDetails && (
+                                <div className="space-y-3">
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Name: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.firstName} {adminDetails.lastName}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Email: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.email}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Phone: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.phoneNumber}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Role: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.role}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-sm font-medium text-gray-700">Status: </span>
+                                        <span className="text-sm text-gray-900">{adminDetails.status}</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3 p-6 border-t border-gray-200">
+                            <button
+                                onClick={() => { setShowAdminModal(false); setAdminDetails(null); }}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                            >
+                                Close
                             </button>
                         </div>
                     </div>

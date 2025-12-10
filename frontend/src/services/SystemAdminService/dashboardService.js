@@ -48,3 +48,29 @@ export const getHotelsByFilter = async (data) => {
     throw error;
   }
 };
+
+export const getAirlineAdmin = async (id) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}/airline-admin/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to fetch Airline Admin details");
+    throw error;
+  }
+};
+
+export const getHotelAdmin = async (id) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}/hotel-admin/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to fetch Hotel Admin details");
+    throw error;
+  }
+};
