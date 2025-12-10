@@ -4,10 +4,10 @@ import { toast } from "react-toastify";
 import hotelDataService from "../../../../services/HotelServices/roomsService";
 
 const ImageCard = ({ imageUrl, imageId, onDelete }) => (
-  <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-md group">
+<div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-md group">
     <img
       src={imageUrl}
-      alt="Room"
+      alt=""
       className="w-full h-full object-cover"
     />
     <button
@@ -37,22 +37,24 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
 
   // 3. useEffect to fetch images on component mount
   useEffect(() => {
+    // Define the fetching logic inside the useEffect hook
+    const fetchRoomImages = async () => {
+      try {
+        setImageLoading(true);
+        // The roomTypeID is available via the 'room' prop, which is stable/used by the function
+        const images = await hotelDataService.getRoomImages(room.roomTypeID); 
+        setRoomImages(images);
+      } catch (err) {
+        console.error("Error fetching room images:", err);
+        toast.error("Failed to load room images.");
+      } finally {
+        setImageLoading(false);
+      }
+    };
     fetchRoomImages();
-  }, []);
+  }, [room.roomTypeID]);
 
-  const fetchRoomImages = async () => {
-    try {
-      setImageLoading(true);
-      const images = await hotelDataService.getRoomImages(room.roomTypeID);
-      // Assuming images structure is [{ imageID, imageUrl }]
-      setRoomImages(images);
-    } catch (err) {
-      console.error("Error fetching room images:", err);
-      toast.error("Failed to load room images.");
-    } finally {
-      setImageLoading(false);
-    }
-  };
+
 
 
   const handleInputChange = (e) => {
