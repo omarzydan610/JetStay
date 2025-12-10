@@ -1,19 +1,18 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
-import { getAirlinesByFilter } from '../../services/SystemAdminService/dashboardService';
-import { activateAirline, deactivateAirline } from '../../services/SystemAdminService/changeStatusService';
+import { getUsersByFilter } from '../../../../services/SystemAdminService/dashboardService';
+import { activateUser, deactivateUser } from '../../../../services/SystemAdminService/changeStatusService';
 
+const UserManagement = () => {
 
-const AirlineManagement = () => {         // Need to Fix Nationality HardCoded 
+    const [users, setUsers] = useState([]);
+    const [userSearch, setUserSearch] = useState('');
+    const [userRoleFilter, setUserRoleFilter] = useState('');
+    const [userStatusFilter, setUserStatusFilter] = useState('');
 
-    const [airlines, setAirlines] = useState([]);
-    const [airlineSearch, setAirlineSearch] = useState('');
-    const [airlineNationalityFilter, setAirlineNationalityFilter] = useState('');
-    const [airlineStatusFilter, setAirlineStatusFilter] = useState('');
-
-    const [airlinePage, setAirlinePage] = useState(0); 
-    const [airlineRowsPerPage] = useState(5);
+    const [userPage, setUserPage] = useState(0);
+    const [userRowsPerPage] = useState(5);
 
     const [totalPages, setTotalPages] = useState(1);
     const [totalElements, setTotalElements] = useState(0);
@@ -21,73 +20,61 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
     // Modal state
     const [showModal, setShowModal] = useState(false);
     const [modalAction, setModalAction] = useState(null); // 'activate' or 'deactivate'
-    const [selectedAirlineId, setSelectedAirlineId] = useState(null);
+    const [selectedUserEmail, setSelectedUserEmail] = useState(null);
     const [deactivationReason, setDeactivationReason] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const fetchAirlines = useCallback(async () => {
+    const fetchUsers = useCallback(async () => {
         try {
+            const data = {
+                search: userSearch || null,
+                role: userRoleFilter || null,
+                status: userStatusFilter || null,
+                page: userPage,
+                size: userRowsPerPage
+            }
 
-            const body = {
-                search: airlineSearch || null,
-                nationality: airlineNationalityFilter || null,
-                status: airlineStatusFilter || null,
-                page: airlinePage,
-                size: airlineRowsPerPage
-            };
+            const response = await getUsersByFilter(data);
 
-            const res = await getAirlinesByFilter(body);
-
-            const data = res.data;
-            setAirlines(data.content);
-            setTotalPages(data.totalPages);
-            setTotalElements(data.totalElements);
-
+            const res = response.data;
+            setUsers(res.content);
+            setTotalPages(res.totalPages);
+            setTotalElements(res.totalElements);
         } catch (error) {
-            console.error("Error fetching airlines:", error);
-            toast.error("Failed to fetch airlines");
+            console.error("Error fetching users:", error);
         }
-    }, [airlineSearch, airlineNationalityFilter, airlineStatusFilter, airlinePage, airlineRowsPerPage]);
+    }, [userSearch, userRoleFilter, userStatusFilter, userPage, userRowsPerPage]);
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
-        fetchAirlines();
-    }, [fetchAirlines]);
+        fetchUsers();
+    }, [fetchUsers]);
 
-
-    const resetAirlineFilters = () => {
-        setAirlineSearch('');
-        setAirlineNationalityFilter('');
-        setAirlineStatusFilter('');
-        setAirlinePage(0);
-        fetchAirlines();
-    };
-
-    const activateAirlineStatus = async (airlineId) => {
+    const activateUserStatus = async (email) => {
         try {
-            await activateAirline(airlineId);
-            toast.success("Airline activated successfully");
-            fetchAirlines();
+            const response = await activateUser(email);
+            toast.success("User activated successfully");
+            console.log("User status toggled:", response.data.message);
         } catch (error) {
-            console.error("Error activating airline:", error);
-            toast.error("Failed to activate airline");
+            console.error("Error toggling user status:", error)
         }
+        fetchUsers();
     };
 
-    const deactivateAirlineStatus = async (airlineId, reason) => {
+    const deactivateUserStatus = async (email, reason) => {
         try {
-            await deactivateAirline(airlineId, reason);
-            toast.success("Airline deactivated successfully");
-            fetchAirlines();
+            const response = await deactivateUser(email, reason);
+            toast.success("User deactivated successfully");
+            console.log("User status toggled:", response.data.message);
+            
         } catch (error) {
-            console.error("Error deactivating airline:", error);
-            toast.error("Failed to deactivate airline");
+            console.error("Error toggling user status:", error);
         }
+        fetchUsers();
     };
 
-    const openModal = (action, airlineId) => {
+    const openModal = (action, email) => {
         setModalAction(action);
-        setSelectedAirlineId(airlineId);
+        setSelectedUserEmail(email);
         setDeactivationReason('');
         setShowModal(true);
     };
@@ -95,7 +82,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
     const closeModal = () => {
         setShowModal(false);
         setModalAction(null);
-        setSelectedAirlineId(null);
+        setSelectedUserEmail(null);
         setDeactivationReason('');
     };
 
@@ -108,9 +95,9 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
         setIsSubmitting(true);
         try {
             if (modalAction === 'activate') {
-                await activateAirlineStatus(selectedAirlineId);
+                await activateUserStatus(selectedUserEmail);
             } else if (modalAction === 'deactivate') {
-                await deactivateAirlineStatus(selectedAirlineId, deactivationReason);
+                await deactivateUserStatus(selectedUserEmail, deactivationReason);
             }
             closeModal();
         } finally {
@@ -118,43 +105,51 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
         }
     };
 
+
+    const resetUserFilters = () => {
+        setUserSearch('');
+        setUserRoleFilter('');
+        setUserStatusFilter('');
+    };
+
     return (
         <div className="p-8">
-            <h2 className="text-2xl font-bold mb-6 text-gray-800">Airline Management</h2>
+            <h2 className="text-2xl font-bold mb-6 text-gray-800">User Management</h2>
 
             <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                     <input
                         type="text"
-                        placeholder="Search by name"
-                        value={airlineSearch}
-                        onChange={(e) => setAirlineSearch(e.target.value)}
+                        placeholder="Search"
+                        value={userSearch}
+                        onChange={(e) => setUserSearch(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
 
                     <select
-                        value={airlineStatusFilter}
-                        onChange={(e) => setAirlineStatusFilter(e.target.value)}
+                        value={userRoleFilter}
+                        onChange={(e) => setUserRoleFilter(e.target.value)}
+                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                        <option value="">All Roles</option>
+                        <option value="AIRLINE_ADMIN">AIRLINE_ADMIN</option>
+                        <option value="HOTEL_ADMIN">HOTEL_ADMIN</option>
+                        <option value="CLIENT">CLIENT</option>
+                    </select>
+
+                    <select
+                        value={userStatusFilter}
+                        onChange={(e) => setUserStatusFilter(e.target.value)}
                         className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                         <option value="">All Status</option>
                         <option value="ACTIVE">ACTIVE</option>
-                        <option value="INACTIVE">INACTIVE</option>
-                    </select>
-
-                    <select
-                        value={airlineNationalityFilter}
-                        onChange={(e) => setAirlineNationalityFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                        <option value="">All Nationalites</option>
-                        <option value="Qatar">Qatar</option>
-                        <option value="USA">USA</option>
+                        <option value="DEACTIVATED">DEACTIVATED</option>
                     </select>
 
                     <div className="flex gap-2">
                         <button
-                            onClick={resetAirlineFilters}
+                            onClick={resetUserFilters}
                             className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center"
                         >
                             <RotateCcw size={18} />
@@ -167,36 +162,40 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                 <table className="w-full">
                     <thead className="bg-gray-50 border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Logo</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Name</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nationality</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Rate</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">ID</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">First Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Name</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Phone</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Role</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
+                            <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {airlines.map((airline) => (
-                            <tr key={airline.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 text-sm text-gray-900">{airline.id}</td>
-                                <td className="px-6 py-4">
-                                    <img src={airline.logoURL} alt={airline.name} className="w-10 h-10 rounded" />
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-900">{airline.name}</td>
-                                <td className="px-6 py-4 text-sm text-gray-900">{airline.nationality}</td>
-                                <td className="px-6 py-4 text-sm text-gray-900">⭐ {airline.rate}</td>
+                        {users.map((user) => (
+                            <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.id}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.firstName}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.lastName}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.email}</td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{user.phoneNumber}</td>
                                 <td className="px-6 py-4 text-sm">
-                                    <span className={`px-2 py-1 text-xs font-medium rounded ${airline.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                                        {airline.status}
+                                    <span className="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded">
+                                        {user.role}
+                                    </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm">
+                                    <span className={`px-2 py-1 text-xs font-medium rounded ${user.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                        {user.status}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 text-sm">
                                     <button
-                                        onClick={() => openModal(airline.status === 'ACTIVE' ? 'deactivate' : 'activate', airline.id)}
-                                        className={`px-4 py-2 rounded-lg text-white transition-colors ${airline.status === 'ACTIVE' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
+                                        onClick={() => openModal(user.status === 'ACTIVE' ? 'deactivate' : 'activate', user.email)}
+                                        className={`px-4 py-2 rounded-lg text-white transition-colors ${user.status === 'ACTIVE' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}
                                     >
-                                        {airline.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
+                                        {user.status === 'ACTIVE' ? 'Deactivate' : 'Activate'}
                                     </button>
                                 </td>
                             </tr>
@@ -207,20 +206,20 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                 <div className="p-4 border-t border-gray-200">
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">
-                            Showing {airlinePage * airlineRowsPerPage + 1} to {Math.min((airlinePage + 1) * airlineRowsPerPage, totalElements)} of {totalElements}
+                            Showing {userPage * userRowsPerPage + 1} to {Math.min((userPage + 1) * userRowsPerPage, totalElements)} of {totalElements} users
                         </span>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => setAirlinePage(Math.max(0, airlinePage - 1))}
-                                disabled={airlinePage === 0}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                                onClick={() => setUserPage(Math.max(0, userPage - 1))}
+                                disabled={userPage === 0}
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Previous
                             </button>
                             <button
-                                onClick={() => setAirlinePage(Math.min(totalPages - 1, airlinePage + 1))}
-                                disabled={airlinePage + 1 >= totalPages}
-                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
+                                onClick={() => setUserPage(Math.min(totalPages - 1, userPage + 1))}
+                                disabled={userPage === totalPages - 1}
+                                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
                                 Next
                             </button>
@@ -236,7 +235,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                         {/* Modal Header */}
                         <div className="flex items-center justify-between p-6 border-b border-gray-200">
                             <h3 className="text-lg font-semibold text-gray-900">
-                                {modalAction === 'activate' ? 'Activate Airline' : 'Deactivate Airline'}
+                                {modalAction === 'activate' ? 'Activate User' : 'Deactivate User'}
                             </h3>
                             <button
                                 onClick={closeModal}
@@ -250,8 +249,8 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                         <div className="p-6">
                             <p className="text-gray-600 mb-4">
                                 {modalAction === 'activate'
-                                    ? 'Are you sure you want to activate this airline?'
-                                    : 'Are you sure you want to deactivate this airline?'}
+                                    ? 'Are you sure you want to activate this user?'
+                                    : 'Are you sure you want to deactivate this user?'}
                             </p>
 
                             {/* Deactivation Reason Input */}
@@ -263,7 +262,7 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
                                     <textarea
                                         value={deactivationReason}
                                         onChange={(e) => setDeactivationReason(e.target.value)}
-                                        placeholder="Please provide a reason for deactivating this airline"
+                                        placeholder="Please provide a reason for deactivating this user"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
                                         rows="4"
                                     />
@@ -302,4 +301,4 @@ const AirlineManagement = () => {         // Need to Fix Nationality HardCoded
     );
 };
 
-export default AirlineManagement;
+export default UserManagement;

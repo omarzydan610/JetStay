@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import BaseProfile from "./pages/Profiles/BaseProfile";
 import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
 import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
+import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
+import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -34,12 +36,46 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/verify-otp" element={<VerifyOtpPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/profile" element={<BaseProfile />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <BaseProfile />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/airline/manage-flights"
-            element={<FlightManagementPage />}
+            element={
+              <ProtectedRoute>
+                <FlightManagementPage />
+              </ProtectedRoute>
+            }
           />
-          <Route path="/hotel/manage-rooms" element={<HotelManagementPage />} />
+          <Route
+            path="/hotel/manage-rooms"
+            element={
+              <ProtectedRoute>
+                <HotelManagementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/booking-details"
+            element={
+              <ProtectedRoute>
+                <BookingDetailsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/tickets-details"
+            element={
+              <ProtectedRoute>
+                <TicketsDetailsPage />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={2500} />

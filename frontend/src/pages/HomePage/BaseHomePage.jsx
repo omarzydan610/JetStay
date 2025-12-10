@@ -4,9 +4,8 @@ import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
-import AdminDashboard from "../SystemAdminDashboard";
+import BaseAdminHomePage from "./Admin/BaseAdminHomePage";
 import UserHomePage from "./UserHomePage";
-// import SystemAdminHomePage from "./Admin/SystemAdminHomePage";
 
 function BaseHomePage() {
   const navigate = useNavigate();
@@ -82,13 +81,12 @@ function BaseHomePage() {
       ) : userData?.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
       ) : userData.role === "SYSTEM_ADMIN" ? (
-        <AdminDashboard />
+        <BaseAdminHomePage />
       ) : (
         <UserHomePage />
       )}
     </div>
   );
-
 }
 
 export default BaseHomePage;

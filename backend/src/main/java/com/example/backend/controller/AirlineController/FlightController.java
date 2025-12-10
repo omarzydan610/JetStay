@@ -68,6 +68,12 @@ public class FlightController {
     @GetMapping("/")
     public ResponseEntity<?> getAllFlightForAirLine(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
+        System.err.println("helloooo");
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
+        System.out.println();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
         Integer airlineID = claims.get("airline_id", Integer.class);
@@ -101,7 +107,7 @@ public class FlightController {
     }
 
     @GetMapping("/details/{id}")
-    public ResponseEntity<?> getFlightDetailsByID(@PathVariable int id){
+    public ResponseEntity<?> getFlightDetailsByID(@PathVariable int id) {
         List<FlightDetailsDTO> flightDetailsDTOS = flightService.getFlightDetails(id);
         return ResponseEntity.ok(SuccessResponse.of("Flight Details retrieved successfully", flightDetailsDTOS));
     }
