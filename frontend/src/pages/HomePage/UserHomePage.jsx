@@ -93,7 +93,7 @@ export default function UserHomePage() {
     } finally {
       setLoading(false);
     }
-  }, [page, size, filter]);
+  }, [page, size, filter, lastFetchedPage, lastFilterKey]);
 
   useEffect(() => {
     loadFlights();
