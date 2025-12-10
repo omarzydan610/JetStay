@@ -187,20 +187,6 @@ export default function BookingDetailsPage() {
     );
   };
 
-  const getPaymentStatusBadge = (isPaid) => {
-    if (isPaid) {
-      return (
-        <span className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-          Paid
-        </span>
-      );
-    }
-    return (
-      <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
-        Pending
-      </span>
-    );
-  };
 
   return (
     <div className="min-h-screen relative overflow-x-hidden bg-gradient-to-br from-slate-50 via-sky-50 to-cyan-50">

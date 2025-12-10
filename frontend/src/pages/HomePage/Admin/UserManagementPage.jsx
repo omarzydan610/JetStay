@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { RotateCcw, X, Star, Users, Hotel, Plane } from "lucide-react";
-import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { useAppContext } from "../../../contexts/AppContext";
 import { getUsersByFilter } from "../../../services/SystemAdminService/dashboardService";
