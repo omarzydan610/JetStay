@@ -107,9 +107,9 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
                      @Param("airlineId") Long airlineId);
 
        @Query("SELECT ft FROM FlightTicket ft WHERE ft.createdAt BETWEEN :startDate AND :endDate")
-       List<FlightTicket> getFlightTicketsDetailBetweenDate(LocalDate starDate,LocalDate endDate);
+       List<FlightTicket> getFlightTicketsDetailBetweenDate(LocalDate startDate,LocalDate endDate);
 
        @Query("SELECT ft FROM FlightTicket ft WHERE ft.createdAt BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId")
-       List<FlightTicket> getFlightTicketsDetailBetweenDateForArline(LocalDate starDate,LocalDate endDate,Long airlineId);
+       List<FlightTicket> getFlightTicketsDetailBetweenDateForArline(LocalDate startDate,LocalDate endDate,Long airlineId);
 
 }

@@ -97,6 +97,64 @@ const adminMonitoringService = {
       throw error;
     }
   },
+
+  /**
+   * Get detailed ticket information within a date range
+   * @param {string} startDate - Start date in format YYYY-MM-DD
+   * @param {string} endDate - End date in format YYYY-MM-DD
+   * @param {number} airlineId - Airline ID (0 for all airlines)
+   * @returns {Promise} List of ticket details
+   */
+  getTicketsDetails: async (startDate, endDate, airlineId = 0) => {
+    try {
+      const response = await apiClient.get(
+        `${API_BASE_URL}/api/admin/Tickets-details`,
+        {
+          params: {
+            startDate,
+            endDate,
+            airlineId,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+        }
+      );
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching tickets details:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get detailed booking information within a date range
+   * @param {string} startDate - Start date in format YYYY-MM-DD
+   * @param {string} endDate - End date in format YYYY-MM-DD
+   * @param {number} hotelId - Hotel ID (0 for all hotels)
+   * @returns {Promise} List of booking details
+   */
+  getBookingDetails: async (startDate, endDate, hotelId = 0) => {
+    try {
+      const response = await apiClient.get(
+        `${API_BASE_URL}/api/admin/Booking-details`,
+        {
+          params: {
+            startDate,
+            endDate,
+            hotelId,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+        }
+      );
+      return response.data || [];
+    } catch (error) {
+      console.error("Error fetching booking details:", error);
+      throw error;
+    }
+  },
 };
 
 export default adminMonitoringService;
