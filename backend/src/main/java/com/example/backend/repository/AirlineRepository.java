@@ -4,6 +4,7 @@ import com.example.backend.entity.Airline;
 
 import java.util.Optional;
 
+import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -42,4 +43,9 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
             @Param("nationality") String nationality,
             @Param("status") Airline.Status status,
             Pageable pageable);
+
+    Optional<Airline> findByAirlineID(Integer airlineID);
+
+    @Query("SELECT a.admin FROM Airline a WHERE a.airlineID = :airlineID")
+    Optional<User> findAdminByAirlineID(@Param("airlineID") Integer airlineID);
 }

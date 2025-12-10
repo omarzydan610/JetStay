@@ -4,6 +4,7 @@ import com.example.backend.entity.Hotel;
 
 import java.util.Optional;
 
+import com.example.backend.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -30,5 +31,10 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
           @Param("country") String country,
           @Param("status") Hotel.Status status,
           Pageable pageable);
+
+  Optional<Hotel> findByHotelID(Integer hotelID);
+
+  @Query("SELECT h.admin FROM Hotel h WHERE h.hotelID = :hotelID")
+  Optional<User> findAdminByHotelID(@Param("hotelID") Integer hotelID);
 
 }
