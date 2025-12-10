@@ -4,6 +4,7 @@ import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
+import SystemAdminHomePage from "./Admin/SystemAdminHomePage";
 
 function BaseHomePage() {
   const navigate = useNavigate();
@@ -14,8 +15,8 @@ function BaseHomePage() {
     const fetchData = async () => {
       if (
         !userData ||
-        ((userData.Role === "HOTEL_ADMIN" ||
-          userData.Role === "AIRLINE_ADMIN") &&
+        ((userData?.Role === "HOTEL_ADMIN" ||
+          userData?.Role === "AIRLINE_ADMIN") &&
           !businessData)
       )
         await fetchUserAndBusinessData();
@@ -62,17 +63,12 @@ function BaseHomePage() {
       {/* NavBar */}
       <Navbar />
       {/* HomePage Based on Role */}
-      {userData.role === "HOTEL_ADMIN" ? (
+      {userData?.role === "HOTEL_ADMIN" ? (
         <HotelHomePage />
-      ) : userData.role === "AIRLINE_ADMIN" ? (
+      ) : userData?.role === "AIRLINE_ADMIN" ? (
         <AirlineHomePage />
-      ) : userData.role === "SYSTEM_ADMIN" ? (
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to the System Admin Home Page
-          </h1>
-          {/* System admin specific content goes here */}
-        </div>
+      ) : userData?.role === "SYSTEM_ADMIN" ? (
+        <SystemAdminHomePage />
       ) : (
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-800">

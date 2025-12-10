@@ -29,6 +29,7 @@ public class JwtAuthService {
     public String generateAuthToken(User user, Integer managedId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", user.getUserID());
+        claims.put("roles", user.getRole().name());
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
             claims.put("hotel_id", managedId);

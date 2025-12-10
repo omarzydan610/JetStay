@@ -41,12 +41,12 @@ export const AppProvider = ({ children }) => {
       setUserData(user);
 
       // Fetch business data if user is admin
-      if (user.role === "HOTEL_ADMIN" || user.role === "AIRLINE_ADMIN") {
+      if (user?.role === "HOTEL_ADMIN" || user?.role === "AIRLINE_ADMIN") {
         let businessResponse;
-        if (user.role === "HOTEL_ADMIN") {
+        if (user?.role === "HOTEL_ADMIN") {
           console.log("AppContext: Fetching hotel data...");
           businessResponse = await getHotelData();
-        } else if (user.role === "AIRLINE_ADMIN") {
+        } else if (user?.role === "AIRLINE_ADMIN") {
           console.log("AppContext: Fetching airline data...");
           businessResponse = await getAirlineData();
         }

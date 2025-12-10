@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/partnership/**").permitAll()
 
                         // Role-based endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated() // All other endpoints require authentication
                 )
                 // Stateless session (required for JWT)
