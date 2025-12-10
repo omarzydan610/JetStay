@@ -5,12 +5,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.dto.response.SuccessResponse;
+import com.example.backend.entity.RoomImage;
+import com.example.backend.entity.RoomType;
 import com.example.backend.service.HotelService.RoomService;
+import com.example.backend.service.HotelService.RoomImageService;
 
+import java.io.IOException;
 import io.jsonwebtoken.Claims;
 
 import java.util.List;
@@ -21,6 +26,9 @@ public class RoomController {
 
         @Autowired
         private RoomService roomTypeService;
+
+        @Autowired
+        private RoomImageService roomImageService;
 
         // Get room types for a hotel
         @GetMapping("/")
@@ -36,14 +44,13 @@ public class RoomController {
 
         // Add room type
         @PostMapping("/add")
-        public ResponseEntity<SuccessResponse<Void>> addRoomType(@RequestBody RoomTypeRequest roomTypeDTO) {
+        public ResponseEntity<SuccessResponse<RoomType>> addRoomType(@RequestBody RoomTypeRequest roomTypeDTO) {
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 Claims claims = (Claims) auth.getCredentials();
                 roomTypeDTO.setHotelId(claims.get("hotel_id", Integer.class));
-                roomTypeService.addRoomType(roomTypeDTO);
+                RoomType newRoom = roomTypeService.addRoomType(roomTypeDTO);
+                return ResponseEntity.ok( SuccessResponse.of("Room type added successfully", newRoom));
 
-                return ResponseEntity.ok(
-                                SuccessResponse.of("Room type added successfully"));
         }
 
         // Update room type
@@ -70,5 +77,38 @@ public class RoomController {
 
                 return ResponseEntity.ok(
                                 SuccessResponse.of("Room type deleted successfully"));
+        }
+
+        @PostMapping("/{roomTypeId}/images/add")
+        public ResponseEntity<SuccessResponse<String>> uploadRoomImage(
+                        @PathVariable Integer roomTypeId,
+                        @RequestParam("file") MultipartFile file) throws IOException {
+                
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Claims claims = (Claims) auth.getCredentials();
+                String adminEmail = claims.getSubject(); 
+
+                String imageUrl = roomImageService.addRoomImage(roomTypeId, file, adminEmail).getImageUrl();
+
+                return ResponseEntity.ok(
+                                SuccessResponse.of("Image uploaded successfully", imageUrl));
+        }
+
+        @DeleteMapping("/images/delete/{imageId}")
+        public ResponseEntity<SuccessResponse<Void>> deleteRoomImage(@PathVariable Integer imageId) throws IOException {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Claims claims = (Claims) auth.getCredentials();
+                String adminEmail = claims.getSubject();
+                roomImageService.deleteRoomImage(imageId, adminEmail);
+                return ResponseEntity.ok(
+                                SuccessResponse.of("Image deleted successfully"));
+        }
+
+        @GetMapping("/{roomTypeId}/images")
+        public ResponseEntity<SuccessResponse<List<RoomImage>>> getRoomImages(@PathVariable Integer roomTypeId) {
+                List<RoomImage> images = roomImageService.getRoomImages(roomTypeId);
+                
+                return ResponseEntity.ok(
+                                SuccessResponse.of("Room images retrieved successfully", images));
         }
 }
