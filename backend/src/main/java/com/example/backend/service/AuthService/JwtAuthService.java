@@ -30,7 +30,6 @@ public class JwtAuthService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", user.getUserID());
         claims.put("roles", user.getRole().name());
-        System.out.println("abdoooooo.  "+user.getRole().name());
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
             claims.put("hotel_id", managedId);
