@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getFlightsGraph } from "../../../services/flightService";
+import { getFlightsGraph } from "../../../services/Airline/flightsService";
 import UserFlightCard from "../../../components/HomePages/UserFlightCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 import { toast } from "react-toastify";
