@@ -15,6 +15,7 @@ import com.example.backend.dto.AdminDTO.BookingMonitoringResponse;
 import com.example.backend.dto.AdminDTO.FlightMonitoringResponse;
 import com.example.backend.dto.AdminDTO.PartnerShipNameResponse;
 import com.example.backend.dto.response.SuccessResponse;
+import com.example.backend.service.AdminService.AdminMonitorFlight;
 import com.example.backend.service.AdminService.AdminService;
 
 @RestController
@@ -23,6 +24,9 @@ public class AdminController {
 
     @Autowired
     AdminService adminService;
+
+    @Autowired
+    AdminMonitorFlight adminMonitorFlight;
 
    
     @GetMapping("/monitor-bookings")
@@ -48,7 +52,7 @@ public class AdminController {
         LocalDate start = LocalDate.parse(startDate);
         LocalDate end = LocalDate.parse(endDate);
 
-        FlightMonitoringResponse response = adminService.monitorFlightTransactions(start, end, airlineId);
+        FlightMonitoringResponse response = adminMonitorFlight.monitorFlightTransactions(start, end, airlineId);
         return ResponseEntity.ok(SuccessResponse.of("Flight monitoring data retrieved successfully", response));
     }
 

@@ -2,9 +2,7 @@ package com.example.backend.controller.AdminController;
 
 import com.example.backend.controller.TestSecurityConfig;
 import com.example.backend.dto.AdminDTO.BookingMonitoringResponse;
-import com.example.backend.dto.AdminDTO.FlightMonitoringResponse;
 import com.example.backend.dto.AdminDTO.PartnerShipNameResponse;
-import com.example.backend.service.AdminService.AdminMonitorFlight;
 import com.example.backend.service.AdminService.AdminService;
 import com.example.backend.service.AuthService.JwtAuthService;
 import org.junit.jupiter.api.Test;
@@ -20,13 +18,12 @@ import java.util.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @Import(TestSecurityConfig.class)
 @WebMvcTest(AdminController.class)
-class AdminControllerTest {
+@DisplayName("Admin Controller - Booking Endpoint Tests")
+class AdminControllerBookingTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,11 +33,6 @@ class AdminControllerTest {
 
     @MockBean
     private JwtAuthService jwtAuthService;
-    
-    @Autowired
-    private AdminMonitorFlight adminMonitorFlight;
-
-    // ==================== monitorBookings Tests ====================
 
     @Test
     @DisplayName("Monitor bookings - all hotels - success")
@@ -159,131 +151,10 @@ class AdminControllerTest {
                 .param("startDate", "invalid-date")
                 .param("endDate", "2024-01-31")
                 .param("hotelId", "0"))
-                .andExpect(status().is5xxServerError());  // Spring converts parse errors to 500
+                .andExpect(status().is5xxServerError());
 
         verify(adminService, never()).monitorBookings(any(), any(), anyLong());
     }
-
-    // ==================== monitorFlights Tests ====================
-
-    @Test
-    @DisplayName("Monitor flights - all airlines - success")
-    void testMonitorFlights_AllAirlines_Success() throws Exception {
-        // Arrange
-        LocalDate startDate = LocalDate.of(2024, 1, 1);
-        LocalDate endDate = LocalDate.of(2024, 1, 31);
-        long airlineId = 0L;
-
-        FlightMonitoringResponse response = FlightMonitoringResponse.builder()
-                .totalTickets(200)
-                .totalRevenue(100000.0)
-                .ticketsByPaymentStatus(Map.of("paid", 150, "unpaid", 50))
-                .ticketsByAirline(new ArrayList<>())
-                .flightsByStatus(Map.of("SCHEDULED", 120, "COMPLETED", 80))
-                .paymentsByStatus(Map.of("COMPLETED", 150, "PENDING", 50))
-                .paymentsByMethod(new ArrayList<>())
-                .dailyTickets(new ArrayList<>())
-                .build();
-
-        when(adminMonitorFlight.monitorFlightTransactions(startDate, endDate, airlineId)).thenReturn(response);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "2024-01-01")
-                .param("endDate", "2024-01-31")
-                .param("airlineId", "0"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Flight monitoring data retrieved successfully"))
-                .andExpect(jsonPath("$.data.totalTickets").value(200))
-                .andExpect(jsonPath("$.data.totalRevenue").value(100000.0))
-                .andExpect(jsonPath("$.data.ticketsByPaymentStatus.paid").value(150))
-                .andExpect(jsonPath("$.data.ticketsByPaymentStatus.unpaid").value(50))
-                .andExpect(jsonPath("$.data.flightsByStatus.SCHEDULED").value(120))
-                .andExpect(jsonPath("$.data.flightsByStatus.COMPLETED").value(80));
-
-        verify(adminMonitorFlight).monitorFlightTransactions(startDate, endDate, airlineId);
-    }
-
-    @Test
-    @DisplayName("Monitor flights - specific airline - success")
-    void testMonitorFlights_SpecificAirline_Success() throws Exception {
-        // Arrange
-        LocalDate startDate = LocalDate.of(2024, 1, 1);
-        LocalDate endDate = LocalDate.of(2024, 1, 31);
-        long airlineId = 1L;
-
-        FlightMonitoringResponse response = FlightMonitoringResponse.builder()
-                .totalTickets(100)
-                .totalRevenue(50000.0)
-                .ticketsByPaymentStatus(Map.of("paid", 100))
-                .ticketsByAirline(new ArrayList<>())
-                .flightsByStatus(Map.of("SCHEDULED", 100))
-                .paymentsByStatus(Map.of("COMPLETED", 100))
-                .paymentsByMethod(new ArrayList<>())
-                .dailyTickets(new ArrayList<>())
-                .build();
-
-        when(adminMonitorFlight.monitorFlightTransactions(startDate, endDate, airlineId)).thenReturn(response);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "2024-01-01")
-                .param("endDate", "2024-01-31")
-                .param("airlineId", "1"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalTickets").value(100))
-                .andExpect(jsonPath("$.data.totalRevenue").value(50000.0));
-
-        verify(adminMonitorFlight).monitorFlightTransactions(startDate, endDate, airlineId);
-    }
-
-    @Test
-    @DisplayName("Monitor flights - default airlineId when not provided")
-    void testMonitorFlights_DefaultAirlineId() throws Exception {
-        // Arrange
-        LocalDate startDate = LocalDate.of(2024, 1, 1);
-        LocalDate endDate = LocalDate.of(2024, 1, 31);
-        long defaultAirlineId = 0L;
-
-        FlightMonitoringResponse response = FlightMonitoringResponse.builder()
-                .totalTickets(200)
-                .totalRevenue(100000.0)
-                .ticketsByPaymentStatus(new HashMap<>())
-                .ticketsByAirline(new ArrayList<>())
-                .flightsByStatus(new HashMap<>())
-                .paymentsByStatus(new HashMap<>())
-                .paymentsByMethod(new ArrayList<>())
-                .dailyTickets(new ArrayList<>())
-                .build();
-
-        when(adminMonitorFlight.monitorFlightTransactions(startDate, endDate, defaultAirlineId)).thenReturn(response);
-
-        // Act & Assert - airlineId not provided, should default to 0
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "2024-01-01")
-                .param("endDate", "2024-01-31"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true));
-
-        verify(adminMonitorFlight).monitorFlightTransactions(startDate, endDate, defaultAirlineId);
-    }
-
-    @Test
-    @DisplayName("Monitor flights - invalid date format")
-    void testMonitorFlights_InvalidDateFormat() throws Exception {
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "invalid-date")
-                .param("endDate", "2024-01-31")
-                .param("airlineId", "0"))
-                .andExpect(status().is5xxServerError());  // Spring converts parse errors to 500
-
-        verify(adminMonitorFlight, never()).monitorFlightTransactions(any(), any(), anyLong());
-    }
-
-    // ==================== getAllHotels Tests ====================
 
     @Test
     @DisplayName("Get all hotels - success")
@@ -330,52 +201,6 @@ class AdminControllerTest {
         verify(adminService).getAllHotels();
     }
 
-    // ==================== getAllAirlines Tests ====================
-
-    @Test
-    @DisplayName("Get all airlines - success")
-    void testGetAllAirlines_Success() throws Exception {
-        // Arrange
-        List<PartnerShipNameResponse> airlines = Arrays.asList(
-                new PartnerShipNameResponse(1, "Airline A"),
-                new PartnerShipNameResponse(2, "Airline B")
-        );
-
-        when(adminService.getAllAirlines()).thenReturn(airlines);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/airlines"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Airlines retrieved successfully"))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].id").value(1))
-                .andExpect(jsonPath("$.data[0].name").value("Airline A"))
-                .andExpect(jsonPath("$.data[1].id").value(2))
-                .andExpect(jsonPath("$.data[1].name").value("Airline B"));
-
-        verify(adminService).getAllAirlines();
-    }
-
-    @Test
-    @DisplayName("Get all airlines - empty list")
-    void testGetAllAirlines_EmptyList() throws Exception {
-        // Arrange
-        when(adminService.getAllAirlines()).thenReturn(new ArrayList<>());
-
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/airlines"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data").isArray())
-                .andExpect(jsonPath("$.data.length()").value(0));
-
-        verify(adminService).getAllAirlines();
-    }
-
-    // ==================== Edge Cases ====================
-
     @Test
     @DisplayName("Monitor bookings - same day date range")
     void testMonitorBookings_SameDayRange() throws Exception {
@@ -408,36 +233,6 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("Monitor flights - same day date range")
-    void testMonitorFlights_SameDayRange() throws Exception {
-        // Arrange
-        LocalDate sameDate = LocalDate.of(2024, 1, 15);
-
-        FlightMonitoringResponse response = FlightMonitoringResponse.builder()
-                .totalTickets(20)
-                .totalRevenue(10000.0)
-                .ticketsByPaymentStatus(new HashMap<>())
-                .ticketsByAirline(new ArrayList<>())
-                .flightsByStatus(new HashMap<>())
-                .paymentsByStatus(new HashMap<>())
-                .paymentsByMethod(new ArrayList<>())
-                .dailyTickets(new ArrayList<>())
-                .build();
-
-        when(adminMonitorFlight.monitorFlightTransactions(sameDate, sameDate, 0L)).thenReturn(response);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "2024-01-15")
-                .param("endDate", "2024-01-15"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.totalTickets").value(20));
-
-        verify(adminMonitorFlight).monitorFlightTransactions(sameDate, sameDate, 0L);
-    }
-
-    @Test
     @DisplayName("Monitor bookings - missing required parameters")
     void testMonitorBookings_MissingParameters() throws Exception {
         // Act & Assert - missing startDate
@@ -451,21 +246,5 @@ class AdminControllerTest {
                 .andExpect(status().is5xxServerError());
 
         verify(adminService, never()).monitorBookings(any(), any(), anyLong());
-    }
-
-    @Test
-    @DisplayName("Monitor flights - missing required parameters")
-    void testMonitorFlights_MissingParameters() throws Exception {
-        // Act & Assert - missing startDate
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("endDate", "2024-01-31"))
-                .andExpect(status().is5xxServerError());
-
-        // missing endDate
-        mockMvc.perform(get("/api/admin/monitor-flights")
-                .param("startDate", "2024-01-01"))
-                .andExpect(status().is5xxServerError());
-
-        verify(adminMonitorFlight, never()).monitorFlightTransactions(any(), any(), anyLong());
     }
 }

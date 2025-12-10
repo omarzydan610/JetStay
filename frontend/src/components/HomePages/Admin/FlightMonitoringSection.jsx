@@ -122,7 +122,6 @@ export default function FlightMonitoringSection() {
       fetchRef.current = true;
       setLoadingAirlines(true);
       try {
-        if (airlines.length > 0) return; // Avoid refetching if already loaded
         const airlinesData = await adminMonitoringService.getAllAirlines();
         setAirlines(airlinesData || []);
       } catch (err) {
