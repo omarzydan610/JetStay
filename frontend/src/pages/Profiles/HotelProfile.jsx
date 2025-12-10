@@ -8,9 +8,11 @@ import AdminEditModal from "../../components/ProfileComponents/AdminEditModal";
 import { updateHotelData } from "../../services/profiles/hotelProfileService";
 import hotelImageService from "../../services/HotelServices/HotelImageService";
 import ConfirmationModal from "../../components/ConfirmationModal";
+import { updateUserInfo } from "../../services/profiles/userUpdateProfileService";
+import { toast } from "react-toastify";
 
 function HotelProfile() {
-  const { userData, businessData, updateBusinessData } = useAppContext();
+  const { userData, businessData, updateBusinessData, updateUserData } = useAppContext();
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [businessModalError, setBusinessModalError] = useState(null);
@@ -68,6 +70,12 @@ function HotelProfile() {
         setIsDeleteModalOpen(false);
       }
     };
+  useEffect(() => {
+      if (sessionStorage.getItem("showUpdateToast")) {
+        toast.success("Profile updated successfully!");
+        sessionStorage.removeItem("showUpdateToast");
+      }
+    }, []);
 
   const handleEditBusiness = () => {
     setIsEditingBusiness(true);
@@ -100,22 +108,25 @@ function HotelProfile() {
   };
 
   const handleSaveAdmin = async (formData) => {
-    // try {
-    //   setAdminModalError(null);
-    //   const response = await updateAdminData({
-    //     firstName: formData.firstName,
-    //     lastName: formData.lastName,
-    //     email: formData.email,
-    //     phoneNumber: formData.phoneNumber,
-    //   });
-    //   updateUserData(response);
-    //   window.location.reload();
-    // } catch (error) {
-    //   console.error("Error updating admin data:", error);
-    //   setAdminModalError("Failed to update admin information. Please try again.");
-    //   throw error;
-    // }
-    alert("not implemented yet");
+    let data = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        phoneNumber: formData.phoneNumber,
+      }
+      console.log("Updating user with data:", data);
+    try {
+      const updatedUser = await updateUserInfo(data);
+
+      updateUserData(updatedUser); 
+      
+      setIsEditingAdmin(false);
+      toast.success("Profile updated successfully!");
+      sessionStorage.setItem("showUpdateToast", "true");
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to update profile", error);
+      toast.error("Failed to update profile. Please try again.");
+    }
   };
 
   const handleCloseBusinessModal = () => {

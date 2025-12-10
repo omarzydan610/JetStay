@@ -4,6 +4,8 @@ import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
 import HotelProfile from "./HotelProfile";
 import AirlineProfile from "./AirlineProfile";
+import UserProfile from "./UserProfile";
+
 
 function BaseProfile() {
   const navigate = useNavigate();
@@ -68,12 +70,7 @@ function BaseProfile() {
           {/* System admin specific content goes here */}
         </div>
       ) : (
-        <div className="p-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to JetStay
-          </h1>
-          {/* General user content goes here */}
-        </div>
+        <UserProfile />
       )}
     </div>
   );
