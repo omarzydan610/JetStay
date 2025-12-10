@@ -3,8 +3,11 @@ package com.example.backend.repository;
 
 import com.example.backend.entity.FlightTicket;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -24,5 +27,84 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
     List<FlightTicket> findByIsPaidTrue();
 
     List<FlightTicket> findByAirlineAirlineNameAndIsPaidTrue(String airlineName);
+
+    // Admin monitoring queries
+    @Query("SELECT COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate")
+    List<Object[]> getTotalTicketsCountBetweenDate(@Param("startDate") LocalDate startDate,
+                                             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT ft.isPaid, COUNT(ft) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY ft.isPaid")
+    List<Object[]> getTicketCountsByPaymentStatusBetweenDate(@Param("startDate") LocalDate startDate,
+                                                             @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT ft.airline.airlineID, ft.airline.airlineName, COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY ft.airline.airlineID, ft.airline.airlineName " +
+           "ORDER BY COUNT(ft) DESC")
+    List<Object[]> getTicketCountsAndRevenueByAirlineBetweenDate(@Param("startDate") LocalDate startDate,
+                                                                 @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT ft.flight.status, COUNT(ft) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY ft.flight.status")
+    List<Object[]> getFlightCountsByStatusBetweenDate(@Param("startDate") LocalDate startDate,
+                                                      @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT ft.flightDate, COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate " +
+           "GROUP BY ft.flightDate " +
+           "ORDER BY ft.flightDate")
+    List<Object[]> getDailyTicketSalesSummary(@Param("startDate") LocalDate startDate,
+                                             @Param("endDate") LocalDate endDate);
+
+    // Airline-specific filtering queries
+    @Query("SELECT COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId")
+    List<Object[]> getTotalTicketsCountBetweenDateAndAirline(@Param("startDate") LocalDate startDate,
+                                                       @Param("endDate") LocalDate endDate,
+                                                       @Param("airlineId") Long airlineId);
+
+    @Query("SELECT ft.isPaid, COUNT(ft) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId " +
+           "GROUP BY ft.isPaid")
+    List<Object[]> getTicketCountsByPaymentStatusBetweenDateAndAirline(@Param("startDate") LocalDate startDate,
+                                                                       @Param("endDate") LocalDate endDate,
+                                                                       @Param("airlineId") Long airlineId);
+
+    @Query("SELECT ft.airline.airlineID, ft.airline.airlineName, COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId " +
+           "GROUP BY ft.airline.airlineID, ft.airline.airlineName " +
+           "ORDER BY COUNT(ft) DESC")
+    List<Object[]> getTicketCountsAndRevenueByAirlineBetweenDateAndAirline(@Param("startDate") LocalDate startDate,
+                                                                           @Param("endDate") LocalDate endDate,
+                                                                           @Param("airlineId") Long airlineId);
+
+    @Query("SELECT ft.flight.status, COUNT(ft) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId " +
+           "GROUP BY ft.flight.status")
+    List<Object[]> getFlightCountsByStatusBetweenDateAndAirline(@Param("startDate") LocalDate startDate,
+                                                                @Param("endDate") LocalDate endDate,
+                                                                @Param("airlineId") Long airlineId);
+
+    @Query("SELECT ft.flightDate, COUNT(ft), COALESCE(SUM(ft.price), 0.0) " +
+           "FROM FlightTicket ft " +
+           "WHERE ft.flightDate BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId " +
+           "GROUP BY ft.flightDate " +
+           "ORDER BY ft.flightDate")
+    List<Object[]> getDailyTicketSalesSummaryByAirline(@Param("startDate") LocalDate startDate,
+                                                       @Param("endDate") LocalDate endDate,
+                                                       @Param("airlineId") Long airlineId);
 }
 
