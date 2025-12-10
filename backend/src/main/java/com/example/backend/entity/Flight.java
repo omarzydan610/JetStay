@@ -20,7 +20,7 @@ public class Flight {
   @Column(name = "flight_id")
   private Integer flightID;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "airline_id", nullable = false)
   private Airline airline;
 
@@ -28,7 +28,7 @@ public class Flight {
   @JoinColumn(name = "departure_airport_id", nullable = false)
   private Airport departureAirport;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne
   @JoinColumn(name = "arrival_airport_id", nullable = false)
   private Airport arrivalAirport;
 
@@ -49,7 +49,7 @@ public class Flight {
   private String planeType;
 
 
-  @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
   private List<TripType> tripsTypes;
 
   public enum FlightStatus {
