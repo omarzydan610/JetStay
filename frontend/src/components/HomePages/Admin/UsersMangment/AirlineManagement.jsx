@@ -239,6 +239,8 @@ const AirlineManagement = () => {
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           airline.status === "ACTIVE"
                             ? "bg-green-100 text-green-800"
+                            : airline.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
                             : "bg-red-100 text-red-800"
                         }`}
                       >
@@ -246,25 +248,34 @@ const AirlineManagement = () => {
                       </span>
                     </td>
                     <td className="px-4 md:px-6 py-4 text-sm">
-                      <button
-                        onClick={() =>
-                          openModal(
+                      {airline.status === "PENDING" ? (
+                        <button
+                          onClick={() => openModal("activate", airline.id)}
+                          className="px-3 py-1.5 rounded-lg text-white text-xs font-medium transition-all duration-200 bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg"
+                        >
+                          Approve
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() =>
+                            openModal(
+                              airline.status === "ACTIVE"
+                                ? "deactivate"
+                                : "activate",
+                              airline.id
+                            )
+                          }
+                          className={`px-3 py-1.5 rounded-lg text-white text-xs font-medium transition-all duration-200 ${
                             airline.status === "ACTIVE"
-                              ? "deactivate"
-                              : "activate",
-                            airline.id
-                          )
-                        }
-                        className={`px-3 py-1.5 rounded-lg text-white text-xs font-medium transition-all duration-200 ${
-                          airline.status === "ACTIVE"
-                            ? "bg-red-600 hover:bg-red-700 shadow-md hover:shadow-lg"
-                            : "bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg"
-                        }`}
-                      >
-                        {airline.status === "ACTIVE"
-                          ? "Deactivate"
-                          : "Activate"}
-                      </button>
+                              ? "bg-red-600 hover:bg-red-700 shadow-md hover:shadow-lg"
+                              : "bg-green-600 hover:bg-green-700 shadow-md hover:shadow-lg"
+                          }`}
+                        >
+                          {airline.status === "ACTIVE"
+                            ? "Deactivate"
+                            : "Activate"}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))
