@@ -1,40 +1,23 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import airlineStatService from "../../../services/Airline/airlineStatestics";
-import { useAppContext } from "../../../contexts/AppContext";
 import Navbar from "../../../components/Navbar";
-import AddFlightSection from "../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
-import EditableFlightList from "../../../components/HomePages/Airline/FlightsMangment/EditableFlightList";
+import EditableRoomList from "../../../components/HomePages/Hotel/RoomManagement/EditableRoomList";
+import AddRoomSection from "../../../components/HomePages/Hotel/RoomManagement/AddRoomSection";
 import PrimaryButton from "../../../components/HomePages/PrimaryButton";
-import GlassCard from "../../../components/HomePages/Airline/GlassCard";
+import GlassCard from "../../../components/HomePages/Hotel/GlassCard";
 
-function FlightManagementPage() {
+function HotelManagementPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userData, fetchUserAndBusinessData } = useAppContext();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState(location.state?.tab || "manage");
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        if (!userData) {
-          await fetchUserAndBusinessData();
-        }
-        await airlineStatService.getAirlineStatistics();
-      } catch (err) {
-        console.error("Failed to fetch data:", err);
-        setError("Failed to fetch airline data. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    setLoading(false);
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -66,7 +49,7 @@ function FlightManagementPage() {
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            Loading flight management...
+            Loading room management...
           </motion.p>
         </div>
       </div>
@@ -122,7 +105,7 @@ function FlightManagementPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.1 }}
             >
-              Flight Management
+              Room Management
             </motion.h1>
             <motion.p
               className="text-gray-600 text-lg"
@@ -130,7 +113,7 @@ function FlightManagementPage() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.7, delay: 0.3 }}
             >
-              Manage your flight operations
+              Manage your room types
             </motion.p>
           </div>
           <PrimaryButton
@@ -154,7 +137,7 @@ function FlightManagementPage() {
                     : "text-gray-600 hover:text-sky-600"
                 }`}
               >
-                📋 Manage Flights
+                📋 Manage Rooms
               </motion.button>
               <motion.button
                 onClick={() => setActiveTab("add")}
@@ -166,7 +149,7 @@ function FlightManagementPage() {
                     : "text-gray-600 hover:text-sky-600"
                 }`}
               >
-                ➕ Add New Flight
+                ➕ Add New Room
               </motion.button>
             </div>
           </GlassCard>
@@ -180,7 +163,7 @@ function FlightManagementPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <EditableFlightList />
+            <EditableRoomList />
           </motion.div>
         )}
 
@@ -191,7 +174,7 @@ function FlightManagementPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
           >
-            <AddFlightSection />
+            <AddRoomSection onRoomCreated={() => setActiveTab("manage")} />
           </motion.div>
         )}
       </motion.div>
@@ -199,4 +182,4 @@ function FlightManagementPage() {
   );
 }
 
-export default FlightManagementPage;
+export default HotelManagementPage;

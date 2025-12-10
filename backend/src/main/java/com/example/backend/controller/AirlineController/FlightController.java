@@ -2,6 +2,7 @@ package com.example.backend.controller.AirlineController;
 
 import java.util.List;
 
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -100,4 +101,11 @@ public class FlightController {
         return ResponseEntity.ok(SuccessResponse.of("Ticket types retrieved successfully",
                 flightService.getTicketTypes()));
     }
+
+    @GetMapping("/details/{id}")
+    public ResponseEntity<?> getFlightDetailsByID(@PathVariable int id){
+        List<FlightDetailsDTO> flightDetailsDTOS = flightService.getFlightDetails(id);
+        return ResponseEntity.ok(SuccessResponse.of("Flight Details retrieved successfully", flightDetailsDTOS));
+    }
+
 }

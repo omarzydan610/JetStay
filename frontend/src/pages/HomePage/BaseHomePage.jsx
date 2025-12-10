@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "../../contexts/AppContext";
 import Navbar from "../../components/Navbar";
-import HotelHomePage from "./HotelHomePage";
+import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
 import UserHomePage from "./UserHomePage";
 

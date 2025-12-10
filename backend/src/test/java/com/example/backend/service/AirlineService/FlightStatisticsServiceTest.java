@@ -1,12 +1,11 @@
-package com.example.backend.service.airline_stat;
+package com.example.backend.service.AirlineService;
 
-import com.example.backend.dto.AirlineDTO.TripTypeStatsRequestDTO;
 import com.example.backend.entity.*;
-import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.repository.*;
-import com.example.backend.entity.Flight.FlightStatus;
-import com.example.backend.service.AirlineService.TripTypeStatisticsService;
 import com.example.backend.service.AuthService.JwtAuthService;
+import com.example.backend.strategy.airline_stat.FlightCountStatistics;
+import com.example.backend.strategy.airline_stat.RatingStatistics;
+import com.example.backend.strategy.airline_stat.RevenueStatistics;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,36 +15,29 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 @SpringBootTest
-public class TripTypeStatsServiceTest {
-
-        @Autowired
-        private TripTypeStatisticsService tripTypeStatsService;
+class FlightStatisticsServiceTest {
 
         @Autowired
         private AirlineRepository airlineRepository;
 
         @Autowired
-        private AirportRepository airportRepository;
-
-        @Autowired
         private FlightRepository flightRepository;
-
-        @Autowired
-        private TripTypeRepository tripTypeRepository;
 
         @Autowired
         private FlightTicketRepository flightTicketRepository;
 
         @Autowired
-        private UserRepository userRepository;
+        private FlightReviewRepository flightReviewRepository;
 
         @Autowired
-        private FlightReviewRepository flightReviewRepository;
+        private AirportRepository airportRepository;
+
+        @Autowired
+        private TripTypeRepository tripTypeRepository;
+
+        @Autowired
+        private UserRepository userRepository;
 
         @MockBean
         private JwtAuthService jwtAuthService;
@@ -93,20 +85,17 @@ public class TripTypeStatsServiceTest {
                                 null, emirates, dubai, cairo,
                                 LocalDateTime.of(2025, 12, 1, 10, 0),
                                 LocalDateTime.of(2025, 12, 1, 12, 30),
-                                FlightStatus.ON_TIME, "DXB → CAI", "Boeing 777"));
+                                Flight.FlightStatus.ON_TIME, "DXB → CAI", "Boeing 777"));
                 Flight qatarFlight = flightRepository.save(new Flight(
                                 null, qatar, doha, dubai,
                                 LocalDateTime.of(2025, 12, 2, 14, 0),
                                 LocalDateTime.of(2025, 12, 2, 16, 30),
-                                FlightStatus.PENDING, "DOH → DXB", "Airbus A350"));
+                                Flight.FlightStatus.PENDING, "DOH → DXB", "Airbus A350"));
 
                 // 5. Trip Types
-                TripType economy = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
-                TripType business = tripTypeRepository
-                                .save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
-                TripType firstClass = tripTypeRepository
-                                .save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
+                TripType economy = tripTypeRepository.save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
+                TripType business = tripTypeRepository.save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
+                TripType firstClass = tripTypeRepository.save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
 
                 // 6. Tickets (with non-null user + tripType)
                 FlightTicket emiratesTicket1 = flightTicketRepository.save(new FlightTicket(
@@ -134,33 +123,49 @@ public class TripTypeStatsServiceTest {
         }
 
         @Test
-        public void testGetAverageTicketsPerType() {
-
-                TripTypeStatsRequestDTO averages = tripTypeStatsService
-                                .getTripTypeStats(airlineRepository.findAll().get(0).getAirlineID());
-
-                System.out.println("Airline: " + averages.getAirlineName());
-                System.out.println("Averages: " + averages.getAverageTicketsPerType());
-
-                assertNotNull(averages);
+        void testFlightCount() {
+                String airlineName = "EgyptAir";
+                FlightCountStatistics stats = new FlightCountStatistics(airlineRepository, flightRepository);
+                Double result = stats.calculate(airlineName);
+                System.out.println("Total flights for " + airlineName + ": " + result);
         }
 
         @Test
-        public void testGetAverageTicketsPerTypeForAll() {
-                TripTypeStatsRequestDTO averages = tripTypeStatsService.getTripTypeStats();
-
-                System.out.println("Airline: " + averages.getAirlineName());
-                System.out.println("Averages: " + averages.getAverageTicketsPerType());
-
-                assertNotNull(averages);
+        void testRevenue() {
+                String airlineName = "EgyptAir";
+                RevenueStatistics stats = new RevenueStatistics(airlineRepository, flightTicketRepository);
+                Double result = stats.calculate(airlineName);
+                System.out.println("Total revenue for " + airlineName + ": " + result);
         }
 
         @Test
-        public void testGetTripTypeStats_NonExistentAirline_ThrowsException() {
-                // Act & Assert
-                UnauthorizedException exception = assertThrows(
-                                UnauthorizedException.class,
-                                () -> tripTypeStatsService.getTripTypeStats(-999));
-                assertEquals("Airline not found for the given ID: -999", exception.getMessage());
+        void testAvgRating() {
+                String airlineName = "EgyptAir";
+                RatingStatistics stats = new RatingStatistics(airlineRepository, flightRepository,
+                                flightReviewRepository);
+                Double result = stats.calculate(airlineName);
+                System.out.println("Avg Rating for " + airlineName + ": " + result);
+        }
+
+        @Test
+        void testAllFlightCount() {
+                FlightCountStatistics stats = new FlightCountStatistics(airlineRepository, flightRepository);
+                Double result = stats.calculate("");
+                System.out.println("Total Overall flights : " + result);
+        }
+
+        @Test
+        void testAllRevenue() {
+                RevenueStatistics stats = new RevenueStatistics(airlineRepository, flightTicketRepository);
+                Double result = stats.calculate("");
+                System.out.println("Total Overall revenue : " + result);
+        }
+
+        @Test
+        void testAllAvgRating() {
+                RatingStatistics stats = new RatingStatistics(airlineRepository, flightRepository,
+                                flightReviewRepository);
+                Double result = stats.calculate("");
+                System.out.println("Avg Overall Rating : " + result);
         }
 }
