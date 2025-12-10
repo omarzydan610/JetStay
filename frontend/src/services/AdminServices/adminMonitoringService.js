@@ -10,14 +10,11 @@ const adminMonitoringService = {
    */
   getAllHotels: async () => {
     try {
-      const response = await apiClient.get(
-        `${API_BASE_URL}/api/admin/hotels`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-          },
+      const response = await apiClient.get(`${API_BASE_URL}/api/admin/hotels`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         }
-      );
+      });
       return response.data?.data || [];
     } catch (error) {
       console.error("Error fetching hotels list:", error);
@@ -31,14 +28,11 @@ const adminMonitoringService = {
    */
   getAllAirlines: async () => {
     try {
-      const response = await apiClient.get(
-        `${API_BASE_URL}/api/admin/airlines`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-          },
+      const response = await apiClient.get(`${API_BASE_URL}/api/admin/airlines`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         }
-      );
+      });
       return response.data?.data || [];
     } catch (error) {
       console.error("Error fetching airlines list:", error);

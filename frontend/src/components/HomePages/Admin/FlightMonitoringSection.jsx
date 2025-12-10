@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
@@ -104,6 +104,8 @@ export default function FlightMonitoringSection() {
   const [selectedAirlineId, setSelectedAirlineId] = useState(0);
   const [airlines, setAirlines] = useState([]);
   const [loadingAirlines, setLoadingAirlines] = useState(false);
+  const fetchRef = useRef(false);
+
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -116,8 +118,11 @@ export default function FlightMonitoringSection() {
 
   useEffect(() => {
     const fetchAirlines = async () => {
+      if (fetchRef.current) return;
+      fetchRef.current = true;
       setLoadingAirlines(true);
       try {
+        if (airlines.length > 0) return; // Avoid refetching if already loaded
         const airlinesData = await adminMonitoringService.getAllAirlines();
         setAirlines(airlinesData || []);
       } catch (err) {
@@ -347,7 +352,7 @@ export default function FlightMonitoringSection() {
             />
             <EnhancedStatCard
               label="Total Revenue"
-              value={`$${monitoringData.totalRevenue?.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) || '0.00'}`}
+              value={`$${monitoringData.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`}
               subValue={`Avg: $${monitoringData.totalTickets ? (monitoringData.totalRevenue / monitoringData.totalTickets).toFixed(2) : '0.00'} per ticket`}
               icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
             />
@@ -529,7 +534,7 @@ export default function FlightMonitoringSection() {
                     <p className="text-3xl font-bold bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent mb-1">
                       {method.count}
                     </p>
-                    <p className="text-sm text-gray-600 font-medium">${method.totalAmount?.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+                    <p className="text-sm text-gray-600 font-medium">${method.totalAmount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
                     <p className="text-xs text-gray-500 mt-1">Avg: ${(method.totalAmount / method.count).toFixed(2)}</p>
                   </div>
                 );
