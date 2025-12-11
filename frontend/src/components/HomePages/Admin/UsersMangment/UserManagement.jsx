@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { RotateCcw, X } from 'lucide-react';
 import { toast } from "react-toastify";
-import { getUsersByFilter } from '../../services/SystemAdminService/dashboardService';
-import { activateUser, deactivateUser } from '../../services/SystemAdminService/changeStatusService';
+import { getUsersByFilter } from '../../../../services/SystemAdminService/dashboardService';
+import { activateUser, deactivateUser } from '../../../../services/SystemAdminService/changeStatusService';
 
 const UserManagement = () => {
 
