@@ -202,8 +202,9 @@ export async function getTicketTypes() {
 
 export const getFlightDetails = async (id) => {
   try {
+    console.log(id)
     const token = authService.getToken();
-    const res = await apiClient.get(`${API_URL}details/${id}`, {
+    const res = await apiClient.get(`${API_URL}/details/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return res.data;

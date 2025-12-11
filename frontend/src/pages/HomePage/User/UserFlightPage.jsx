@@ -1,17 +1,19 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getFlightsGraph } from "../../../services/Airline/flightsService";
 import UserFlightCard from "../../../components/HomePages/UserFlightCard";
+import FlightDetailsCard from "../../../components/flights/FlightDetailsCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 import { toast } from "react-toastify";
 
 export default function UserFlightPage() {
   const [flights, setFlights] = useState([]);
   const [page, setPage] = useState(0);
-  const size = 2;
+  const size = 20;
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [lastFetchedPage, setLastFetchedPage] = useState(-1);
   const [lastFilterKey, setLastFilterKey] = useState("");
+  const [selectedFlightId, setSelectedFlightId] = useState(null);
 
   const [filter, setFilter] = useState({});
 
@@ -225,6 +227,31 @@ export default function UserFlightPage() {
     setFilter({});
   };
 
+  if (selectedFlightId) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6">
+        {/* Outer frame */}
+        <div className="relative bg-white rounded-xl shadow-lg border border-gray-200 w-full max-w-4xl p-6">
+          
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedFlightId(null)}
+            className="absolute top-0 left-0 w-10 h-10 flex items-center justify-center 
+                      bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 
+                      transition shadow-md"
+            aria-label="Close"
+          >
+            ✕
+          </button>
+
+          {/* Flight details inside framed card */}
+          <FlightDetailsCard id={selectedFlightId} />
+        </div>
+      </div>
+    );
+  }
+
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-sky-50 to-cyan-50">
       <div className="max-w-6xl mx-auto p-6 space-y-6">
@@ -401,7 +428,7 @@ export default function UserFlightPage() {
                       key={flight.flightID}
                       className="w-full transform transition hover:-translate-y-1 hover:shadow-lg"
                     >
-                      <UserFlightCard flight={flight} />
+                      <UserFlightCard flight={flight} onClick={() => setSelectedFlightId(flight.flightID)}/>
                     </div>
                   ))}
                 </div>
