@@ -94,7 +94,7 @@ public class RoomServiceTest {
     @Order(2)
     void testGetRoomTypeById() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "Suite", 2, hotel, 5, "Desc", 200f));
+                new RoomType(null, "Suite", 2, hotel, 5, "Desc", 200f, null));
 
         RoomType found = roomTypeService.getRoomTypeById(hotel.getHotelID(), saved.getRoomTypeID());
 
@@ -106,8 +106,8 @@ public class RoomServiceTest {
     @Test
     @Order(3)
     void testGetRoomTypesByHotelId() {
-        roomTypeRepository.save(new RoomType(null, "Single", 1, hotel, 10, "A", 100f));
-        roomTypeRepository.save(new RoomType(null, "Double", 2, hotel, 6, "B", 150f));
+        roomTypeRepository.save(new RoomType(null, "Single", 1, hotel, 10, "A", 100f, null));
+        roomTypeRepository.save(new RoomType(null, "Double", 2, hotel, 6, "B", 150f, null));
 
         List<?> list = roomTypeService.getRoomTypesByHotelId(hotel.getHotelID());
 
@@ -119,7 +119,7 @@ public class RoomServiceTest {
     @Order(4)
     void testUpdateRoomTypeSuccess() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "OldName", 2, hotel, 5, "Old", 100f));
+                new RoomType(null, "OldName", 2, hotel, 5, "Old", 100f, null));
 
         RoomTypeRequest dto = new RoomTypeRequest();
         dto.setRoomTypeName("NewName");
@@ -150,7 +150,7 @@ public class RoomServiceTest {
     @Order(6)
     void testDeleteRoomType() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "Del", 2, hotel, 4, "D", 150f));
+                new RoomType(null, "Del", 2, hotel, 4, "D", 150f, null));
 
         roomTypeService.deleteRoomType(hotel.getHotelID(), saved.getRoomTypeID());
 
@@ -182,7 +182,7 @@ public class RoomServiceTest {
     @Order(9)
     void testGetRoomTypeById_Unauthorized() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "UnauthorizedTest", 2, hotel, 4, "X", 100f));
+                new RoomType(null, "UnauthorizedTest", 2, hotel, 4, "X", 100f, null));
 
         assertThrows(UnauthorizedException.class,
                 () -> roomTypeService.getRoomTypeById(9999, saved.getRoomTypeID()));
@@ -201,7 +201,7 @@ public class RoomServiceTest {
     @Order(11)
     void testDeleteRoomType_Unauthorized() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "DelFail", 2, hotel, 4, "D", 150f));
+                new RoomType(null, "DelFail", 2, hotel, 4, "D", 150f, null));
 
         assertThrows(UnauthorizedException.class,
                 () -> roomTypeService.deleteRoomType(9999, saved.getRoomTypeID()));
@@ -237,7 +237,7 @@ public class RoomServiceTest {
     @Order(14)
     void testUpdateRoomType_UpdateAllFields() {
         RoomType saved = roomTypeRepository.save(
-                new RoomType(null, "NameA", 2, hotel, 5, "DescA", 100f));
+                new RoomType(null, "NameA", 2, hotel, 5, "DescA", 100f, null));
 
         RoomTypeRequest dto = new RoomTypeRequest();
         dto.setRoomTypeName("NameB");

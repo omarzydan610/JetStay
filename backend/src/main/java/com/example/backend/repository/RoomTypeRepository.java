@@ -3,6 +3,9 @@ package com.example.backend.repository;
 import com.example.backend.dto.RoomTypeResponse;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,5 +19,8 @@ public interface RoomTypeRepository extends JpaRepository<RoomType, Integer> {
     public List<RoomTypeResponse> findByHotelId(@Param("hotelId") int hotelId);
 
     List<RoomType> findByHotel(Hotel hotel);
+
+    @EntityGraph(attributePaths = {"hotel", "roomImages"})
+    Page<RoomType> findAll(Pageable pageable);
 
 }

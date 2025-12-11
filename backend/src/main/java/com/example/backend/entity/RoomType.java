@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Table(name = "room_types")
 @Data
@@ -35,4 +37,7 @@ public class RoomType {
 
   @Column(name = "price", nullable = false)
   private Float price;
+
+  @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<RoomImage> roomImages;
 }

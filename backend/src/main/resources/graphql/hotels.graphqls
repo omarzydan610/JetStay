@@ -1,0 +1,62 @@
+# ============================
+# Hotel Related Types
+# ============================
+
+type Hotel {
+    hotelID: ID
+    hotelName: String
+    latitude: Float
+    longitude: Float
+    city: String
+    country: String
+    hotelRate: Float
+    numberOfRates: Int
+    admin: User
+    createdAt: String
+    logoUrl: String
+    status: HotelStatus
+}
+
+type Room {
+    roomTypeID: ID
+    roomTypeName: String
+    price: Float
+    quantity: Int
+    numberOfGuests: Int
+    description: String
+    images: [RoomImage!]   # return images of this room
+    hotel: Hotel!          # include hotel info for each room
+}
+
+type RoomImage {
+    imageID: ID
+    imageUrl: String
+}
+
+type User {
+    userID: ID
+    username: String
+    email: String
+}
+
+enum HotelStatus {
+    ACTIVE
+    INACTIVE
+}
+
+# ============================
+# Filters
+# ============================
+
+input RoomFilterDTO {
+    roomNameContains: String
+    roomTypeContains: String
+    priceGte: Float
+    priceLte: Float
+    hotelRateGte: Float
+    hotelRateLte: Float
+    hotelID: Int
+    hotelNameContains: String
+    cityContains: String
+    countryContains: String
+}

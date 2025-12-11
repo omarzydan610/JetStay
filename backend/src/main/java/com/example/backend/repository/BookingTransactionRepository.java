@@ -2,6 +2,7 @@ package com.example.backend.repository;
 
 import com.example.backend.dto.AdminDTO.DatabaseDTO.CountByStateDTO;
 import com.example.backend.entity.BookingTransaction;
+import com.example.backend.entity.Hotel;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,14 +29,12 @@ public interface BookingTransactionRepository extends JpaRepository<BookingTrans
             "ORDER BY COUNT(bt) DESC")
     List<Object[]> getBookingCountsAndRevenueByHotelBetweenDate(LocalDate startDate, LocalDate endDate);
 
-
     @Query("SELECT bt.paymentMethod.methodId, bt.paymentMethod.methodName, COUNT(bt), SUM(bt.totalPrice) " +
             "FROM BookingTransaction bt " +
             "WHERE bt.bookingDate BETWEEN :startDate AND :endDate " +
             "GROUP BY bt.paymentMethod.methodId, bt.paymentMethod.methodName " +
             "ORDER BY COUNT(bt) DESC")
     List<Object[]> getBookingCountsAndRevenueByPaymentMethod(LocalDate startDate, LocalDate endDate);
-
 
     @Query("SELECT bt.bookingDate, COUNT(bt), SUM(bt.totalPrice) " +
             "FROM BookingTransaction bt " +
@@ -60,21 +59,24 @@ public interface BookingTransactionRepository extends JpaRepository<BookingTrans
             "FROM BookingTransaction bt " +
             "WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId " +
             "GROUP BY bt.status")
-    List<CountByStateDTO> getBookingCountsByStatusBetweenDateAndHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
+    List<CountByStateDTO> getBookingCountsByStatusBetweenDateAndHotel(LocalDate startDate, LocalDate endDate,
+            Long hotelId);
 
     @Query("SELECT bt.hotel.hotelID, bt.hotel.hotelName, COUNT(bt), SUM(bt.totalPrice) " +
             "FROM BookingTransaction bt " +
             "WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId " +
             "GROUP BY bt.hotel.hotelID, bt.hotel.hotelName " +
             "ORDER BY COUNT(bt) DESC")
-    List<Object[]> getBookingCountsAndRevenueByHotelBetweenDateAndHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
+    List<Object[]> getBookingCountsAndRevenueByHotelBetweenDateAndHotel(LocalDate startDate, LocalDate endDate,
+            Long hotelId);
 
     @Query("SELECT bt.paymentMethod.methodId, bt.paymentMethod.methodName, COUNT(bt), SUM(bt.totalPrice) " +
             "FROM BookingTransaction bt " +
             "WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId " +
             "GROUP BY bt.paymentMethod.methodId, bt.paymentMethod.methodName " +
             "ORDER BY COUNT(bt) DESC")
-    List<Object[]> getBookingCountsAndRevenueByPaymentMethodAndHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
+    List<Object[]> getBookingCountsAndRevenueByPaymentMethodAndHotel(LocalDate startDate, LocalDate endDate,
+            Long hotelId);
 
     @Query("SELECT bt.bookingDate, COUNT(bt), SUM(bt.totalPrice) " +
             "FROM BookingTransaction bt " +
@@ -86,6 +88,13 @@ public interface BookingTransactionRepository extends JpaRepository<BookingTrans
     @Query("SELECT bt.isPaid, COUNT(bt) FROM BookingTransaction bt " +
             "WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId " +
             "GROUP BY bt.isPaid")
-    List<Object[]> getBookingCountsByPaymentStatusBetweenDateAndHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
+    List<Object[]> getBookingCountsByPaymentStatusBetweenDateAndHotel(LocalDate startDate, LocalDate endDate,
+            Long hotelId);
+
+    @Query("SELECT bt From BookingTransaction bt WHERE bt.bookingDate BETWEEN :startDate AND :endDate ")
+    List<BookingTransaction> getBookingBetweenDate(LocalDate startDate, LocalDate endDate);
+
+    @Query("SELECT bt From BookingTransaction bt WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId  ")
+    List<BookingTransaction> getBookingBetweenDateForHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
 
 }

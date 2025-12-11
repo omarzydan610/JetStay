@@ -56,13 +56,14 @@ public interface FlightRepository extends JpaRepository<Flight, Integer>, JpaSpe
             al.airlineName
         )
         FROM Flight f
-        JOIN f.airline al
-        JOIN f.departureAirport dep
-        JOIN f.arrivalAirport arr
-        JOIN TripType tt ON tt.flight = f
+        LEFT JOIN f.airline al
+        LEFT JOIN f.departureAirport dep
+        LEFT JOIN f.arrivalAirport arr
+        LEFT JOIN TripType tt ON tt.flight = f
         WHERE f.flightID = :flightId
     """)
     List<FlightDetailsDTO> getFlightDetails(@Param("flightId") Integer flightId);
+
 
     @EntityGraph(attributePaths = {"airline", "departureAirport", "arrivalAirport"})
     Page<Flight> findAll(Pageable pageable);

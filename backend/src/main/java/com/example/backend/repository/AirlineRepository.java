@@ -38,7 +38,7 @@ public interface AirlineRepository extends JpaRepository<Airline, Integer> {
             "(:search IS NULL OR :search = '' OR " +
             "LOWER(a.airlineName) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
             "(:nationality IS NULL OR :nationality = '' OR " +
-            "LOWER(a.airlineNationality) = LOWER(:nationality)) AND " +
+            "LOWER(a.airlineNationality) LIKE LOWER(CONCAT('%', :nationality, '%'))) AND " +
             "(:status IS NULL OR :status = '' OR a.status = :status)")
     Page<Airline> findAirlinesWithFilters(
             @Param("search") String search,

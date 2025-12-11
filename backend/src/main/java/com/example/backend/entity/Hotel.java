@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "hotels")
@@ -53,6 +54,9 @@ public class Hotel {
   @Enumerated(EnumType.STRING)
   @Column(name = "status", nullable = false)
   private Status status;
+
+  @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
+  private List<RoomType> roomTypes;
 
   public enum Status {
     PENDING,

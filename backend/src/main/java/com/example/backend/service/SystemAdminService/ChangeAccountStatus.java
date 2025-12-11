@@ -169,7 +169,7 @@ public class ChangeAccountStatus {
         }
     }
 
-    private String loadEmailTemplate(String fileName, String name, String type, String reason) throws Exception {
+    public String loadEmailTemplate(String fileName, String name, String type, String reason) throws Exception {
         ClassPathResource resource = new ClassPathResource("template/" + fileName);
         String template;
 
