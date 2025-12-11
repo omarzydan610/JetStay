@@ -7,11 +7,11 @@ import AirlineEditModal from "../../components/ProfileComponents/AirlineEditModa
 import AdminEditModal from "../../components/ProfileComponents/AdminEditModal";
 import { updateAirlineData } from "../../services/profiles/airlineProfileService";
 import { updateUserInfo } from "../../services/profiles/userUpdateProfileService";
-import { toast } from "react-toastify"
-
+import { toast } from "react-toastify";
 
 function AirlineProfile() {
-  const { userData, businessData, updateUserData, updateBusinessData } = useAppContext();
+  const { userData, businessData, updateUserData, updateBusinessData } =
+    useAppContext();
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [businessModalError, setBusinessModalError] = useState(null);
@@ -37,7 +37,7 @@ function AirlineProfile() {
       const response = await updateAirlineData({
         name: formData.name,
         nationality: formData.nationality,
-        logoUrl: formData.logoUrl,
+        logoFile: formData.logoFile, // Pass the actual file object, not logoUrl
       });
       updateBusinessData(response);
       window.location.reload();
@@ -52,21 +52,20 @@ function AirlineProfile() {
 
   const handleSaveAdmin = async (formData) => {
     let data = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phoneNumber: formData.phoneNumber,
-      }
-      console.log("Updating user with data:", data);
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phoneNumber: formData.phoneNumber,
+    };
+    console.log("Updating user with data:", data);
     try {
       const updatedUser = await updateUserInfo(data);
 
-      updateUserData(updatedUser); 
-      
+      updateUserData(updatedUser);
+
       setIsEditingAdmin(false);
       toast.success("Profile updated successfully!");
       sessionStorage.setItem("showUpdateToast", "true");
       window.location.reload();
-
     } catch (error) {
       console.error("Failed to update profile", error);
       toast.error("Failed to update profile. Please try again.");

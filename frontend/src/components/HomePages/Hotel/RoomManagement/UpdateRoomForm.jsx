@@ -4,15 +4,19 @@ import { toast } from "react-toastify";
 import hotelDataService from "../../../../services/HotelServices/roomsService";
 
 const ImageCard = ({ imageUrl, imageId, onDelete }) => (
-<div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-md group">
+  <div className="relative w-32 h-32 rounded-lg overflow-hidden shadow-md group">
     <img
       src={imageUrl}
-      alt=""
+      alt="Room"
       className="w-full h-full object-cover"
     />
     <button
-      onClick={() => onDelete(imageId)}
-      className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-bold"
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        onDelete(imageId);
+      }}
+      className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white text-sm font-bold hover:bg-opacity-70"
       title="Delete Image"
     >
       Delete
@@ -140,14 +144,12 @@ export default function UpdateRoomForm({ room, onUpdate, onCancel }) {
     } finally {
       setImageLoading(false);
       // Reset file input value to allow uploading the same file again if needed
-      e.target.value = null;
+      e.target.value = "";
     }
   };
 
   // 5. Function to handle image deletion
   const handleDeleteImage = async (imageId) => {
-    if (!window.confirm("Are you sure you want to delete this image?")) return;
-
     try {
       setImageLoading(true);
       await hotelDataService.deleteRoomImage(imageId);

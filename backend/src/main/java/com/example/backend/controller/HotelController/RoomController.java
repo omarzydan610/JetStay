@@ -80,7 +80,7 @@ public class RoomController {
         }
 
         @PostMapping("/{roomTypeId}/images/add")
-        public ResponseEntity<SuccessResponse<String>> uploadRoomImage(
+        public ResponseEntity<SuccessResponse<RoomImage>> uploadRoomImage(
                         @PathVariable Integer roomTypeId,
                         @RequestParam("file") MultipartFile file) throws IOException {
                 
@@ -88,10 +88,10 @@ public class RoomController {
                 Claims claims = (Claims) auth.getCredentials();
                 String adminEmail = claims.getSubject(); 
 
-                String imageUrl = roomImageService.addRoomImage(roomTypeId, file, adminEmail).getImageUrl();
+                RoomImage roomImage = roomImageService.addRoomImage(roomTypeId, file, adminEmail);
 
                 return ResponseEntity.ok(
-                                SuccessResponse.of("Image uploaded successfully", imageUrl));
+                                SuccessResponse.of("Image uploaded successfully", roomImage));
         }
 
         @DeleteMapping("/images/delete/{imageId}")

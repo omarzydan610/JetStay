@@ -25,7 +25,7 @@ public class AirlineDataController {
 
   @PostMapping("/update")
   public ResponseEntity<?> updateData(@RequestHeader("Authorization") String token,
-      @RequestBody AirlineUpdateDataRequest request) {
+      @ModelAttribute AirlineUpdateDataRequest request) {
     airlineDataService.updateData(token, request);
     return ResponseEntity.ok(SuccessResponse.of("Data updated successfully"));
   }

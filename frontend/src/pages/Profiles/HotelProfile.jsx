@@ -12,7 +12,8 @@ import { updateUserInfo } from "../../services/profiles/userUpdateProfileService
 import { toast } from "react-toastify";
 
 function HotelProfile() {
-  const { userData, businessData, updateBusinessData, updateUserData } = useAppContext();
+  const { userData, businessData, updateBusinessData, updateUserData } =
+    useAppContext();
   const [isEditingBusiness, setIsEditingBusiness] = useState(false);
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
   const [businessModalError, setBusinessModalError] = useState(null);
@@ -22,11 +23,11 @@ function HotelProfile() {
   const [imageToDelete, setImageToDelete] = useState(null);
 
   useEffect(() => {
-    if (businessData) { 
-        console.log(">>> Data is ready, fetching images now...");
-        fetchImages();
+    if (businessData) {
+      console.log(">>> Data is ready, fetching images now...");
+      fetchImages();
     }
-  }, [businessData])
+  }, [businessData]);
 
   const fetchImages = async (hotelId) => {
     try {
@@ -34,6 +35,9 @@ function HotelProfile() {
       setHotelImages(images);
     } catch (error) {
       console.error("Error fetching hotel images:", error);
+      // Gracefully handle error - set empty images array
+      setHotelImages([]);
+      // Don't throw - let the page load without images
     }
   };
 
@@ -51,31 +55,33 @@ function HotelProfile() {
   };
 
   const handleDeleteClick = (imageId) => {
-      setImageToDelete(imageId); 
-      setIsDeleteModalOpen(true);
-    };
+    setImageToDelete(imageId);
+    setIsDeleteModalOpen(true);
+  };
   const confirmDeleteImage = async () => {
-      if (!imageToDelete) return;
+    if (!imageToDelete) return;
 
-      try {
-        await hotelImageService.deleteHotelImage(imageToDelete);
-        
-        setHotelImages((prev) => prev.filter((img) => img.imageID !== imageToDelete));
-        
-        setIsDeleteModalOpen(false);
-        setImageToDelete(null);
-      } catch (error) {
-        console.error("Error deleting image:", error);
-        alert("Failed to delete image.");
-        setIsDeleteModalOpen(false);
-      }
-    };
+    try {
+      await hotelImageService.deleteHotelImage(imageToDelete);
+
+      setHotelImages((prev) =>
+        prev.filter((img) => img.imageID !== imageToDelete)
+      );
+
+      setIsDeleteModalOpen(false);
+      setImageToDelete(null);
+    } catch (error) {
+      console.error("Error deleting image:", error);
+      alert("Failed to delete image.");
+      setIsDeleteModalOpen(false);
+    }
+  };
   useEffect(() => {
-      if (sessionStorage.getItem("showUpdateToast")) {
-        toast.success("Profile updated successfully!");
-        sessionStorage.removeItem("showUpdateToast");
-      }
-    }, []);
+    if (sessionStorage.getItem("showUpdateToast")) {
+      toast.success("Profile updated successfully!");
+      sessionStorage.removeItem("showUpdateToast");
+    }
+  }, []);
 
   const handleEditBusiness = () => {
     setIsEditingBusiness(true);
@@ -94,7 +100,7 @@ function HotelProfile() {
         country: formData.country,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        logoUrl: formData.logoUrl,
+        logoFile: formData.logoFile, // Pass the actual file object, not logoUrl
       });
       updateBusinessData(response);
       window.location.reload();
@@ -109,16 +115,16 @@ function HotelProfile() {
 
   const handleSaveAdmin = async (formData) => {
     let data = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        phoneNumber: formData.phoneNumber,
-      }
-      console.log("Updating user with data:", data);
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      phoneNumber: formData.phoneNumber,
+    };
+    console.log("Updating user with data:", data);
     try {
       const updatedUser = await updateUserInfo(data);
 
-      updateUserData(updatedUser); 
-      
+      updateUserData(updatedUser);
+
       setIsEditingAdmin(false);
       toast.success("Profile updated successfully!");
       sessionStorage.setItem("showUpdateToast", "true");

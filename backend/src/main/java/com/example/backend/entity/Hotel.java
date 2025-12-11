@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,6 +57,7 @@ public class Hotel {
   private Status status;
 
   @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL)
+  @JsonIgnore
   private List<RoomType> roomTypes;
 
   public enum Status {
