@@ -25,37 +25,45 @@ export const getRoomsGraph = async (page = 0, size = 10, filter = {}) => {
             logoUrl
             city
             country
+            hotelRate
+            numberOfRates
           }
         }
       }
     `;
 
     const variables = { filter, page, size };
-    console.log(filter)
-    console.log("Requesting rooms, page:", page, "size:", size);
+    console.log("Requesting rooms, page:", page, "filter:", filter);
 
     const res = await apiClient.post(
       `/graphql`,
       { query, variables },
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    console.log(res.data)
 
-    console.log(res.data.data.rooms)
-
-    if (res.data?.errors) {
-      console.error("GraphQL errors:", res.data.errors);
-      toast.error("Failed to load rooms (GraphQL)");
-      throw new Error("GraphQL query error");
+    if (!res.data) {
+      toast.error("No response from server");
+      return { data: [] };
     }
 
-    const roomsPayload = res.data?.data?.rooms;
+    if (res.data.errors) {
+      console.error("GraphQL errors:", res.data.errors);
+      toast.error("Failed to load rooms (GraphQL error)");
+      return { data: [] };
+    }
 
-    if (!roomsPayload) return { data: [] };
+    const roomsPayload = res.data.data?.rooms;
 
-    // Rooms already contain hotel info → just return directly
+    if (!roomsPayload) {
+      console.warn("No rooms found in response", res.data);
+      return { data: [] };
+    }
+
     return { data: roomsPayload };
   } catch (error) {
-    toast.error("Failed to load rooms (GraphQL)");
-    throw error;
+    console.error("Error fetching rooms:", error);
+    toast.error("Failed to load rooms (network/server error)");
+    return { data: [] };
   }
 };
