@@ -67,13 +67,15 @@ function HotelEditModal({ isOpen, onClose, businessData, onSave, error }) {
     e.preventDefault();
     try {
       setIsSaving(true);
-      // For now, we'll just pass the form data
-      // In a real implementation, you'd upload the file and get a URL
-      const submitData = {
-        ...formData,
-        logoUrl: formData.logoFile ? logoPreview : formData.logoUrl,
-      };
-      await onSave(submitData);
+      // Pass the actual form data with the file object
+      await onSave({
+        name: formData.name,
+        city: formData.city,
+        country: formData.country,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
+        logoFile: formData.logoFile, // Pass the actual File object
+      });
       onClose();
     } catch (error) {
       console.error("Error saving hotel data:", error);

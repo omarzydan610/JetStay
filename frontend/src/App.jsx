@@ -7,6 +7,7 @@ import VerifyOtpPage from "./pages/AuthPages/VerifyOtpPage";
 import ResetPasswordPage from "./pages/AuthPages/ResetPasswordPage";
 import BaseHomePage from "./pages/HomePage/BaseHomePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 import BaseProfile from "./pages/Profiles/BaseProfile";
 import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
 import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
@@ -28,14 +29,46 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/auth" element={<AuthPage />} />
+          <Route
+            path="/auth"
+            element={
+              <PublicRoute>
+                <AuthPage />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/partnership-request"
-            element={<PartnerShipRequestPage />}
+            element={
+              <PublicRoute>
+                <PartnerShipRequestPage />
+              </PublicRoute>
+            }
           />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/verify-otp" element={<VerifyOtpPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/verify-otp"
+            element={
+              <PublicRoute>
+                <VerifyOtpPage />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <PublicRoute>
+                <ResetPasswordPage />
+              </PublicRoute>
+            }
+          />
           <Route
             path="/profile"
             element={

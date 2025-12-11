@@ -6,6 +6,8 @@ import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
 import BaseAdminHomePage from "./Admin/BaseAdminHomePage";
 import UserHomePage from "./UserHomePage";
+import PendingStatusPage from "./PendingStatusPage";
+import InactiveStatusPage from "./InactiveStatusPage";
 
 function BaseHomePage() {
   const navigate = useNavigate();
@@ -57,6 +59,19 @@ function BaseHomePage() {
         </div>
       </div>
     );
+  }
+
+  // Check business data status for admin users
+  if (
+    (userData?.role === "HOTEL_ADMIN" || userData?.role === "AIRLINE_ADMIN") &&
+    businessData
+  ) {
+    if (businessData.status === "PENDING") {
+      return <PendingStatusPage />;
+    }
+    if (businessData.status === "INACTIVE") {
+      return <InactiveStatusPage />;
+    }
   }
 
   return (

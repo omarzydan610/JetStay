@@ -29,7 +29,7 @@ public class HotelDataController {
 
   @PostMapping("/update")
   public ResponseEntity<?> updateData(@RequestHeader("Authorization") String token,
-      @RequestBody HotelUpdateDataRequest request) {
+      @ModelAttribute HotelUpdateDataRequest request) {
     hotelDataService.updateData(token, request);
     return ResponseEntity.ok(SuccessResponse.of("Data updated successfully"));
   }

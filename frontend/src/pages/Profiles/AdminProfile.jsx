@@ -2,20 +2,15 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAppContext } from "../../contexts/AppContext";
 import AdminInfoSection from "../../components/ProfileComponents/AdminInfoSection";
-import AirlineBusinessInfoSection from "../../components/ProfileComponents/AirlineBusinessInfoSection";
-import AirlineEditModal from "../../components/ProfileComponents/AirlineEditModal";
 import AdminEditModal from "../../components/ProfileComponents/AdminEditModal";
-import { updateAirlineData } from "../../services/profiles/airlineProfileService";
 import { updateUserInfo } from "../../services/profiles/userUpdateProfileService";
 import { toast } from "react-toastify";
 
-function AirlineProfile() {
-  const { userData, businessData, updateUserData, updateBusinessData } =
-    useAppContext();
-  const [isEditingBusiness, setIsEditingBusiness] = useState(false);
+function AdminProfile() {
+  const { userData, updateUserData } = useAppContext();
   const [isEditingAdmin, setIsEditingAdmin] = useState(false);
-  const [businessModalError, setBusinessModalError] = useState(null);
   const [adminModalError, setAdminModalError] = useState(null);
+
   useEffect(() => {
     if (sessionStorage.getItem("showUpdateToast")) {
       toast.success("Profile updated successfully!");
@@ -23,31 +18,8 @@ function AirlineProfile() {
     }
   }, []);
 
-  const handleEditBusiness = () => {
-    setIsEditingBusiness(true);
-  };
-
   const handleEditAdmin = () => {
     setIsEditingAdmin(true);
-  };
-
-  const handleSaveBusiness = async (formData) => {
-    try {
-      setBusinessModalError(null);
-      const response = await updateAirlineData({
-        name: formData.name,
-        nationality: formData.nationality,
-        logoFile: formData.logoFile, // Pass the actual file object, not logoUrl
-      });
-      updateBusinessData(response);
-      window.location.reload();
-    } catch (error) {
-      console.error("Error updating business data:", error);
-      setBusinessModalError(
-        "Failed to update airline information. Please try again."
-      );
-      throw error;
-    }
   };
 
   const handleSaveAdmin = async (formData) => {
@@ -58,6 +30,7 @@ function AirlineProfile() {
     };
     console.log("Updating user with data:", data);
     try {
+      setAdminModalError(null);
       const updatedUser = await updateUserInfo(data);
 
       updateUserData(updatedUser);
@@ -68,13 +41,9 @@ function AirlineProfile() {
       window.location.reload();
     } catch (error) {
       console.error("Failed to update profile", error);
+      setAdminModalError("Failed to update profile. Please try again.");
       toast.error("Failed to update profile. Please try again.");
     }
-  };
-
-  const handleCloseBusinessModal = () => {
-    setIsEditingBusiness(false);
-    setBusinessModalError(null);
   };
 
   const handleCloseAdminModal = () => {
@@ -90,13 +59,6 @@ function AirlineProfile() {
         transition={{ duration: 0.5 }}
         className="space-y-8"
       >
-        {/* Business Information Section */}
-        <AirlineBusinessInfoSection
-          businessData={businessData}
-          onEdit={handleEditBusiness}
-          isEditing={isEditingBusiness}
-        />
-
         {/* Admin Information Section */}
         <AdminInfoSection
           userData={userData}
@@ -104,15 +66,7 @@ function AirlineProfile() {
           isEditing={isEditingAdmin}
         />
 
-        {/* Edit Modals */}
-        <AirlineEditModal
-          isOpen={isEditingBusiness}
-          onClose={handleCloseBusinessModal}
-          businessData={businessData}
-          onSave={handleSaveBusiness}
-          error={businessModalError}
-        />
-
+        {/* Edit Modal */}
         <AdminEditModal
           isOpen={isEditingAdmin}
           onClose={handleCloseAdminModal}
@@ -125,4 +79,4 @@ function AirlineProfile() {
   );
 }
 
-export default AirlineProfile;
+export default AdminProfile;

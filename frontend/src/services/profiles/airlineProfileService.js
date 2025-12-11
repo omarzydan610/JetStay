@@ -22,15 +22,35 @@ export const getAirlineData = async () => {
 
 /**
  * Update airline information
- * @param {Object} airlineData - Updated airline data (name, nationality, logoUrl)
+ * @param {Object} airlineData - Updated airline data (name, nationality, logoFile)
  * @returns {Promise} Updated airline data
  */
 export const updateAirlineData = async (airlineData) => {
   try {
     const token = authService.getToken();
-    const response = await apiClient.post("/api/airline/update", airlineData, {
+
+    // Create FormData for multipart file upload
+    const formData = new FormData();
+
+    // Append all fields to FormData
+    if (airlineData.name !== undefined && airlineData.name !== null) {
+      formData.append("name", airlineData.name);
+    }
+    if (
+      airlineData.nationality !== undefined &&
+      airlineData.nationality !== null
+    ) {
+      formData.append("nationality", airlineData.nationality);
+    }
+    // Append the file if it exists
+    if (airlineData.logoFile instanceof File) {
+      formData.append("logoFile", airlineData.logoFile);
+    }
+
+    const response = await apiClient.post("/api/airline/update", formData, {
       headers: {
         Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
@@ -39,4 +59,3 @@ export const updateAirlineData = async (airlineData) => {
     throw error;
   }
 };
-

@@ -58,13 +58,12 @@ function AirlineEditModal({ isOpen, onClose, businessData, onSave, error }) {
     e.preventDefault();
     try {
       setIsSaving(true);
-      // For now, we'll just pass the form data
-      // In a real implementation, you'd upload the file and get a URL
-      const submitData = {
-        ...formData,
-        logoUrl: formData.logoFile ? logoPreview : formData.logoUrl,
-      };
-      await onSave(submitData);
+      // Pass the actual form data with the file object
+      await onSave({
+        name: formData.name,
+        nationality: formData.nationality,
+        logoFile: formData.logoFile, // Pass the actual File object
+      });
       onClose();
     } catch (error) {
       console.error("Error saving airline data:", error);
@@ -131,9 +130,7 @@ function AirlineEditModal({ isOpen, onClose, businessData, onSave, error }) {
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) =>
-                    handleInputChange("name", e.target.value)
-                  }
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
                   placeholder="Enter airline name"
                   required
