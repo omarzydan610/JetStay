@@ -48,7 +48,7 @@ class RoomGraphQLControllerTest {
         graphQlTester.document("""
                 query {
                   rooms(
-                    filter: { roomTypeNameContains: "deluxe" }
+                    filter: { roomTypeContains: "deluxe" }
                     page: 0,
                     size: 10
                   ) {
@@ -107,7 +107,6 @@ class RoomGraphQLControllerTest {
         graphQlTester.document("""
                 query {
                   rooms(
-                    filter: { guestsEq: 3 }
                     page: 2,
                     size: 15
                   ) {
@@ -144,7 +143,7 @@ class RoomGraphQLControllerTest {
                   rooms(
                     filter: { 
                       priceLte: 300,
-                      roomTypeNameContains: "suite"
+                      roomTypeContains: "suite"
                     }
                     page: 0,
                     size: 10
