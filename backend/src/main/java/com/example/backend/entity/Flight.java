@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,8 +49,8 @@ public class Flight {
   @Column(name = "plane_type")
   private String planeType;
 
-
   @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL)
+  @JsonManagedReference
   private List<TripType> tripsTypes;
 
   public enum FlightStatus {

@@ -116,7 +116,21 @@ function AuthPage() {
 
       switch (error.code) {
         case "UNAUTHORIZED":
-          setLoginErrors({ general: "Invalid credentials. Please try again." });
+          // Check if the error is about deactivated account
+          if (
+            error.message &&
+            error.message.toLowerCase().includes("deactivated")
+          ) {
+            setLoginErrors({
+              general:
+                error.message ||
+                "Your account has been deactivated. Please contact support.",
+            });
+          } else {
+            setLoginErrors({
+              general: "Invalid credentials. Please try again.",
+            });
+          }
           break;
         case "FORBIDDEN":
           setLoginErrors({

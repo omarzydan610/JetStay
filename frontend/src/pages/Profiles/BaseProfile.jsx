@@ -7,6 +7,7 @@ import AirlineProfile from "./AirlineProfile";
 import UserProfile from "./UserProfile";
 
 
+
 function BaseProfile() {
   const navigate = useNavigate();
   const { userData, loading, error, fetchUserAndBusinessData } =
@@ -65,7 +66,7 @@ function BaseProfile() {
       ) : userData.role === "SYSTEM_ADMIN" ? (
         <div className="p-8">
           <h1 className="text-3xl font-bold text-gray-800">
-            Welcome to the System Admin Profile
+            Welcome to the System Admin Home Page
           </h1>
           {/* System admin specific content goes here */}
         </div>

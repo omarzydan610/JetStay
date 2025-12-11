@@ -41,7 +41,9 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtAuthService jwtAuthService;
 
-    public AuthService(PasswordEncoder encoder, UserRepository userRepository, AuthenticationManager authenticationManager, JwtAuthService jwtAuthService, HotelRepository hotelRepository, AirlineRepository airlineRepository) {
+    public AuthService(PasswordEncoder encoder, UserRepository userRepository,
+            AuthenticationManager authenticationManager, JwtAuthService jwtAuthService, HotelRepository hotelRepository,
+            AirlineRepository airlineRepository) {
         this.encoder = encoder;
         this.userRepository = userRepository;
         this.userMapper = new UserMapper();
@@ -77,13 +79,15 @@ public class AuthService {
         User user = userRepository.findByEmail(loginDTO.getEmail())
                 .orElseThrow(() -> new UnauthorizedException("User does not exist"));
 
+        if (user.getStatus() == User.UserStatus.DEACTIVATED) {
+            throw new UnauthorizedException("User is deactivated");
+        }
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginDTO.getEmail(),
-                            loginDTO.getPassword()
-                    )
-            );
+                            loginDTO.getPassword()));
         } catch (AuthenticationException e) {
             throw new UnauthorizedException("Invalid email or password");
         }
@@ -92,11 +96,11 @@ public class AuthService {
 
         if (user.getRole() == User.UserRole.HOTEL_ADMIN) {
             Hotel hotels = hotelRepository.findByAdminUserID(user.getUserID())
-                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
             managedId = hotels.getHotelID();
         } else if (user.getRole() == User.UserRole.AIRLINE_ADMIN) {
             Airline airlines = airlineRepository.findByAdminUserID(user.getUserID())
-                .orElseThrow(() -> new ResourceNotFoundException("Airline not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Airline not found"));
             managedId = airlines.getAirlineID();
         }
 
@@ -110,8 +114,7 @@ public class AuthService {
         try {
             GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(
                     GoogleNetHttpTransport.newTrustedTransport(),
-                    GsonFactory.getDefaultInstance()
-            )
+                    GsonFactory.getDefaultInstance())
                     .setAudience(Collections.singletonList(googleClientId))
                     .build();
 
@@ -133,7 +136,7 @@ public class AuthService {
                         newUser.setFirstName(fname);
                         newUser.setLastName(lname);
                         newUser.setPassword(" ");
-                        newUser.setPhoneNumber("+20");   //Google token doesn't include phone number
+                        newUser.setPhoneNumber("+20"); // Google token doesn't include phone number
                         newUser.setRole(User.UserRole.CLIENT);
                         return userRepository.save(newUser);
                     });

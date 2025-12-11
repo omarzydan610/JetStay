@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import BookingMonitoringSection from "../../../components/HomePages/Admin/BookingMonitoringSection";
-import FlightMonitoringSection from "../../../components/HomePages/Admin/FlightMonitoringSection";
+import BookingMonitoringSection from "../../../components/HomePages/Admin/Statistics/HotelsStatistics";
+import FlightMonitoringSection from "../../../components/HomePages/Admin/Statistics/AirlinesStatistics";
 import GlassCard from "../../../components/HomePages/Hotel/GlassCard";
 
-export default function SystemAdminHomePage() {
+export default function AdminStatisticsPage() {
   const [activeTab, setActiveTab] = useState("bookings");
 
   const containerVariants = {
@@ -50,26 +50,6 @@ export default function SystemAdminHomePage() {
         animate="visible"
         className="flex-1 flex flex-col max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-16 relative z-10 space-y-12"
       >
-        {/* Header */}
-        <motion.div variants={itemVariants} className="text-center mb-4">
-          <motion.h1
-            className="text-3xl md:text-5xl font-extrabold bg-gradient-to-r from-sky-600 to-cyan-600 bg-clip-text text-transparent mb-2"
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-          >
-            System Admin Dashboard
-          </motion.h1>
-          <motion.p
-            className="text-gray-600 text-lg md:text-xl"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
-          >
-            Monitor bookings and flight transactions across the platform
-          </motion.p>
-        </motion.div>
-
         {/* Tab Navigation */}
         <motion.div variants={itemVariants}>
           <GlassCard className="p-2">
@@ -82,7 +62,7 @@ export default function SystemAdminHomePage() {
                     : "text-gray-600 hover:bg-sky-50"
                 }`}
               >
-                Hotel Bookings
+                Hotels
               </button>
               <button
                 onClick={() => setActiveTab("flights")}
@@ -92,7 +72,7 @@ export default function SystemAdminHomePage() {
                     : "text-gray-600 hover:bg-sky-50"
                 }`}
               >
-                Flight Transactions
+                Airlines
               </button>
             </div>
           </GlassCard>

@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "trip_types")
@@ -21,6 +20,7 @@ public class TripType {
 
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
+    @JsonBackReference
     private Flight flight;
 
     @Column(name = "quantity", nullable = false)

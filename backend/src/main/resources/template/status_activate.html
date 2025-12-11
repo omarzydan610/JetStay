@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Account Activated</title>
+    <style>
+        body { background:#f6f8fb; font-family:Arial; margin:0; padding:0; }
+        .box { max-width:600px; margin:auto; background:white; padding:20px; border-radius:12px;
+              box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .header { background:#007bff; color:white; padding:15px; text-align:center; border-radius:12px 12px 0 0;
+                 font-size:20px; font-weight:bold; }
+        .content { font-size:15px; color:#333; line-height:1.6; padding:15px; }
+        .footer { font-size:13px; color:#777; text-align:center; padding-top:10px; border-top:1px solid #eee; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <div class="header">JetStay</div>
+    <div class="content">
+        <h3>Dear ${name},</h3>
+        <p>Your <b>${type}</b> has been <b style="color:green;">ACTIVATED</b> 🎉</p>
+        <p>Welcome back to JetStay! You can now continue using the system normally.</p>
+    </div>
+    <div class="footer">© ${year} JetStay. All Rights Reserved.</div>
+</div>
+</body>
+</html>
