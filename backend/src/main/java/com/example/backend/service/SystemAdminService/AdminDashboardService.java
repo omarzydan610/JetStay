@@ -1,11 +1,14 @@
 package com.example.backend.service.SystemAdminService;
 
 import com.example.backend.dto.AdminDashboard.*;
+import com.example.backend.dto.UserDto.UserDataResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.mapper.AirlineViewDataMapper;
 import com.example.backend.mapper.HotelViewDataMapper;
+import com.example.backend.mapper.UserMapper;
 import com.example.backend.mapper.UserViewDataMapper;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.HotelRepository;
@@ -15,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
+import static com.example.backend.mapper.UserMapper.getUserData;
 
 @Service
 public class AdminDashboardService {
@@ -63,5 +68,19 @@ public class AdminDashboardService {
         );
         AirlineViewDataMapper airlinemapper = new AirlineViewDataMapper();
         return airlinePage.map(airlinemapper::DataToDTO);
+    }
+
+    public UserDataResponse getAirlineAdmin (int airlineID){
+        User admin = airlineRepository.findAdminByAirlineID(airlineID)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin of this Airline not found "+ airlineID));
+
+        return getUserData(admin);
+    }
+
+    public UserDataResponse getHotelAdmin (int hotelID){
+        User admin = hotelRepository.findAdminByHotelID(hotelID)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin of this Hotel not found "+ hotelID));
+
+        return getUserData(admin);
     }
 }

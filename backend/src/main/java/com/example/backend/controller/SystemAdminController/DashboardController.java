@@ -1,6 +1,7 @@
 package com.example.backend.controller.SystemAdminController;
 
 import com.example.backend.dto.AdminDashboard.*;
+import com.example.backend.dto.UserDto.UserDataResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.SystemAdminService.AdminDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +33,17 @@ public class DashboardController {
     public ResponseEntity<?> getAirlinesByFilter(@RequestBody AirlineViewCriteriaDTO criteria){
         Page<AirlineDataDTO> airlineData = adminDashboardService.getAirlinesByCriteria(criteria);
         return ResponseEntity.ok(SuccessResponse.of("Fetch Airlines Successfully", airlineData));
+    }
+
+    @GetMapping("/airline-admin/{id}")
+    public ResponseEntity<?> getAirlineAdmin(@PathVariable int id){
+        UserDataResponse adminData = adminDashboardService.getAirlineAdmin(id);
+        return ResponseEntity.ok(SuccessResponse.of("Get Airline Admin Successfully", adminData));
+    }
+
+    @GetMapping("/hotel-admin/{id}")
+    public ResponseEntity<?> getHotelAdmin(@PathVariable int id){
+        UserDataResponse adminData = adminDashboardService.getHotelAdmin(id);
+        return ResponseEntity.ok(SuccessResponse.of("Get Hotel Admin Successfully", adminData));
     }
 }
