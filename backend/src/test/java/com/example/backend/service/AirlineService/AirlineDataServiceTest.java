@@ -9,17 +9,23 @@ import com.example.backend.entity.Airport;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.JwtAuthService;
+import com.example.backend.service.Partnership.FileStorageService;
+import com.example.backend.cache.FlightCacheManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,12 +45,17 @@ class AirlineDataServiceTest {
   @Mock
   private AirlineRepository airlineRepository;
 
+  @Mock
+  private FileStorageService fileStorageService;
+
+  @Mock
+  private FlightCacheManager flightCacheManager;
+
   @InjectMocks
   private AirlineDataService airlineDataService;
 
-  @Mock private AirportRepository airportRepository;
-
-
+  @Mock
+  private AirportRepository airportRepository;
 
   private User airlineAdmin;
   private Airline airline;
@@ -194,18 +205,22 @@ class AirlineDataServiceTest {
   }
 
   @Test
-  void updateData_Success_UpdateAllFields() {
+  void updateData_Success_UpdateAllFields() throws IOException {
     // Arrange
     AirlineUpdateDataRequest request = new AirlineUpdateDataRequest();
     request.setName("UpdatedAirline");
     request.setNationality("UpdatedCountry");
-    request.setLogoUrl("http://example.com/new-logo.png");
+
+    // Mock the file upload
+    MockMultipartFile logoFile = new MockMultipartFile("logoFile", "logo.png", "image/png", new byte[] { 1, 2, 3 });
+    request.setLogoFile(logoFile);
 
     when(jwtAuthService.extractTokenFromHeader(authorizationHeader)).thenReturn(token);
     when(jwtAuthService.extractEmail(token)).thenReturn("admin@airline.com");
     when(userRepository.findByEmail("admin@airline.com")).thenReturn(Optional.of(airlineAdmin));
     when(airlineRepository.findByAdminUserID(1)).thenReturn(Optional.of(airline));
     when(jwtAuthService.extractAirlineID(token)).thenReturn(100);
+    when(fileStorageService.storeFile(any(MultipartFile.class))).thenReturn("http://example.com/new-logo.png");
     when(airlineRepository.save(any(Airline.class))).thenReturn(airline);
 
     // Act
@@ -217,6 +232,7 @@ class AirlineDataServiceTest {
     verify(userRepository).findByEmail("admin@airline.com");
     verify(airlineRepository).findByAdminUserID(1);
     verify(jwtAuthService).extractAirlineID(token);
+    verify(fileStorageService).storeFile(any(MultipartFile.class));
     verify(airlineRepository).save(airline);
     assertEquals("UpdatedAirline", airline.getAirlineName());
     assertEquals("UpdatedCountry", airline.getAirlineNationality());
@@ -228,7 +244,7 @@ class AirlineDataServiceTest {
     // Arrange
     AirlineUpdateDataRequest request = new AirlineUpdateDataRequest();
     request.setName("UpdatedAirline");
-    // nationality and logoUrl are null
+    // nationality and logoFile are null
 
     when(jwtAuthService.extractTokenFromHeader(authorizationHeader)).thenReturn(token);
     when(jwtAuthService.extractEmail(token)).thenReturn("admin@airline.com");
@@ -377,87 +393,5 @@ class AirlineDataServiceTest {
     assertTrue(exception.getMessage().contains("Failed to update airline data"));
 
     verify(airlineRepository).save(airline);
-  }
-
-  @Test
-  void getAllAirPorts_ReturnsList() {
-    Airport airport = new Airport();
-    airport.setAirportID(1);
-    airport.setAirportName("Test Airport");
-    airport.setCountry("Egypt");
-    airport.setCity("Cairo");
-
-    when(airportRepository.findByCountryAndCity("Egypt", "Cairo"))
-        .thenReturn(List.of(airport));
-
-    List<Airport> result = airlineDataService.getAllAirPorts("Egypt", "Cairo");
-
-    assertNotNull(result);
-    assertEquals(1, result.size());
-    assertEquals("Cairo", result.get(0).getCity());
-    verify(airportRepository).findByCountryAndCity("Egypt", "Cairo");
-  }
-
-  @Test
-  void getAllAirPorts_ReturnsEmptyList() {
-    when(airportRepository.findByCountryAndCity("USA", "Miami"))
-        .thenReturn(List.of());
-
-    List<Airport> result = airlineDataService.getAllAirPorts("USA", "Miami");
-
-    assertNotNull(result);
-    assertTrue(result.isEmpty());
-    verify(airportRepository).findByCountryAndCity("USA", "Miami");
-  }
-
-  @Test
-  void getAllCountries_ReturnsList() {
-    List<CountryDtoResponse> countries = List.of(
-        new CountryDtoResponse("Egypt"),
-        new CountryDtoResponse("UAE"));
-
-    when(airportRepository.findAllCountries()).thenReturn(countries);
-
-    List<CountryDtoResponse> result = airlineDataService.getAllCountries();
-
-    assertEquals(2, result.size());
-    assertEquals("Egypt", result.get(0).getName());
-    verify(airportRepository).findAllCountries();
-  }
-
-  @Test
-  void getAllCountries_ReturnsEmptyList() {
-    when(airportRepository.findAllCountries()).thenReturn(List.of());
-
-    List<CountryDtoResponse> result = airlineDataService.getAllCountries();
-
-    assertTrue(result.isEmpty());
-    verify(airportRepository).findAllCountries();
-  }
-
-  @Test
-  void getCitiesByCountry_ReturnsList() {
-    List<CityDtoResponse> cities = List.of(
-        new CityDtoResponse("Cairo"),
-        new CityDtoResponse("Giza"));
-
-    when(airportRepository.findAllCitiesByCountry("Egypt")).thenReturn(cities);
-
-    List<CityDtoResponse> result = airlineDataService.getCitiesByCountry("Egypt");
-
-    assertEquals(2, result.size());
-    assertEquals("Cairo", result.get(0).getName());
-    verify(airportRepository).findAllCitiesByCountry("Egypt");
-  }
-
-  @Test
-  void getCitiesByCountry_ReturnsEmptyList() {
-    when(airportRepository.findAllCitiesByCountry("USA"))
-        .thenReturn(List.of());
-
-    List<CityDtoResponse> result = airlineDataService.getCitiesByCountry("USA");
-
-    assertTrue(result.isEmpty());
-    verify(airportRepository).findAllCitiesByCountry("USA");
   }
 }

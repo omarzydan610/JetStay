@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import FlightListCards from "../components/flights/FlightListCards";
+import FlightDetailsCard from "../components/flights/FlightDetailsCard";
 
 export default function FlightsPage() {
   const navigate = useNavigate();
@@ -15,6 +16,9 @@ export default function FlightsPage() {
       <div className="bg-white/70 backdrop-blur-md p-8 rounded-2xl shadow-lg border border-gray-200">
         <FlightListCards />
       </div>
+
+      {/* Add here just for test until Search page done */}
+      <FlightDetailsCard id={1} /> 
 
       {/* Action buttons */}
       <div className="mt-12 flex flex-col md:flex-row justify-center gap-6">

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "trip_types")
@@ -19,6 +20,7 @@ public class TripType {
 
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
+    @JsonBackReference
     private Flight flight;
 
     @Column(name = "quantity", nullable = false)
@@ -27,13 +29,6 @@ public class TripType {
     @Column(name = "price", nullable = false)
     private Integer price;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "type_name")
-    private TripTypeName typeName;
-
-    public enum TripTypeName {
-        ECONOMY,
-        BUSINESS,
-        FIRST_CLASS
-    }
+    @Column(name = "type_name", nullable = false)
+    private String typeName;
 }

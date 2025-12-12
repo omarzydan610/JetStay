@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.List;
 
 @Entity
 @Table(name = "room_types")
@@ -35,4 +38,8 @@ public class RoomType {
 
   @Column(name = "price", nullable = false)
   private Float price;
+
+  @OneToMany(mappedBy = "roomType", cascade = CascadeType.ALL, orphanRemoval = true)
+  @JsonIgnore
+  private List<RoomImage> roomImages;
 }

@@ -1,18 +1,29 @@
 package com.example.backend.service.HotelService;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.backend.dto.HotelDTO.HotelDataResponse;
+import com.example.backend.dto.HotelDTO.HotelStatisticsResponse;
+import com.example.backend.dto.HotelDTO.HotelStatisticsResponse.RoomTypeStatisticsDTO;
 import com.example.backend.dto.HotelDTO.HotelUpdateDataRequest;
 import com.example.backend.entity.Hotel;
+import com.example.backend.entity.RoomType;
 import com.example.backend.entity.User;
 import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.InternalServerErrorException;
 import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.exception.UnauthorizedException;
 import com.example.backend.mapper.HotelDataMapper;
 import com.example.backend.repository.HotelRepository;
+import com.example.backend.repository.RoomTypeRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.JwtAuthService;
+import com.example.backend.service.Partnership.FileStorageService;
 
 @Service
 public class HotelDataService {
@@ -23,6 +34,10 @@ public class HotelDataService {
   private UserRepository userRepository;
   @Autowired
   private HotelRepository hotelRepository;
+  @Autowired
+  private RoomTypeRepository roomTypeRepository;
+  @Autowired
+  private FileStorageService fileStorageService;
 
   public HotelDataResponse getData(String authorizationHeader) {
     String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
@@ -48,7 +63,7 @@ public class HotelDataService {
         request.getCountry() == null &&
         request.getLongitude() == null &&
         request.getLatitude() == null &&
-        request.getLogoUrl() == null) {
+        (request.getLogoFile() == null || request.getLogoFile().isEmpty())) {
       throw new BadRequestException("Update request cannot be empty");
     }
     String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
@@ -75,12 +90,46 @@ public class HotelDataService {
         hotel.setLongitude(request.getLongitude());
       if (request.getLatitude() != null)
         hotel.setLatitude(request.getLatitude());
-      if (request.getLogoUrl() != null)
-        hotel.setLogoUrl(request.getLogoUrl());
+
+      // Handle logo file upload
+      if (request.getLogoFile() != null && !request.getLogoFile().isEmpty()) {
+        try {
+          String logoUrl = fileStorageService.storeFile(request.getLogoFile());
+          hotel.setLogoUrl(logoUrl);
+        } catch (IOException e) {
+          throw new InternalServerErrorException("Failed to upload hotel logo: " + e.getMessage());
+        }
+      }
       hotelRepository.save(hotel);
+    } catch (InternalServerErrorException e) {
+      throw e;
     } catch (Exception e) {
       throw new BadRequestException("Failed to update hotel data: " + e.getMessage());
     }
+  }
+
+  public HotelStatisticsResponse getStatistics(int hotelID) {
+    // Verify hotel exists
+    Hotel hotel = hotelRepository.findById(hotelID)
+        .orElseThrow(() -> new UnauthorizedException("Hotel not found for the given ID: " + hotelID));
+
+    List<RoomType> roomTypes = roomTypeRepository.findByHotel(hotel);
+    Integer totalRooms = roomTypes.stream()
+        .mapToInt(RoomType::getQuantity)
+        .sum();
+
+    Integer occupiedRooms = 0; // Need to be impemented when booking is done
+
+    // Build room type statistics
+    List<RoomTypeStatisticsDTO> roomTypeStats = roomTypes.stream()
+        .map(rt -> new RoomTypeStatisticsDTO(
+            rt.getRoomTypeName(),
+            rt.getQuantity(),
+            0 // Need to be impemented when booking is done
+        ))
+        .collect(Collectors.toList());
+
+    return new HotelStatisticsResponse(totalRooms, occupiedRooms, roomTypeStats);
   }
 
 }

@@ -1,14 +1,20 @@
 package com.example.backend.repository;
 
+
+import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface FlightRepository extends JpaRepository<Flight, Integer> {
+public interface FlightRepository extends JpaRepository<Flight, Integer>, JpaSpecificationExecutor<Flight> {
 
     // Find all flights by airline ID
     List<Flight> findByAirlineAirlineID(int airlineId);
@@ -31,5 +37,36 @@ public interface FlightRepository extends JpaRepository<Flight, Integer> {
     long countByStatus(Flight.FlightStatus flightStatus);
 
     List<Flight> findByAirline_AirlineID(Integer airlineId);
+
+    boolean existsById(Integer flightID);
+
+    @Query("""
+        SELECT new com.example.backend.dto.AirlineDTO.FlightDetailsDTO(
+            f.departureDate,
+            f.arrivalDate,
+            f.status,
+            dep.airportName,
+            dep.city,
+            arr.airportName,
+            arr.city,
+            f.planeType,
+            tt.typeName,
+            tt.price,
+            al.logoUrl,
+            al.airlineName
+        )
+        FROM Flight f
+        LEFT JOIN f.airline al
+        LEFT JOIN f.departureAirport dep
+        LEFT JOIN f.arrivalAirport arr
+        LEFT JOIN TripType tt ON tt.flight = f
+        WHERE f.flightID = :flightId
+    """)
+    List<FlightDetailsDTO> getFlightDetails(@Param("flightId") Integer flightId);
+
+
+    @EntityGraph(attributePaths = {"airline", "departureAirport", "arrivalAirport"})
+    Page<Flight> findAll(Pageable pageable);
+
 
 }

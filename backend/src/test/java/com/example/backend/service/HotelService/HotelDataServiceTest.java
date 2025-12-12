@@ -9,13 +9,18 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.UserRepository;
 import com.example.backend.service.AuthService.JwtAuthService;
+import com.example.backend.service.Partnership.FileStorageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,6 +38,9 @@ class HotelDataServiceTest {
 
   @Mock
   private HotelRepository hotelRepository;
+
+  @Mock
+  private FileStorageService fileStorageService;
 
   @InjectMocks
   private HotelDataService hotelDataService;
@@ -193,7 +201,7 @@ class HotelDataServiceTest {
   }
 
   @Test
-  void updateData_Success_UpdateAllFields() {
+  void updateData_Success_UpdateAllFields() throws IOException {
     // Arrange
     HotelUpdateDataRequest request = new HotelUpdateDataRequest();
     request.setName("UpdatedHotel");
@@ -201,13 +209,17 @@ class HotelDataServiceTest {
     request.setCountry("UpdatedCountry");
     request.setLatitude(41.8781);
     request.setLongitude(-87.6298);
-    request.setLogoUrl("http://example.com/new-logo.png");
+
+    // Mock the file upload
+    MockMultipartFile logoFile = new MockMultipartFile("logoFile", "logo.png", "image/png", new byte[] { 1, 2, 3 });
+    request.setLogoFile(logoFile);
 
     when(jwtAuthService.extractTokenFromHeader(authorizationHeader)).thenReturn(token);
     when(jwtAuthService.extractEmail(token)).thenReturn("admin@hotel.com");
     when(userRepository.findByEmail("admin@hotel.com")).thenReturn(Optional.of(hotelAdmin));
     when(hotelRepository.findByAdminUserID(1)).thenReturn(Optional.of(hotel));
     when(jwtAuthService.extractHotelID(token)).thenReturn(hotelID);
+    when(fileStorageService.storeFile(any(MultipartFile.class))).thenReturn("http://example.com/new-logo.png");
     when(hotelRepository.save(any(Hotel.class))).thenReturn(hotel);
 
     // Act
@@ -219,6 +231,7 @@ class HotelDataServiceTest {
     verify(userRepository).findByEmail("admin@hotel.com");
     verify(hotelRepository).findByAdminUserID(1);
     verify(jwtAuthService).extractHotelID(token);
+    verify(fileStorageService).storeFile(any(MultipartFile.class));
     verify(hotelRepository).save(hotel);
     assertEquals("UpdatedHotel", hotel.getHotelName());
     assertEquals("UpdatedCity", hotel.getCity());

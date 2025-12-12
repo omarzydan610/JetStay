@@ -51,12 +51,13 @@ public class SecurityConfig {
                                 "/v3/api-docs",
                                 "/v3/api-docs.yaml",
                                 "/swagger-resources/**",
-                                "/webjars/**")
+                                "/webjars/**",
+                                "/graphql")
                         .permitAll()
                         .requestMatchers("/api/partnership/**").permitAll()
 
                         // Role-based endpoints
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")
                         .anyRequest().authenticated() // All other endpoints require authentication
                 )
                 // Stateless session (required for JWT)

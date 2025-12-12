@@ -25,26 +25,8 @@ public class AirlineDataController {
 
   @PostMapping("/update")
   public ResponseEntity<?> updateData(@RequestHeader("Authorization") String token,
-      @RequestBody AirlineUpdateDataRequest request) {
+      @ModelAttribute AirlineUpdateDataRequest request) {
     airlineDataService.updateData(token, request);
     return ResponseEntity.ok(SuccessResponse.of("Data updated successfully"));
-  }
-
-  @GetMapping("/airPorts")
-  public ResponseEntity<?> getAirPorts(@RequestParam String country , @RequestParam String city) {
-    return ResponseEntity.ok(SuccessResponse.of("Airports retrieved successfully",
-        airlineDataService.getAllAirPorts(country, city)));
-  }
-
-  @GetMapping("/countries")
-  public ResponseEntity<?> getCountries() {
-    return ResponseEntity.ok(SuccessResponse.of("Countries retrieved successfully",
-        airlineDataService.getAllCountries()));
-  }
-
-  @GetMapping("/cities")
-  public ResponseEntity<?> getCitiesByCountry(@RequestParam String country) {
-    return ResponseEntity.ok(SuccessResponse.of("Cities retrieved successfully",
-        airlineDataService.getCitiesByCountry(country)));
   }
 }

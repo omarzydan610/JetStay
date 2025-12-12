@@ -1,0 +1,15 @@
+# ============================
+# Queries
+# ============================
+
+type Query {
+    # Flights
+    flights(filter: FlightFilterDTO, page: Int, size: Int): [Flight]
+    airlines: [Airline]
+    airports: [Airport]
+    tripTypes: [TripType]
+
+    # Hotels
+    rooms(filter: RoomFilterDTO, page: Int, size: Int): [Room!]!
+    users: [User]
+}

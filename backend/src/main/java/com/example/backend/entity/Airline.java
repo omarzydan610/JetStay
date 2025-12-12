@@ -46,12 +46,13 @@ public class Airline {
   private Status status;
 
   public enum Status {
+    PENDING,
     ACTIVE,
     INACTIVE
   }
   @PrePersist
   protected void onCreate() {
-    this.status = Status.INACTIVE;
+    this.status = Status.PENDING;
     this.createdAt = LocalDateTime.now();
   }
 }
