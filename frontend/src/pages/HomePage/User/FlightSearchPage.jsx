@@ -5,7 +5,7 @@ import FlightDetailsCard from "../../../components/flights/FlightDetailsCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 import { toast } from "react-toastify";
 
-export default function UserFlightPage() {
+export default function FlightSearchPage() {
   const [flights, setFlights] = useState([]);
   const [page, setPage] = useState(0);
   const size = 20;
