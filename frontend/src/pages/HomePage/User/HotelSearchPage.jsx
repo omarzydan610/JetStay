@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getRoomsGraph } from "../../../services/HotelServices/hotelGraphService";
-import GlassCard from "../../../components/HomePages/Airline/GlassCard";
+import HotelDetailsPanel from "../../../components/HomePages/User/HotelsBooking/HotelDetailsPanel";
+import HotelsList from "../../../components/HomePages/User/HotelsBooking/HotelsList";
 import { toast } from "react-toastify";
 import {
   Building2,
@@ -11,10 +12,7 @@ import {
   Bed,
   RotateCcw,
   Search,
-  X,
-  MapPin as MapPinIcon,
 } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function HotelSearchPage() {
   const [rooms, setRooms] = useState([]);
@@ -197,262 +195,6 @@ export default function HotelSearchPage() {
     return roomPlaceholderImages;
   };
 
-  // Hotel Details Panel
-  const HotelDetailsPanel = ({ hotel, onClose }) => {
-    const [selectedRoomType, setSelectedRoomType] = useState(null);
-    
-    return (
-    <motion.div
-      initial={{ opacity: 0, x: 300 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 300 }}
-      transition={{ duration: 0.3 }}
-      className="fixed right-0 top-0 bottom-0 w-full md:w-2/5 bg-white shadow-2xl z-50 flex flex-col overflow-hidden"
-    >
-      {/* Header */}
-      <div className="relative h-64 bg-gradient-to-br from-sky-400 to-cyan-400 flex items-end">
-        {hotel.image ? (
-          <img
-            src={hotel.image}
-            alt={hotel.hotelName}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        ) : (
-          <img
-            src={
-              placeholderImages[
-                parseInt(hotel.hotelID || "0", 10) % placeholderImages.length
-              ]
-            }
-            alt={hotel.hotelName}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-black/30"></div>
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition z-10"
-        >
-          <X size={24} className="text-gray-800" />
-        </button>
-        <div className="relative z-10 p-6 text-white w-full">
-          <h1 className="text-4xl font-bold mb-2">{hotel.hotelName}</h1>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1">
-              <Star size={20} fill="currentColor" />
-              <span className="text-lg font-semibold">{hotel.hotelRate}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPinIcon size={20} />
-              <span>
-                {hotel.city}, {hotel.country}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Room Types */}
-      <div className="flex-1 overflow-y-auto p-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">
-          Available Room Types
-        </h2>
-
-        <div className="space-y-4">
-          {hotel.roomTypes.map((roomType) => {
-            const isSelected = selectedRoomType?.roomTypeID === roomType.roomTypeID;
-            return (
-              <div
-                key={roomType.roomTypeID}
-                className={`rounded-lg border-2 overflow-hidden cursor-pointer transition ${
-                  isSelected
-                    ? "border-sky-600 shadow-lg"
-                    : "border-gray-200 hover:border-sky-300"
-                }`}
-              >
-                {/* Room Header - Always Visible */}
-                <button
-                  onClick={() => setSelectedRoomType(isSelected ? null : roomType)}
-                  className={`w-full p-4 text-left transition ${
-                    isSelected ? "bg-sky-50" : "bg-white hover:bg-gray-50"
-                  }`}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold text-gray-800">
-                        {roomType.roomTypeName}
-                      </h3>
-                      <p className="text-gray-600 text-sm mt-1 line-clamp-1">
-                        {roomType.description}
-                      </p>
-                    </div>
-                    <span className="text-2xl font-bold text-sky-600 ml-4">
-                      ${roomType.price}
-                    </span>
-                  </div>
-                </button>
-
-                {/* Expanded Room Details */}
-                {isSelected && (
-                  <div
-                    className="border-t-2 border-gray-200 bg-gray-50 p-4"
-                  >
-                    {/* Room Images */}
-                    {Array.isArray(getRoomImage(roomType)) ? (
-                      <div className="grid grid-cols-3 gap-2 mb-4">
-                        {getRoomImage(roomType).map((img, idx) => (
-                          <div key={idx} className="w-full h-32 rounded-lg overflow-hidden bg-gray-300">
-                            <img
-                              src={img}
-                              alt={`${roomType.roomTypeName} ${idx + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="w-full h-48 rounded-lg overflow-hidden bg-gray-300 mb-4">
-                        <img
-                          src={getRoomImage(roomType)}
-                          alt={roomType.roomTypeName}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-
-                    {/* Full Description */}
-                    <div className="mb-4">
-                      <h4 className="font-semibold text-gray-800 mb-2">Description</h4>
-                      <p className="text-gray-700 text-sm leading-relaxed">
-                        {roomType.description}
-                      </p>
-                    </div>
-
-                    {/* Room Details Grid */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="bg-white rounded-lg p-3 border border-sky-200">
-                        <p className="text-gray-600 text-xs font-semibold">CAPACITY</p>
-                        <p className="text-xl font-bold text-sky-600 mt-1">
-                          {roomType.capacity} guests
-                        </p>
-                      </div>
-                      <div className="bg-white rounded-lg p-3 border border-cyan-200">
-                        <p className="text-gray-600 text-xs font-semibold">AVAILABLE</p>
-                        <p className="text-xl font-bold text-cyan-600 mt-1">
-                          {roomType.availableRooms} rooms
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Price Summary */}
-                    <div className="bg-white rounded-lg p-3 border-2 border-sky-200">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-700 font-semibold">Total Price</span>
-                        <span className="text-3xl font-bold text-sky-600">
-                          ${roomType.price}
-                        </span>
-                      </div>
-                      <p className="text-gray-500 text-xs mt-1">per night</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Booking Button */}
-      <div className="p-6 border-t-2 border-gray-200 bg-gray-50">
-        <button
-          disabled={!selectedRoomType}
-          onClick={() => {
-            if (selectedRoomType) {
-              toast.success(
-                `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
-              );
-            }
-          }}
-          className={`w-full py-3 rounded-lg font-bold text-lg transition ${
-            selectedRoomType
-              ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          {selectedRoomType ? "Book Now" : "Select a Room Type"}
-        </button>
-      </div>
-    </motion.div>
-    );
-  };
-
-  // Hotel Row Component
-  const HotelRow = ({ hotel }) => (
-    <motion.button
-      onClick={() => {
-        setSelectedHotel(hotel);
-      }}
-      whileHover={{ scale: 1.02 }}
-      className="w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-sky-300 hover:shadow-lg transition text-left"
-    >
-      <div className="flex gap-6 items-center">
-        {/* Hotel Images */}
-        <div className="flex gap-2 flex-shrink-0">
-          {Array.isArray(getHotelImage(hotel)) ? (
-            getHotelImage(hotel).map((img, idx) => (
-              <div key={idx} className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200">
-                <img
-                  src={img}
-                  alt={`${hotel.hotelName} ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))
-          ) : (
-            <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-200">
-              <img
-                src={getHotelImage(hotel)}
-                alt={hotel.hotelName}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-        </div>
-
-        {/* Hotel Info */}
-        <div className="flex-1">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            {hotel.hotelName}
-          </h3>
-          <div className="flex items-center gap-4 text-gray-600 mb-3">
-            <div className="flex items-center gap-1">
-              <Star size={18} className="text-yellow-500" fill="currentColor" />
-              <span className="font-semibold">{hotel.hotelRate}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <MapPinIcon size={18} />
-              <span>
-                {hotel.city}, {hotel.country}
-              </span>
-            </div>
-          </div>
-          <p className="text-sm text-gray-500">
-            {hotel.roomTypes.length} room type
-            {hotel.roomTypes.length !== 1 ? "s" : ""} available
-          </p>
-        </div>
-
-        {/* Min Price */}
-        <div className="text-right flex-shrink-0">
-          <p className="text-gray-600 text-sm">From</p>
-          <p className="text-3xl font-bold text-sky-600">
-            ${Math.min(...hotel.roomTypes.map((r) => r.price))}
-          </p>
-        </div>
-      </div>
-    </motion.button>
-  );
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-cyan-50">
       {/* Filter Panel - Always Visible */}
@@ -611,11 +353,11 @@ export default function HotelSearchPage() {
               <p>No hotels found. Try adjusting your filters.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {hotels.map((hotel) => (
-                <HotelRow key={hotel.hotelID} hotel={hotel} />
-              ))}
-            </div>
+            <HotelsList
+              hotels={hotels}
+              onSelectHotel={setSelectedHotel}
+              getHotelImage={getHotelImage}
+            />
           )}
 
           {/* Pagination */}
@@ -648,6 +390,8 @@ export default function HotelSearchPage() {
         <HotelDetailsPanel
           hotel={selectedHotel}
           onClose={() => setSelectedHotel(null)}
+          getRoomImage={getRoomImage}
+          placeholderImages={placeholderImages}
         />
       )}
     </div>
