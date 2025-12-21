@@ -8,11 +8,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "room_payment")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Payment {
+public class RoomPayment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

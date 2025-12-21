@@ -52,8 +52,7 @@ public class SecurityConfig {
                                 "/v3/api-docs.yaml",
                                 "/swagger-resources/**",
                                 "/webjars/**",
-                                "/graphql",
-                                "/api/payment/**")
+                                "/graphql")
                         .permitAll()
                         .requestMatchers("/api/partnership/**").permitAll()
 
