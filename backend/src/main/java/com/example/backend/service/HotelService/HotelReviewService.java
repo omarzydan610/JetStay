@@ -4,12 +4,13 @@ import com.example.backend.dto.HotelDTO.HotelReviewItemDTO;
 import com.example.backend.dto.HotelDTO.HotelReviewRequest;
 import com.example.backend.dto.HotelDTO.HotelReviewSummaryDTO;
 import com.example.backend.entity.BookingTransaction;
+import com.example.backend.entity.Hotel;
 import com.example.backend.entity.HotelReview;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingTransactionRepository;
+import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.HotelReviewRepository;
-import com.example.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,7 +27,8 @@ public class HotelReviewService {
     private BookingTransactionRepository bookingRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private HotelRepository hotelRepository;
+
 
     public void addReview(Integer userId, HotelReviewRequest reviewdto) {
 
@@ -59,6 +61,14 @@ public class HotelReviewService {
         review.setComment(reviewdto.getComment());
 
         reviewRepository.save(review);
+
+        // Update Hotel rate
+        Hotel hotel = booking.getHotel();
+        double newRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
+        hotel.setHotelRate((float)newRate);
+        hotel.setNumberOfRates(hotel.getNumberOfRates()+1);
+        hotelRepository.save(hotel);
+
     }
 
     public void editReview(Integer userId, HotelReviewRequest reviewdto) {
@@ -77,9 +87,16 @@ public class HotelReviewService {
         review.setCleanlinessRate(reviewdto.getCleanlinessRate());
         review.setValueForMoneyRate(reviewdto.getValueForMoneyRate());
         review.setLocationRate(reviewdto.getLocationRate());
+        review.setRating((float)calculateOverallRate(reviewdto));
         review.setComment(reviewdto.getComment());
 
         reviewRepository.save(review);
+
+        // Update Hotel rate
+        Hotel hotel = review.getHotel();
+        double newRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
+        hotel.setHotelRate((float)newRate);
+        hotelRepository.save(hotel);
     }
 
     public void deleteReview(Integer userId, Integer transactionId){
@@ -92,7 +109,14 @@ public class HotelReviewService {
             throw new BadRequestException("You cannot delete this review");
         }
 
+        Hotel hotel = review.getHotel();
         reviewRepository.delete(review);
+
+        // Update Hotel rate
+        double newRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
+        hotel.setHotelRate((float)newRate);
+        hotel.setNumberOfRates(hotel.getNumberOfRates()-1);
+        hotelRepository.save(hotel);
     }
 
     public Page<HotelReviewItemDTO> getHotelReviews(Integer hotelId, int page, int size) {
@@ -105,4 +129,16 @@ public class HotelReviewService {
     public HotelReviewSummaryDTO getHotelReviewSummary(Integer hotelId){
         return  reviewRepository.getHotelReviewSummary(hotelId);
     }
+
+    private double calculateOverallRate(HotelReviewRequest review) {
+        return (
+                review.getStaffRate()
+                        + review.getComfortRate()
+                        + review.getFacilitiesRate()
+                        + review.getCleanlinessRate()
+                        + review.getValueForMoneyRate()
+                        + review.getLocationRate()
+        ) / 6.0;
+    }
+
 }

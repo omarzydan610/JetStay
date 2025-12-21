@@ -52,4 +52,11 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
             @Param("hotelId") Integer hotelId,
             Pageable pageable
     );
+
+    @Query("""
+        SELECT COALESCE(AVG(r.rating), 0.0)
+        FROM HotelReview r
+        WHERE r.hotel.hotelID = :hotelId
+    """)
+    Double calculateHotelAverageRate(@Param("hotelId") Integer hotelId);
 }
