@@ -28,15 +28,9 @@ type Airport {
 }
 
 type TripType {
-    typeName: TripTypeName
+    typeName: String
     quantity: Int
     price: Float
-}
-
-enum TripTypeName {
-ECONOMY,
-BUSINESS,
-FIRST_CLASS
 }
 
 enum FlightStatus {
