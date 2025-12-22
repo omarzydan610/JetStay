@@ -7,168 +7,169 @@ on:
     branches: ["main", "master"]
 
 jobs:
-  backend-setup:
-    name: Backend - Setup
+  # =========================================================
+  # ================= BACKEND ===============================
+  # =========================================================
+
+  backend-test:
+    name: Backend - Test & Coverage
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "21"
+          distribution: temurin
+          java-version: 21
 
-      - name: Cache Maven dependencies
+      - name: Cache Maven
         uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-  backend-build:
-    name: Backend - Build
-    runs-on: ubuntu-latest
-    needs: backend-setup
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Build backend
-        run: mvn clean compile -DskipTests
-        working-directory: backend
-
-  backend-test:
-    name: Backend - Test
-    runs-on: ubuntu-latest
-    needs: backend-build
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-java@v4
-        with:
-          distribution: "temurin"
-          java-version: "21"
-
-      - uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-maven
-
-      - name: Run tests and generate coverage
+      - name: Run tests and generate JaCoCo report
         run: mvn clean test jacoco:report
         working-directory: backend
 
-      - name: Upload full HTML coverage report
+      - name: Upload JaCoCo HTML report
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
+          name: backend-jacoco-report
           path: backend/target/site/jacoco/
 
-      - name: Extract coverage percentage
+      # -----------------------------------------------------
+      # Extract Coverage & Project Statistics
+      # -----------------------------------------------------
+      - name: Extract coverage statistics
         id: coverage
         run: |
-          FILE="backend/target/site/jacoco/jacoco.xml"
-
-          if [[ ! -f "$FILE" ]]; then
-            echo "Coverage XML not found at $FILE"
-            echo "Listing directory contents:"
-            ls -la backend/target/site/jacoco/ || true
-            exit 1
-          fi
-
-          # Extract coverage using Python to parse XML properly
-          # Get the root-level LINE counter (last one in the file)
-          LINE_RATE=$(python3 << 'EOF'
+          python3 << 'EOF'
           import xml.etree.ElementTree as ET
-          import sys
+          import os
+          from pathlib import Path
 
-          try:
-              tree = ET.parse('backend/target/site/jacoco/jacoco.xml')
-              root = tree.getroot()
-              
-              # Find all LINE counters and get the root-level one (last one)
-              counters = root.findall('.//counter[@type="LINE"]')
-              if counters:
-                  # Get the last counter which should be the root/total
-                  counter = counters[-1]
-                  covered = int(counter.get('covered', 0))
-                  missed = int(counter.get('missed', 0))
-                  total = covered + missed
-                  
-                  if total > 0:
-                      rate = (covered / total) * 100
-                      print(f'{rate:.2f}')
-                  else:
-                      print('0.00')
-              else:
-                  print('0.00')
-          except Exception as e:
-              print(f'Error: {e}', file=sys.stderr)
-              sys.exit(1)
+          JACOCO_XML = "backend/target/site/jacoco/jacoco.xml"
+
+          tree = ET.parse(JACOCO_XML)
+          root = tree.getroot()
+
+          # ---- LINE COVERAGE ----
+          counters = root.findall('.//counter[@type="LINE"]')
+          counter = counters[-1]
+          covered = int(counter.get('covered'))
+          missed = int(counter.get('missed'))
+          total = covered + missed
+          rate = (covered / total * 100) if total else 0
+
+          # ---- COVERAGE INDICATOR ----
+          if rate >= 80:
+              indicator = "🟢"
+          elif rate >= 60:
+              indicator = "🟡"
+          else:
+              indicator = "🔴"
+
+          # ---- JAVA FILES ----
+          main_files = {
+              f.stem
+              for f in Path("backend/src/main/java").rglob("*.java")
+          }
+
+          test_files = {
+              f.stem.replace("Test", "")
+              for f in Path("backend/src/test/java").rglob("*Test.java")
+          }
+
+          tested = sorted(main_files & test_files)
+          untested = sorted(main_files - test_files)
+
+          # ---- OUTPUT ----
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"line_rate={rate:.2f}\n")
+              out.write(f"covered_lines={covered}\n")
+              out.write(f"total_lines={total}\n")
+              out.write(f"indicator={indicator}\n")
+              out.write(f"total_files={len(main_files)}\n")
+              out.write(f"tested_files={len(tested)}\n")
+              out.write(f"untested_files={len(untested)}\n")
+              out.write("untested_files_list=" + "\\n".join(untested) + "\n")
           EOF
-          )
 
-          if [[ -z "$LINE_RATE" ]]; then
-            echo "Could not extract coverage from XML file!"
-            echo "First 100 characters of XML file:"
-            head -c 100 "$FILE" || true
-            exit 1
-          fi
-
-          echo "line_rate=$LINE_RATE" >> $GITHUB_OUTPUT
-          echo "Extracted line coverage: $LINE_RATE%"
-
+      # -----------------------------------------------------
+      # GitHub Summary
+      # -----------------------------------------------------
       - name: Add coverage to GitHub Summary
         run: |
-          echo "### Backend Test Coverage: **${{ steps.coverage.outputs.line_rate }}%**" >> $GITHUB_STEP_SUMMARY
+          echo "## 📊 Backend Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**${{ steps.coverage.outputs.indicator }} Line Coverage:** **${{ steps.coverage.outputs.line_rate }}%**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines Covered: ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Java Files: ${{ steps.coverage.outputs.total_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Files With Tests: ${{ steps.coverage.outputs.tested_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Files Without Tests: ${{ steps.coverage.outputs.untested_files }}" >> $GITHUB_STEP_SUMMARY
 
+      # -----------------------------------------------------
+      # PR COMMENT (PRETTY & STRUCTURED)
+      # -----------------------------------------------------
       - name: Comment Coverage on PR
+        if: github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
           message: |
-            ## ✅ Backend Test Coverage Report
+            ## 📊 Backend Coverage Report
+
+            ### Overall Coverage
+            **${{ steps.coverage.outputs.indicator }} Line Coverage: `${{ steps.coverage.outputs.line_rate }}%`**
+
+            ```
+            ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }} lines covered
+            ```
+
+            ---
+
+            ### 📁 Project Statistics
+
             | Metric | Value |
-            |--------|-------|
-            | Line Coverage | **${{ steps.coverage.outputs.line_rate }}%** |
-            | Coverage Report | Available in CI Artifacts |
+            |------|------|
+            | Total Java Files | **${{ steps.coverage.outputs.total_files }}** |
+            | Files With Tests | **${{ steps.coverage.outputs.tested_files }}** |
+            | Files Without Tests | **${{ steps.coverage.outputs.untested_files }}** |
 
-  frontend-setup:
-    name: Frontend - Setup
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+            ---
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+            ### 🚨 Files Missing Tests
+            <details>
+            <summary>Click to expand</summary>
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node
+            ```
+            ${{ steps.coverage.outputs.untested_files_list }}
+            ```
+
+            </details>
+
+            ---
+
+            📦 **Full HTML coverage report** is available in **GitHub Actions Artifacts**
+
+            💡 **Suggestion:** Aim for **≥ 80%** line coverage before merging.
+
+  # =========================================================
+  # ================= FRONTEND ==============================
+  # =========================================================
 
   frontend-build:
     name: Frontend - Build
     runs-on: ubuntu-latest
-    needs: frontend-setup
+
     steps:
       - uses: actions/checkout@v4
 
@@ -190,9 +191,14 @@ jobs:
         run: npm run build
         working-directory: frontend
 
+  # =========================================================
+  # ================= PR TITLE VALIDATION ===================
+  # =========================================================
+
   validate-pr-title:
     name: Validate PR Title
     runs-on: ubuntu-latest
+
     steps:
       - name: Validate PR title format
         env:
@@ -205,8 +211,8 @@ jobs:
             exit 0
           fi
 
-          echo "ERROR: Invalid PR title format."
-          echo "Expected formats:"
-          echo "  [JET-123] Your title"
-          echo "  [NOJET] Your title"
+          echo "❌ Invalid PR title format"
+          echo "Expected:"
+          echo "  [JET-123] Title"
+          echo "  [NOJET] Title"
           exit 1
