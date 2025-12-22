@@ -33,21 +33,27 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
     """)
     HotelReviewSummaryDTO getHotelReviewSummary(@Param("hotelId") Integer hotelId);
 
-    @Query("""
-        SELECT new com.example.backend.dto.HotelDTO.HotelReviewItemDTO(
-            u.firstName,
-            rt.roomTypeName,
-            DATEDIFF(rb.checkOut, rb.checkIn),
-            r.rating,
-            r.comment,
-            r.createdAt
-        )
-        FROM HotelReview r
-        JOIN r.user u
-        JOIN RoomBooking rb ON rb.bookingTransaction.bookingTransactionId = r.bookingTransaction.bookingTransactionId
-        JOIN rb.roomType rt
-        WHERE r.hotel.hotelID = :hotelId
-    """)
+    @Query(value = """
+        SELECT 
+        CONCAT(u.first_name, ' ', u.last_name) AS userName,
+        rt.room_type_name AS roomType,
+        DATEDIFF(rb.check_out, rb.check_in) AS nights,
+        r.rating,
+        r.comment,
+        r.created_at AS createdAt
+        FROM hotel_reviews r
+        JOIN users u ON r.user_id = u.user_id
+        JOIN room_booking rb ON rb.booking_transaction_id = r.booking_transaction_id
+        JOIN room_types rt ON rb.room_type_id = rt.room_type_id
+        WHERE r.hotel_id = :hotelId
+        ORDER BY r.created_at DESC """,
+
+            countQuery = """
+        SELECT COUNT(*) 
+        FROM hotel_review r
+        WHERE r.hotel_id = :hotelId
+        """,
+            nativeQuery = true)
     Page<HotelReviewItemDTO> getHotelReviews(
             @Param("hotelId") Integer hotelId,
             Pageable pageable
