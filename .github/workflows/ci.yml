@@ -6,17 +6,14 @@ on:
   push:
     branches: ["main", "master"]
 
-jobs:
-  # =========================================================
-  # ================= BACKEND ===============================
-  # =========================================================
+# =========================================================
+# ================= BACKEND ===============================
+# =========================================================
 
-  backend-test:
-    name: Backend - Test & Coverage
+jobs:
+  backend-setup:
+    name: Backend - Setup
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -34,7 +31,52 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-      - name: Run tests and generate JaCoCo report
+  backend-build:
+    name: Backend - Build
+    runs-on: ubuntu-latest
+    needs: backend-setup
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      - name: Build backend
+        run: mvn clean compile -DskipTests
+        working-directory: backend
+
+  backend-test:
+    name: Backend - Test & Coverage
+    runs-on: ubuntu-latest
+    needs: backend-build
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven
+
+      - name: Run tests & generate JaCoCo report
         run: mvn clean test jacoco:report
         working-directory: backend
 
@@ -45,43 +87,32 @@ jobs:
           path: backend/target/site/jacoco/
 
       # -----------------------------------------------------
-      # Extract Coverage & Project Statistics
+      # Extract Coverage & Statistics (FIXED)
       # -----------------------------------------------------
       - name: Extract coverage statistics
         id: coverage
         run: |
           python3 << 'EOF'
           import xml.etree.ElementTree as ET
-          import os
           from pathlib import Path
+          import os
 
-          JACOCO_XML = "backend/target/site/jacoco/jacoco.xml"
-
-          tree = ET.parse(JACOCO_XML)
+          # ---------- Parse JaCoCo ----------
+          tree = ET.parse("backend/target/site/jacoco/jacoco.xml")
           root = tree.getroot()
 
-          # ---- LINE COVERAGE ----
-          counters = root.findall('.//counter[@type="LINE"]')
-          counter = counters[-1]
-          covered = int(counter.get('covered'))
-          missed = int(counter.get('missed'))
+          counter = root.findall('.//counter[@type="LINE"]')[-1]
+          covered = int(counter.get("covered"))
+          missed = int(counter.get("missed"))
           total = covered + missed
           rate = (covered / total * 100) if total else 0
 
-          # ---- COVERAGE INDICATOR ----
-          if rate >= 80:
-              indicator = "🟢"
-          elif rate >= 60:
-              indicator = "🟡"
-          else:
-              indicator = "🔴"
+          indicator = "🟢" if rate >= 80 else "🟡" if rate >= 60 else "🔴"
 
-          # ---- JAVA FILES ----
+          # ---------- Java Files ----------
           main_files = {
-              f.stem
-              for f in Path("backend/src/main/java").rglob("*.java")
+              f.stem for f in Path("backend/src/main/java").rglob("*.java")
           }
-
           test_files = {
               f.stem.replace("Test", "")
               for f in Path("backend/src/test/java").rglob("*Test.java")
@@ -90,16 +121,22 @@ jobs:
           tested = sorted(main_files & test_files)
           untested = sorted(main_files - test_files)
 
-          # ---- OUTPUT ----
-          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
-              out.write(f"line_rate={rate:.2f}\n")
-              out.write(f"covered_lines={covered}\n")
-              out.write(f"total_lines={total}\n")
-              out.write(f"indicator={indicator}\n")
-              out.write(f"total_files={len(main_files)}\n")
-              out.write(f"tested_files={len(tested)}\n")
-              out.write(f"untested_files={len(untested)}\n")
-              out.write("untested_files_list=" + "\\n".join(untested) + "\n")
+          # ---------- GitHub Outputs ----------
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a") as f:
+              f.write(f"line_rate={rate:.2f}\n")
+              f.write(f"covered_lines={covered}\n")
+              f.write(f"total_lines={total}\n")
+              f.write(f"indicator={indicator}\n")
+              f.write(f"total_files={len(main_files)}\n")
+              f.write(f"tested_files={len(tested)}\n")
+              f.write(f"untested_files={len(untested)}\n")
+
+              # 🔥 MULTILINE SAFE OUTPUT
+              f.write("untested_files_list<<EOF\n")
+              for file in untested:
+                  f.write(file + "\n")
+              f.write("EOF\n")
           EOF
 
       # -----------------------------------------------------
@@ -111,13 +148,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**${{ steps.coverage.outputs.indicator }} Line Coverage:** **${{ steps.coverage.outputs.line_rate }}%**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Lines Covered: ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Lines: ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }}" >> $GITHUB_STEP_SUMMARY
           echo "- Java Files: ${{ steps.coverage.outputs.total_files }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Files With Tests: ${{ steps.coverage.outputs.tested_files }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Files Without Tests: ${{ steps.coverage.outputs.untested_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- With Tests: ${{ steps.coverage.outputs.tested_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Without Tests: ${{ steps.coverage.outputs.untested_files }}" >> $GITHUB_STEP_SUMMARY
 
       # -----------------------------------------------------
-      # PR COMMENT (PRETTY & STRUCTURED)
+      # PR COMMENT (NOW LIST IS CLEAN ✅)
       # -----------------------------------------------------
       - name: Comment Coverage on PR
         if: github.event_name == 'pull_request'
@@ -156,11 +193,7 @@ jobs:
 
             </details>
 
-            ---
-
-            📦 **Full HTML coverage report** is available in **GitHub Actions Artifacts**
-
-            💡 **Suggestion:** Aim for **≥ 80%** line coverage before merging.
+            📦 Full HTML coverage report is available in CI Artifacts
 
   # =========================================================
   # ================= FRONTEND ==============================
@@ -183,16 +216,14 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
         working-directory: frontend
 
-      - name: Build React app
-        run: npm run build
+      - run: npm run build
         working-directory: frontend
 
   # =========================================================
-  # ================= PR TITLE VALIDATION ===================
+  # ================= PR TITLE ==============================
   # =========================================================
 
   validate-pr-title:
@@ -204,15 +235,9 @@ jobs:
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo "Checking PR Title: $PR_TITLE"
-
           if [[ "$PR_TITLE" =~ ^\[JET-[0-9]+\] ]] || [[ "$PR_TITLE" =~ ^\[NOJET\] ]]; then
-            echo "PR title format is valid!"
             exit 0
           fi
 
           echo "❌ Invalid PR title format"
-          echo "Expected:"
-          echo "  [JET-123] Title"
-          echo "  [NOJET] Title"
           exit 1
