@@ -63,7 +63,7 @@ public class HotelReviewService {
         reviewRepository.save(review);
 
         // Update Hotel rate
-  updateHotelRating(booking.getHotel(), 1);
+        updateHotelRating(booking.getHotel(), 1);
 
     }
 
@@ -89,7 +89,7 @@ public class HotelReviewService {
         reviewRepository.save(review);
 
         // Update Hotel rate
-updateHotelRating(review.getHotel(), 0);
+        updateHotelRating(review.getHotel(), 0);
     }
 
     public void deleteReview(Integer userId, Integer transactionId){
@@ -106,7 +106,7 @@ updateHotelRating(review.getHotel(), 0);
         reviewRepository.delete(review);
 
         // Update Hotel rate
- updateHotelRating(hotel, -1);
+        updateHotelRating(hotel, -1);
     }
 
     public Page<HotelReviewItemDTO> getHotelReviews(Integer hotelId, int page, int size) {
@@ -130,12 +130,11 @@ updateHotelRating(review.getHotel(), 0);
                         + review.getLocationRate()
         ) / 6.0;
     }
-private void updateHotelRating(Hotel hotel, int rateCountDelta) {
-    double newAverageRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
-    hotel.setHotelRate((float) newAverageRate);
-    if (rateCountDelta != 0) {
+
+    private void updateHotelRating(Hotel hotel, int rateCountDelta) {
+        double newAverageRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
+        hotel.setHotelRate((float) newAverageRate);
         hotel.setNumberOfRates(hotel.getNumberOfRates() + rateCountDelta);
+        hotelRepository.save(hotel);
     }
-    hotelRepository.save(hotel);
-}
 }

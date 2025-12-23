@@ -2,6 +2,8 @@ package com.example.backend.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,8 +29,25 @@ public class FlightReview {
     @Column(name = "flight_id", nullable = false)
     private Integer flightId;
 
-    @Column(name = "ticket_id", nullable = false)
-    private Integer ticketId;
+    @OneToOne
+    @JoinColumn(name = "ticket_id")
+    private FlightTicket ticket;
+
+    @Min(1) @Max(5)
+    @Column(name="onTime_rate", nullable = false)
+    private int onTimeRate;
+
+    @Min(1) @Max(5)
+    @Column(name="staff_rate", nullable = false)
+    private int staffRate;
+
+    @Min(1) @Max(5)
+    @Column(name="comfort_rate", nullable = false)
+    private int comfortRate;
+
+    @Min(1) @Max(5)
+    @Column(name="amenities_rate", nullable = false)
+    private int amenitiesRate;
 
     @Column(nullable = false)
     private Float rating;
@@ -38,5 +57,10 @@ public class FlightReview {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
 
