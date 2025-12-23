@@ -1,22 +1,30 @@
 import CheckoutForm from "../../components/Payment/checkoutForm.jsx";
 import { useLocation } from "react-router-dom";
-import {
-  CardElement,
-  Elements,
-  useElements,
-  useStripe,
-} from "@stripe/react-stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 
-const stripePromise = loadStripe("pk_test_51SgUkj2MZSsaVhaf1ENZ4AtX5clx7JEzXOEOCfd4qpS20MIVZ2vqZwFJ43QHVfGvsREfsJfZ19KBxPq78Ja405Qu00X5PSI8JO");
+const stripePromise = loadStripe(
+  "pk_test_51SgUkj2MZSsaVhaf1ENZ4AtX5clx7JEzXOEOCfd4qpS20MIVZ2vqZwFJ43QHVfGvsREfsJfZ19KBxPq78Ja405Qu00X5PSI8JO"
+);
 
 export default function StripePaymentPage() {
   const location = useLocation();
+
   const { ticket } = location.state || {};
-  console.log("Ticket data in StripePaymentPage:", ticket);
+  const { bookingTransaction } = location.state || {};
+  console.log("Payment Page - Ticket:", ticket);
+  console.log(
+    "Payment Page - Booking Transaction:",
+    bookingTransaction
+  );
+
   return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm ticket={ticket} />
-    </Elements>
+    <div className="min-h-screen flex flex-col">
+      
+      {/* Stripe Elements */}
+      <Elements stripe={stripePromise}>
+        <CheckoutForm ticket={ticket} bookingTransaction={bookingTransaction} />
+      </Elements>
+    </div>
   );
 }

@@ -18,9 +18,7 @@
   animation: slide-in 2s ease-out;
 }
 .animated-gradient {
-  background: linear-gradient(270deg, #e0e7ff, #8ba6ff, #67a4ff, #ffffff, #e0e7ff);
-  background-size: 600% 600%; /* make gradient bigger for sliding effect */
-  animation: slideGradient 12s ease infinite;
+  animation: slideGradient 2s ease infinite;
 }
 
 @keyframes slideGradient {

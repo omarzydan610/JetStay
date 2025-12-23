@@ -110,8 +110,8 @@ function App() {
               </ProtectedRoute>
             }
           />
-                    <Route
-            path="/payment/flights"
+          <Route
+            path="/payment"
             element={
               <ProtectedRoute>
                 <StripePaymentPage />

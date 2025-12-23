@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { RoomTypeItem } from "./RoomTypeItem";
 
@@ -11,6 +12,7 @@ export default function HotelDetailsPanel({
   placeholderImages,
 }) {
   const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const navigate = useNavigate();
 
   return (
     <motion.div
@@ -87,12 +89,37 @@ export default function HotelDetailsPanel({
         <button
           disabled={!selectedRoomType}
           onClick={() => {
-            if (selectedRoomType) {
-              toast.success(
-                `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
-              );
-            }
+            if (!selectedRoomType) return;
+
+            const dummyBookingTransaction = {
+              bookingTransactionId: 2, // temp ID for frontend
+              totalPrice: selectedRoomType.price,
+              isPaid: false,
+              status: "PENDING",
+              numberOfGuests : 2, // default for demo
+              numberOfRooms : 1, // default for demo
+              checkInDate : "2024-12-01", // default for demo
+              checkOutDate : "2024-12-05", // default for demo
+              bookingDate: new Date().toISOString().split("T")[0],
+
+              hotel: {
+                hotelId: hotel.hotelId,
+                hotelName: hotel.hotelName,
+                city: hotel.city,
+              },
+            };
+
+            toast.success(
+              `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
+            );
+
+            navigate("/payment", {
+              state: {
+                bookingTransaction: dummyBookingTransaction,
+              },
+            });
           }}
+
           className={`w-full py-3 rounded-lg font-bold text-lg transition ${
             selectedRoomType
               ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"

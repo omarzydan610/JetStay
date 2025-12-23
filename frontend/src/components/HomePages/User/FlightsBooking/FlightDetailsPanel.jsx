@@ -80,7 +80,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
       },
       airline: {
         airlineId: 5,
-        name: "Example Air",
+        name: "EgyAir",
         code: "EXA",
       },
       flightDate: "2025-12-25",
@@ -102,7 +102,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
     console.log("Proceeding to booking for flight:", dummyTicket);
 
     // Navigate and pass the dummy ticket
-    navigate("/payment/flights", { state: { ticket: dummyTicket } });
+    navigate("/payment", { state: { ticket: dummyTicket } });
 
   };
 

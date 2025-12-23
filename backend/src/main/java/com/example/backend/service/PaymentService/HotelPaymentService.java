@@ -1,5 +1,6 @@
 package com.example.backend.service.PaymentService;
 
+import com.example.backend.config.StripeResponseErrorHandler;
 import com.example.backend.dto.PaymentDTO.RoomPaymentDTO;
 import com.example.backend.dto.PaymentDTO.StripeDTO;
 import com.example.backend.entity.BookingTransaction;
@@ -28,6 +29,10 @@ public class HotelPaymentService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay"; // same FastAPI endpoint
+
+    public HotelPaymentService() {
+        restTemplate.setErrorHandler(new StripeResponseErrorHandler());
+    }
 
     public ResponseEntity<String> pay(RoomPaymentDTO dto) {
 
