@@ -110,10 +110,7 @@ updateHotelRating(review.getHotel(), 0);
         reviewRepository.delete(review);
 
         // Update Hotel rate
-        double newRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
-        hotel.setHotelRate((float)newRate);
-        hotel.setNumberOfRates(hotel.getNumberOfRates()-1);
-        hotelRepository.save(hotel);
+ updateHotelRating(hotel, -1);
     }
 
     public Page<HotelReviewItemDTO> getHotelReviews(Integer hotelId, int page, int size) {
