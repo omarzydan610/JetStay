@@ -93,10 +93,7 @@ public class HotelReviewService {
         reviewRepository.save(review);
 
         // Update Hotel rate
-        Hotel hotel = review.getHotel();
-        double newRate = reviewRepository.calculateHotelAverageRate(hotel.getHotelID());
-        hotel.setHotelRate((float)newRate);
-        hotelRepository.save(hotel);
+updateHotelRating(review.getHotel(), 0);
     }
 
     public void deleteReview(Integer userId, Integer transactionId){
