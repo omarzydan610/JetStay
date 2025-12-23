@@ -60,6 +60,11 @@ public class BookingTransaction {
     @Column(name = "booking_date")
     private LocalDate bookingDate;
 
+    @ManyToOne
+    @JoinColumn(name = "applied_offer_id")
+    private RoomOffer appliedOffer;
+
+
     public enum Status {
         PENDING,
         CONFIRMED,
