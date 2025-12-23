@@ -1,6 +1,7 @@
 package com.example.backend.dto.AirlineDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class FlightsDataRequestDTO {
     private final Integer flightId;
@@ -12,6 +13,8 @@ public class FlightsDataRequestDTO {
     private final String status;
     private final String description;
     private final String planeType;
+    private final List<FlightOfferResponse> offers;
+
 
     private FlightsDataRequestDTO(Builder builder) {
         this.flightId = builder.flightId;
@@ -23,6 +26,7 @@ public class FlightsDataRequestDTO {
         this.status = builder.status;
         this.description = builder.description;
         this.planeType = builder.planeType;
+        this.offers = builder.offers;
     }
 
     public static class Builder {
@@ -35,6 +39,7 @@ public class FlightsDataRequestDTO {
         private String status;
         private String description;
         private String planeType;
+        private List<FlightOfferResponse> offers;
 
         public Builder flightId(Integer flightId) { this.flightId = flightId; return this; }
         public Builder airlineId(Integer airlineId) { this.airlineId = airlineId; return this; }
@@ -45,8 +50,10 @@ public class FlightsDataRequestDTO {
         public Builder status(String status) { this.status = status; return this; }
         public Builder description(String description) { this.description = description; return this; }
         public Builder planeType(String planeType) { this.planeType = planeType; return this; }
+        public Builder offers(List<FlightOfferResponse> offers) { this.offers = offers; return this; }
 
         public FlightsDataRequestDTO build() { return new FlightsDataRequestDTO(this); }
+        
     }
 
     public Integer getFlightId() { return flightId; }
@@ -58,4 +65,5 @@ public class FlightsDataRequestDTO {
     public String getStatus() { return status; }
     public String getDescription() { return description; }
     public String getPlaneType() { return planeType; }
+    public List<FlightOfferResponse> getOffers() { return offers; }
 }
