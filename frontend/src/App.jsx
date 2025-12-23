@@ -12,6 +12,7 @@ import BaseProfile from "./pages/Profiles/BaseProfile";
 import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
 import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
 import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
+import StripePaymentPage from "./pages/payment/stripePaymentPage";
 import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -106,6 +107,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <TicketsDetailsPage />
+              </ProtectedRoute>
+            }
+          />
+                    <Route
+            path="/payment/flights"
+            element={
+              <ProtectedRoute>
+                <StripePaymentPage />
               </ProtectedRoute>
             }
           />

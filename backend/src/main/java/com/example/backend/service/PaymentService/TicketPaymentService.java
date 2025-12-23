@@ -1,5 +1,6 @@
 package com.example.backend.service.PaymentService;
 
+import com.example.backend.config.StripeResponseErrorHandler;
 import com.example.backend.dto.PaymentDTO.TicketPaymentDTO;
 import com.example.backend.dto.PaymentDTO.StripeDTO;
 import com.example.backend.entity.FlightTicket;
@@ -11,8 +12,12 @@ import com.example.backend.repository.TicketPaymentRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.ResponseErrorHandler;
+
+import java.io.IOException;
 
 @Service
 public class TicketPaymentService {
@@ -29,30 +34,29 @@ public class TicketPaymentService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay";
 
+    public TicketPaymentService() {
+        restTemplate.setErrorHandler(new StripeResponseErrorHandler());
+    }
+
     public ResponseEntity<String> pay(TicketPaymentDTO dto) {
 
-        // Validate FlightTicket
-        FlightTicket ticket = flightTicketRepository.findById(dto.getTicketId())
-                .orElse(null);
-        if (ticket.equals(null)) {
+        FlightTicket ticket = flightTicketRepository.findById(dto.getTicketId()).orElse(null);
+        if (ticket == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("{\"status\":\"failed\",\"error\":\"Flight ticket not found\"}");
         }
 
-        if (ticket.getIsPaid().equals(true)) {
+        if (Boolean.TRUE.equals(ticket.getIsPaid())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body("{\"status\":\"failed\",\"error\":\"Flight ticket was just purchased moments before\"}");
         }
 
-        // Validate PaymentMethod
-        PaymentMethod method = paymentMethodRepository.findById(dto.getMethodId())
-                .orElse(null);
+        PaymentMethod method = paymentMethodRepository.findById(dto.getMethodId()).orElse(null);
         if (method == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("{\"status\":\"failed\",\"error\":\"Payment method not found\"}");
         }
 
-        // Convert to Stripe DTO
         StripeDTO stripeDTO = StripeDTO.builder()
                 .paymentMethodID(dto.getPaymentMethod())
                 .amount(dto.getAmount())
@@ -60,7 +64,6 @@ public class TicketPaymentService {
                 .description(dto.getDescription())
                 .build();
 
-        // Save initial payment as PENDING
         TicketPayment payment = new TicketPayment();
         payment.setTicket(ticket);
         payment.setMethod(method);
@@ -70,7 +73,6 @@ public class TicketPaymentService {
         Integer paymentID = payment.getPaymentId();
 
         ResponseEntity<String> fastApiResponse;
-        boolean success = false;
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -78,27 +80,23 @@ public class TicketPaymentService {
 
             HttpEntity<StripeDTO> request = new HttpEntity<>(stripeDTO, headers);
 
-            fastApiResponse = restTemplate.postForEntity(
-                    FASTAPI_URL,
-                    request,
-                    String.class
-            );
+            fastApiResponse = restTemplate.postForEntity(FASTAPI_URL, request, String.class);
 
-            success = fastApiResponse.getStatusCode().is2xxSuccessful();
+            // Determine success by parsing JSON "status" field manually
+            boolean success = fastApiResponse.getBody() != null && fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
 
-            if (success){
+            if (success) {
                 ticket.setIsPaid(true);
                 flightTicketRepository.save(ticket);
             }
 
+            confirmPayment(paymentID, success);
 
         } catch (Exception e) {
             fastApiResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"status\":\"failed\",\"error\":\"" + e.getMessage() + "\"}");
+            confirmPayment(paymentID, false);
         }
-
-        // Update payment status
-        confirmPayment(paymentID, success);
 
         return fastApiResponse;
     }

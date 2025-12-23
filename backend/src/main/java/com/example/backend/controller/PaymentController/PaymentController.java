@@ -34,7 +34,8 @@ public class PaymentController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody TicketPaymentDTO ticketPaymentDTO) {
 
-        User user = authenticateAndValidateUser(authorizationHeader, ticketPaymentDTO.getUserId());
+        User user = authenticateAndValidateUser(authorizationHeader);
+        ticketPaymentDTO.setUserId(user.getUserID());
 
         ResponseEntity<String> fastApiResponse = ticketPaymentService.pay(ticketPaymentDTO);
         return ResponseEntity
@@ -48,7 +49,8 @@ public class PaymentController {
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestBody RoomPaymentDTO roomPaymentDTO) {
 
-        User user = authenticateAndValidateUser(authorizationHeader, roomPaymentDTO.getUserId());
+        User user = authenticateAndValidateUser(authorizationHeader);
+        roomPaymentDTO.setUserId(user.getUserID());
 
         ResponseEntity<String> fastApiResponse = hotelPaymentService.pay(roomPaymentDTO);
         return ResponseEntity
@@ -57,7 +59,7 @@ public class PaymentController {
     }
 
     // Common method for authentication and userId validation
-    private User authenticateAndValidateUser(String authorizationHeader, Integer dtoUserId) {
+    private User authenticateAndValidateUser(String authorizationHeader) {
         String token = jwtAuthService.extractTokenFromHeader(authorizationHeader);
         String userEmail = jwtAuthService.extractEmail(token);
 
@@ -66,10 +68,6 @@ public class PaymentController {
 
         if (user.getRole() != User.UserRole.CLIENT) {
             throw new BadRequestException("User is not allowed to make payments");
-        }
-
-        if (!user.getUserID().equals(dtoUserId)) {
-            throw new BadRequestException("User ID does not match authenticated token");
         }
 
         return user;

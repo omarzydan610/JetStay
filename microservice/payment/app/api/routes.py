@@ -54,6 +54,7 @@ def create_payment(payment: PaymentIn):
             error=None
         )
         payments_history.append(out)
+        print(JSONResponse(content=out.dict(), status_code=201).body)
         return JSONResponse(content=out.dict(), status_code=201)
 
     except PaymentMethodRequired as e:
@@ -78,13 +79,31 @@ def create_payment(payment: PaymentIn):
         payments_history.append(out)
         return JSONResponse(content=out.dict(), status_code=402)
 
-    except stripe.error.StripeError as e:
+    except stripe.error.CardError as e:
+        # Stripe card errors have a JSON body we can return
+        err_body = e.json_body.get("error", {}) if e.json_body else {}
+        user_message = err_body.get("message", str(e))
+        print("CardError:", user_message)
         out = PaymentOut(
             amount=payment.amount,
             currency=payment.currency,
             status="failed",
             stripe_payment_intent=None,
-            error=str(e)
+            error=user_message
+        )
+        payments_history.append(out)
+        print(JSONResponse(content=out.dict(), status_code=402).body)
+        return JSONResponse(content=out.dict(), status_code=402)
+
+    except stripe.error.StripeError as e:
+        # Other Stripe errors
+        user_message = getattr(e, "user_message", str(e))
+        out = PaymentOut(
+            amount=payment.amount,
+            currency=payment.currency,
+            status="failed",
+            stripe_payment_intent=None,
+            error=user_message
         )
         payments_history.append(out)
         return JSONResponse(content=out.dict(), status_code=400)
@@ -99,8 +118,3 @@ def create_payment(payment: PaymentIn):
         )
         payments_history.append(out)
         return JSONResponse(content=out.dict(), status_code=500)
-
-
-@router.get("/history", response_model=List[PaymentOut])
-def list_payments():
-    return payments_history
