@@ -9,6 +9,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.AirlineRepository;
 import com.example.backend.repository.FlightReviewRepository;
 import com.example.backend.repository.FlightTicketRepository;
+import com.example.backend.service.CommentModerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -27,8 +28,11 @@ public class AirlineReviewService {
     @Autowired
     private AirlineRepository airlineRepository;
 
+    @Autowired
+    private CommentModerationService moderationService;
 
-    public void addReview(Integer userId, AirlineReviewRequest request) {
+
+    public boolean addReview(Integer userId, AirlineReviewRequest request) {
 
         if (reviewRepository.existsByTicket_TicketId(request.getTicketId())) {
             throw new BadRequestException("Review already exists for this ticket");
@@ -45,26 +49,31 @@ public class AirlineReviewService {
             throw new BadRequestException("You are not allowed to review this ticket");
         }
 
+
         FlightReview review = new FlightReview();
         review.setUserId(userId);
         review.setFlightId(ticket.getFlight().getFlightID());
         review.setTicket(ticket);
 
-        review.setOnTimeRate(request.getOnTimeRate());
-        review.setComfortRate(request.getComfortRate());
-        review.setStaffRate(request.getStaffRate());
-        review.setAmenitiesRate(request.getAmenitiesRate());
-        review.setComment(request.getComment());
+        reviewMapping(request, review);
 
-        review.setRating(calculateRating(request));
+        if (moderationService.isToxic(request.getComment())) {
+            review.setToxicFlag(true);
+            reviewRepository.save(review);
+            return false;
+        }
 
+        review.setToxicFlag(false);
         reviewRepository.save(review);
 
         //Update Airline Rate
         updateAirlineRating(ticket.getAirline(), 1);
+        return true;
     }
 
-    public void editReview(Integer userId, AirlineReviewRequest request) {
+
+
+    public boolean editReview(Integer userId, AirlineReviewRequest request) {
 
         FlightReview review = reviewRepository.findByTicket_TicketId(request.getTicketId())
                 .orElseThrow(() -> new ResourceNotFoundException("Review not found"));
@@ -73,18 +82,21 @@ public class AirlineReviewService {
             throw new BadRequestException("You cannot edit this review");
         }
 
-        review.setOnTimeRate(request.getOnTimeRate());
-        review.setComfortRate(request.getComfortRate());
-        review.setStaffRate(request.getStaffRate());
-        review.setAmenitiesRate(request.getAmenitiesRate());
-        review.setComment(request.getComment());
+        reviewMapping(request, review);
 
-        review.setRating(calculateRating(request));
+        if (moderationService.isToxic(request.getComment())) {
+            review.setToxicFlag(true);
+            reviewRepository.save(review);
+            return false;
+        }
 
+        review.setToxicFlag(false);
         reviewRepository.save(review);
 
         //Update Airline Rate
         updateAirlineRating(review.getTicket().getAirline(), 0);
+
+        return true;
     }
 
     public void deleteReview(Integer userId, Integer ticketId) {
@@ -125,5 +137,15 @@ public class AirlineReviewService {
         airline.setAirlineRate((float) newAverageRate);
         airline.setNumberOfRates(airline.getNumberOfRates() + rateCountDelta);
         airlineRepository.save(airline);
+    }
+
+    private void reviewMapping(AirlineReviewRequest request, FlightReview review) {
+        review.setOnTimeRate(request.getOnTimeRate());
+        review.setComfortRate(request.getComfortRate());
+        review.setStaffRate(request.getStaffRate());
+        review.setAmenitiesRate(request.getAmenitiesRate());
+        review.setComment(request.getComment());
+
+        review.setRating(calculateRating(request));
     }
 }

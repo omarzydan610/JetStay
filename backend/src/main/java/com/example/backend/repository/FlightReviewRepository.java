@@ -53,7 +53,7 @@ public interface FlightReviewRepository extends JpaRepository<FlightReview, Inte
         JOIN t.user u
         JOIN t.tripType tt
         JOIN t.flight f
-        WHERE t.airline.airlineID = :airlineId
+        WHERE t.airline.airlineID = :airlineId AND r.toxicFlag = false
     """)
     Page<AirlineReviewItemDTO> getAirlineReviews(@Param("airlineId") Integer airlineId, Pageable pageable);
 

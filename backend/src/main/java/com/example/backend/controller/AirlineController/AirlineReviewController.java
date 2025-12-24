@@ -24,16 +24,24 @@ public class AirlineReviewController {
     public ResponseEntity<?> addReview(@RequestBody AirlineReviewRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
-        airlineReviewService.addReview(claims.get("user_id", Integer.class), request);
-        return ResponseEntity.ok(SuccessResponse.of("Review is added successfully"));
+        boolean flag = airlineReviewService.addReview(claims.get("user_id", Integer.class), request);
+        if(flag) {
+            return ResponseEntity.ok(SuccessResponse.of("Review is added successfully"));
+        }else {
+            return ResponseEntity.ok(SuccessResponse.of("Your comment needs System Admin approval !"));
+        }
     }
 
     @PutMapping("/edit")
     public ResponseEntity<?> editReview(@RequestBody AirlineReviewRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
-        airlineReviewService.editReview(claims.get("user_id", Integer.class), request);
-        return ResponseEntity.ok(SuccessResponse.of("Review is edited successfully"));
+        boolean flag = airlineReviewService.editReview(claims.get("user_id", Integer.class), request);
+        if(flag) {
+            return ResponseEntity.ok(SuccessResponse.of("Review is edited successfully"));
+        }else {
+            return ResponseEntity.ok(SuccessResponse.of("Your comment needs System Admin approval !"));
+        }
     }
 
     @DeleteMapping("/delete/{ticketId}")

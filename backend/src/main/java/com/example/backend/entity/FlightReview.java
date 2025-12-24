@@ -58,6 +58,9 @@ public class FlightReview {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "toxic_flag")
+    private Boolean toxicFlag;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
