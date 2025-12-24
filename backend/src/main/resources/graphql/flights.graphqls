@@ -28,7 +28,7 @@ type Airport {
 }
 
 type TripType {
-    typeName: TripTypeName
+    typeName: String
     quantity: Int
     price: Float
 }
