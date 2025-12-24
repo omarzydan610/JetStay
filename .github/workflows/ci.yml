@@ -6,22 +6,24 @@ on:
   push:
     branches: ["main", "master"]
 
+# =========================================================
+# ================= BACKEND ===============================
+# =========================================================
+
 jobs:
   backend-setup:
     name: Backend - Setup
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "21"
+          distribution: temurin
+          java-version: 21
 
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -31,13 +33,14 @@ jobs:
     name: Backend - Build
     runs-on: ubuntu-latest
     needs: backend-setup
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "21"
+          distribution: temurin
+          java-version: 21
 
       - uses: actions/cache@v4
         with:
@@ -46,23 +49,24 @@ jobs:
           restore-keys: ${{ runner.os }}-maven
 
       - name: Build backend
-        run: mvn clean compile -DskipTests
         working-directory: backend
+        run: mvn clean compile -DskipTests
 
   backend-test:
-    name: Backend - Test
+    name: Backend - Test & Coverage
     runs-on: ubuntu-latest
-    needs: backend-build
+    needs: [backend-build, payment-check]
     permissions:
       contents: read
       pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-java@v4
         with:
-          distribution: "temurin"
-          java-version: "21"
+          distribution: temurin
+          java-version: 21
 
       - uses: actions/cache@v4
         with:
@@ -70,105 +74,346 @@ jobs:
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-maven
 
-      - name: Run tests and generate coverage
-        run: mvn clean test jacoco:report
+      - name: Run backend tests & JaCoCo
         working-directory: backend
+        run: mvn clean test jacoco:report
 
-      - name: Upload full HTML coverage report
+      - name: Upload backend coverage
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-report
+          name: backend-jacoco-report
           path: backend/target/site/jacoco/
 
-      - name: Extract coverage percentage
-        id: coverage
+      # ---------- Backend coverage extraction ----------
+      - name: Extract backend coverage
+        id: backend
         run: |
-          FILE="backend/target/site/jacoco/jacoco.xml"
-
-          if [[ ! -f "$FILE" ]]; then
-            echo "Coverage XML not found at $FILE"
-            echo "Listing directory contents:"
-            ls -la backend/target/site/jacoco/ || true
-            exit 1
-          fi
-
-          # Extract coverage using Python to parse XML properly
-          # Get the root-level LINE counter (last one in the file)
-          LINE_RATE=$(python3 << 'EOF'
+          python3 << 'EOF'
           import xml.etree.ElementTree as ET
-          import sys
+          from pathlib import Path
+          import os
 
-          try:
-              tree = ET.parse('backend/target/site/jacoco/jacoco.xml')
-              root = tree.getroot()
-              
-              # Find all LINE counters and get the root-level one (last one)
-              counters = root.findall('.//counter[@type="LINE"]')
-              if counters:
-                  # Get the last counter which should be the root/total
-                  counter = counters[-1]
-                  covered = int(counter.get('covered', 0))
-                  missed = int(counter.get('missed', 0))
-                  total = covered + missed
+          tree = ET.parse("backend/target/site/jacoco/jacoco.xml")
+          root = tree.getroot()
+
+          c = root.findall('.//counter[@type="LINE"]')[-1]
+          covered = int(c.get("covered"))
+          missed = int(c.get("missed"))
+          total = covered + missed
+          rate = (covered / total * 100) if total else 0
+
+          indicator = "🟢" if rate >= 80 else "🟡" if rate >= 60 else "🔴"
+
+          # Exclude specific directories: config, dto, entity, exception, repository
+          excluded_dirs = {"config", "dto", "entity", "exception", "repository"}
+          main_files = {}
+          for f in Path("backend/src/main/java").rglob("*.java"):
+              if not any(excluded in f.parts for excluded in excluded_dirs):
+                  # Extract route starting from the package after com/example/backend/
+                  parts = list(f.parts)
+                  # Find the index where "backend" appears in the package structure
+                  backend_pkg_idx = -1
+                  for i, part in enumerate(parts):
+                      if part == "backend" and i > 0 and parts[i-1] == "example" and parts[i-2] == "com":
+                          backend_pkg_idx = i
+                          break
                   
-                  if total > 0:
-                      rate = (covered / total) * 100
-                      print(f'{rate:.2f}')
-                  else:
-                      print('0.00')
-              else:
-                  print('0.00')
-          except Exception as e:
-              print(f'Error: {e}', file=sys.stderr)
-              sys.exit(1)
+                  if backend_pkg_idx != -1:
+                      # Extract everything after com/example/backend
+                      route = "/".join(parts[backend_pkg_idx+1:])
+                      main_files[f.stem] = route
+
+          tests = {f.stem.replace("Test", "") for f in Path("backend/src/test/java").rglob("*Test.java")}
+          untested_names = sorted(set(main_files.keys()) - tests)
+          untested = [main_files[name] for name in untested_names]
+
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a") as f:
+              f.write(f"indicator={indicator}\n")
+              f.write(f"rate={rate:.2f}\n")
+              f.write(f"covered={covered}\n")
+              f.write(f"total={total}\n")
+              f.write(f"untested_count={len(untested)}\n")
+              f.write("untested<<EOF\n")
+              for x in untested:
+                  f.write(x + "\n")
+              f.write("EOF\n")
           EOF
-          )
 
-          if [[ -z "$LINE_RATE" ]]; then
-            echo "Could not extract coverage from XML file!"
-            echo "First 100 characters of XML file:"
-            head -c 100 "$FILE" || true
-            exit 1
-          fi
+      # ---------- Download payment coverage ----------
+      - name: Download payment coverage metadata
+        if: needs.payment-check.outputs.exists == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: payment-coverage-meta
+          path: payment
 
-          echo "line_rate=$LINE_RATE" >> $GITHUB_OUTPUT
-          echo "Extracted line coverage: $LINE_RATE%"
-
-      - name: Add coverage to GitHub Summary
+      - name: Read payment coverage
+        if: needs.payment-check.outputs.exists == 'true'
+        id: payment
         run: |
-          echo "### Backend Test Coverage: **${{ steps.coverage.outputs.line_rate }}%**" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "indicator=$(sed -n '1p' payment/payment.txt)"
+            echo "rate=$(sed -n '2p' payment/payment.txt)"
+            echo "covered=$(sed -n '3p' payment/payment.txt)"
+            echo "total=$(sed -n '4p' payment/payment.txt)"
+          } >> $GITHUB_OUTPUT
 
-      - name: Comment Coverage on PR
+      # ---------- Calculate Total Coverage ----------
+      - name: Calculate total coverage
+        id: total
+        run: |
+          bc=${{ steps.backend.outputs.covered }}
+          bt=${{ steps.backend.outputs.total }}
+          pc=${{ steps.payment.outputs.covered || 0 }}
+          pt=${{ steps.payment.outputs.total || 0 }}
+
+          tc=$((bc + pc))
+          tt=$((bt + pt))
+          tr=$([[ $tt -eq 0 ]] && echo 0 || echo "scale=2; $tc * 100 / $tt" | bc)
+          ti=$([[ $tr -ge 80 ]] && echo "🟢" || ([[ $tr -ge 60 ]] && echo "🟡" || echo "🔴"))
+
+          {
+            echo "covered=$tc"
+            echo "total=$tt"
+            echo "rate=$tr"
+            echo "indicator=$ti"
+          } >> $GITHUB_OUTPUT
+
+      # ---------- Unified PR comment ----------
+      - name: Comment Coverage on PR (with Payment Service)
+        if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
           message: |
-            ## ✅ Backend Test Coverage Report
-            | Metric | Value |
-            |--------|-------|
-            | Line Coverage | **${{ steps.coverage.outputs.line_rate }}%** |
-            | Coverage Report | Available in CI Artifacts |
+            # 📊 JetStay Coverage Report
 
-  frontend-setup:
-    name: Frontend - Setup
+            <div style="background-color: #f6f8fa; padding: 16px; border-radius: 8px; border-left: 4px solid #0366d6; margin: 16px 0;">
+
+            ## 📈 Overall Project Coverage
+            <h3 style="color: #24292e; margin: 8px 0;">
+            ${{ steps.total.outputs.indicator }} <strong>${{ steps.total.outputs.rate }}%</strong> Coverage
+            </h3>
+            <p style="color: #586069; margin: 4px 0;">
+            <code>${{ steps.total.outputs.covered }} / ${{ steps.total.outputs.total }}</code> statements covered
+            </p>
+
+            </div>
+
+            ---
+
+            <div style="background-color: #f6f8fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+
+            ## 🧠 Backend Service
+            <h3 style="color: #24292e; margin: 8px 0;">
+            ${{ steps.backend.outputs.indicator }} <strong>${{ steps.backend.outputs.rate }}%</strong> Line Coverage
+            </h3>
+            <p style="color: #586069; margin: 4px 0;">
+            <code>${{ steps.backend.outputs.covered }} / ${{ steps.backend.outputs.total }}</code> lines covered
+            </p>
+
+            </div>
+
+            <details open>
+            <summary style="cursor: pointer; font-weight: bold; color: #d73a49; font-size: 1.1em; margin: 12px 0;">
+            🚨 Untested Files (<code>${{ steps.backend.outputs.untested_count }}</code>)
+            </summary>
+
+            <div style="margin-top: 12px; background-color: #fff5f5; padding: 12px; border-radius: 6px; border-left: 3px solid #d73a49; max-height: 500px; overflow-y: auto;">
+
+            ```
+            ${{ steps.backend.outputs.untested }}
+            ```
+
+            </div>
+            </details>
+
+            ---
+
+            <div style="background-color: #f6f8fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+
+            ## 💳 Payment Service
+            <h3 style="color: #24292e; margin: 8px 0;">
+            ${{ steps.payment.outputs.indicator }} <strong>${{ steps.payment.outputs.rate }}%</strong> Coverage
+            </h3>
+            <p style="color: #586069; margin: 4px 0;">
+            <code>${{ steps.payment.outputs.covered }} / ${{ steps.payment.outputs.total }}</code> statements covered
+            </p>
+
+            </div>
+
+            ---
+
+            <p style="text-align: center; color: #6a737d; font-size: 0.9em; margin-top: 20px;">
+            📦 Full HTML reports are available in <strong>CI Artifacts</strong>
+            </p>
+
+      - name: Comment Coverage on PR (without Payment Service)
+        if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'false'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            # 📊 JetStay Coverage Report
+
+            <div style="background-color: #f6f8fa; padding: 16px; border-radius: 8px; border-left: 4px solid #0366d6; margin: 16px 0;">
+
+            ## 📈 Overall Project Coverage
+            <h3 style="color: #24292e; margin: 8px 0;">
+            ${{ steps.total.outputs.indicator }} <strong>${{ steps.total.outputs.rate }}%</strong> Coverage
+            </h3>
+            <p style="color: #586069; margin: 4px 0;">
+            <code>${{ steps.total.outputs.covered }} / ${{ steps.total.outputs.total }}</code> statements covered
+            </p>
+
+            </div>
+
+            ---
+
+            <div style="background-color: #f6f8fa; padding: 16px; border-radius: 8px; margin: 16px 0;">
+
+            ## 🧠 Backend Service
+            <h3 style="color: #24292e; margin: 8px 0;">
+            ${{ steps.backend.outputs.indicator }} <strong>${{ steps.backend.outputs.rate }}%</strong> Line Coverage
+            </h3>
+            <p style="color: #586069; margin: 4px 0;">
+            <code>${{ steps.backend.outputs.covered }} / ${{ steps.backend.outputs.total }}</code> lines covered
+            </p>
+
+            </div>
+
+            <details open>
+            <summary style="cursor: pointer; font-weight: bold; color: #d73a49; font-size: 1.1em; margin: 12px 0;">
+            🚨 Untested Files (<code>${{ steps.backend.outputs.untested_count }}</code>)
+            </summary>
+
+            <div style="margin-top: 12px; background-color: #fff5f5; padding: 12px; border-radius: 6px; border-left: 3px solid #d73a49; max-height: 500px; overflow-y: auto;">
+
+            ```
+            ${{ steps.backend.outputs.untested }}
+            ```
+
+            </div>
+            </details>
+
+            ---
+
+            <p style="text-align: center; color: #6a737d; font-size: 0.9em; margin-top: 20px;">
+            📦 Full HTML reports are available in <strong>CI Artifacts</strong>
+            </p>
+
+  # =========================================================
+  # ================= PAYMENT SERVICE ======================
+  # =========================================================
+
+  payment-check:
+    name: Payment Service - Check Existence
     runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check.outputs.exists }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Check if payment service exists
+        id: check
+        run: |
+          if [ -d "microservice/payment" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+  payment-setup:
+    name: Payment Service - Setup
+    runs-on: ubuntu-latest
+    needs: payment-check
+    if: needs.payment-check.outputs.exists == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          node-version: 20
+          python-version: "3.11"
 
       - uses: actions/cache@v4
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('microservice/payment/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip
+
+      - name: Install dependencies
+        working-directory: microservice/payment
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-cov
+
+  payment-test:
+    name: Payment Service - Test & Coverage
+    runs-on: ubuntu-latest
+    needs: payment-setup
+    if: needs.payment-check.outputs.exists == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: microservice/payment
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-cov
+
+      - name: Run payment tests
+        working-directory: microservice/payment
+        run: |
+          PYTHONPATH=$(pwd):$PYTHONPATH \
+          pytest --cov=app --cov-report=html --cov-report=json --cov-report=term-missing tests/
+
+      - name: Upload payment HTML coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: payment-coverage-report
+          path: microservice/payment/htmlcov/
+
+      - name: Extract payment coverage
+        run: |
+          python3 << 'EOF'
+          import json, os
+
+          with open("microservice/payment/coverage.json") as f:
+              data = json.load(f)
+
+          total_statements = data["totals"]["num_statements"]
+          total_missing = data["totals"]["missing_lines"]
+          coverage_rate = data["totals"]["percent_covered"]
+          covered = total_statements - total_missing
+
+          indicator = "🟢" if coverage_rate >= 80 else "🟡" if coverage_rate >= 60 else "🔴"
+
+          os.makedirs("coverage_meta", exist_ok=True)
+          with open("coverage_meta/payment.txt", "w") as f:
+              f.write(f"{indicator}\n{coverage_rate:.2f}\n{covered}\n{total_statements}\n")
+          EOF
+
+      - name: Upload payment coverage metadata
+        uses: actions/upload-artifact@v4
+        with:
+          name: payment-coverage-meta
+          path: coverage_meta/payment.txt
+
+  # =========================================================
+  # ================= FRONTEND ==============================
+  # =========================================================
 
   frontend-build:
     name: Frontend - Build
     runs-on: ubuntu-latest
-    needs: frontend-setup
+
     steps:
       - uses: actions/checkout@v4
 
@@ -182,31 +427,28 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
         working-directory: frontend
 
-      - name: Build React app
-        run: npm run build
+      - run: npm run build
         working-directory: frontend
+
+  # =========================================================
+  # ================= PR TITLE ==============================
+  # =========================================================
 
   validate-pr-title:
     name: Validate PR Title
     runs-on: ubuntu-latest
+
     steps:
       - name: Validate PR title format
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          echo "Checking PR Title: $PR_TITLE"
-
           if [[ "$PR_TITLE" =~ ^\[JET-[0-9]+\] ]] || [[ "$PR_TITLE" =~ ^\[NOJET\] ]]; then
-            echo "PR title format is valid!"
             exit 0
           fi
 
-          echo "ERROR: Invalid PR title format."
-          echo "Expected formats:"
-          echo "  [JET-123] Your title"
-          echo "  [NOJET] Your title"
+          echo "❌ Invalid PR title format"
           exit 1
