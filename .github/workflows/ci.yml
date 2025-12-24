@@ -140,6 +140,27 @@ jobs:
             echo "total=$(sed -n '4p' payment/payment.txt)"
           } >> $GITHUB_OUTPUT
 
+      # ---------- Calculate Total Coverage ----------
+      - name: Calculate total coverage
+        id: total
+        run: |
+          bc=${{ steps.backend.outputs.covered }}
+          bt=${{ steps.backend.outputs.total }}
+          pc=${{ steps.payment.outputs.covered || 0 }}
+          pt=${{ steps.payment.outputs.total || 0 }}
+
+          tc=$((bc + pc))
+          tt=$((bt + pt))
+          tr=$([[ $tt -eq 0 ]] && echo 0 || echo "scale=2; $tc * 100 / $tt" | bc)
+          ti=$([[ $tr -ge 80 ]] && echo "🟢" || ([[ $tr -ge 60 ]] && echo "🟡" || echo "🔴"))
+
+          {
+            echo "covered=$tc"
+            echo "total=$tt"
+            echo "rate=$tr"
+            echo "indicator=$ti"
+          } >> $GITHUB_OUTPUT
+
       # ---------- Unified PR comment ----------
       - name: Comment Coverage on PR (with Payment Service)
         if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'true'
@@ -148,6 +169,15 @@ jobs:
           recreate: true
           message: |
             ## 📊 JetStay Coverage Report
+
+            ---
+
+            ### 📊 Total Project Coverage
+            **${{ steps.total.outputs.indicator }} Coverage: `${{ steps.total.outputs.rate }}%`**
+
+            ```
+            ${{ steps.total.outputs.covered }} / ${{ steps.total.outputs.total }} statements covered
+            ```
 
             ---
 
@@ -189,6 +219,15 @@ jobs:
           recreate: true
           message: |
             ## 📊 JetStay Coverage Report
+
+            ---
+
+            ### 📊 Total Project Coverage
+            **${{ steps.total.outputs.indicator }} Coverage: `${{ steps.total.outputs.rate }}%`**
+
+            ```
+            ${{ steps.total.outputs.covered }} / ${{ steps.total.outputs.total }} statements covered
+            ```
 
             ---
 
