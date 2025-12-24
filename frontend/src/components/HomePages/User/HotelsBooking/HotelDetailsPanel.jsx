@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { RoomTypeItem } from "./RoomTypeItem";
 import roomsService from "../../../../services/HotelServices/roomsService";
