@@ -40,4 +40,7 @@ public class RoomBooking {
 
     @Column(name = "check_out")
     private LocalDate checkOut;
+
+    @Column(name = "no_of_rooms")
+    private Integer noOfRooms;
 }

@@ -44,71 +44,126 @@ public class AirlineStatisticsServiceTest {
         @Autowired
         private UserRepository userRepository;
 
+        @Autowired
+        private BookingTransactionRepository bookingTransactionRepository;
+
+        @Autowired
+        private RoomBookingRepository roomBookingRepository;
+
+        @Autowired
+        private RoomTypeRepository roomTypeRepository;
+
+        @Autowired
+        private RoomImageRepository roomImageRepository;
+
+        @Autowired
+        private HotelRepository hotelRepository;
+
+        @Autowired
+        private HotelReviewRepository hotelReviewRepository;
+
+        @Autowired
+        private HotelImageRepository hotelImageRepository;
+
+        @Autowired
+        private HotelAmenityRepository hotelAmenityRepository;
+
         @MockBean
         private JwtAuthService jwtAuthService;
 
         @BeforeEach
         void setupData() {
+                // 1. Delete RoomBookings (Dependent on BookingTransaction, RoomType, Hotel,
+                // User)
+                roomBookingRepository.deleteAll();
+
+                // 2. Delete HotelReviews (Dependent on BookingTransaction, Hotel, User)
+                hotelReviewRepository.deleteAll();
+
+                // 3. Delete BookingTransactions (Dependent on Hotel, User)
+                // MUST be deleted before Hotel because it has a FK to Hotel
+                bookingTransactionRepository.deleteAll();
+
+                // 4. Delete other Hotel dependents
+                roomImageRepository.deleteAll();
+                roomTypeRepository.deleteAll();
+                hotelImageRepository.deleteAll();
+                hotelAmenityRepository.deleteAll();
+
+                // 5. Delete Hotels (Dependent on User)
+                hotelRepository.deleteAll();
+
+                // 6. Delete Flight related entities
                 flightReviewRepository.deleteAll();
                 flightTicketRepository.deleteAll();
                 tripTypeRepository.deleteAll();
                 flightRepository.deleteAll();
+
+                // 7. Delete Reference Data & Users
+                airlineRepository.deleteAll();
+                airportRepository.deleteAll();
+                userRepository.deleteAll();
+
                 airlineRepository.deleteAll();
                 airportRepository.deleteAll();
                 userRepository.deleteAll();
 
                 User admin1 = userRepository.save(new User(
-                        null, "Admin", "One", "admin1@example.com", "pass123", "1111111111",
-                        User.UserStatus.ACTIVE, User.UserRole.SYSTEM_ADMIN, LocalDateTime.now()));
+                                null, "Admin", "One", "admin1@example.com", "pass123", "1111111111",
+                                User.UserStatus.ACTIVE, User.UserRole.SYSTEM_ADMIN, LocalDateTime.now()));
                 User admin2 = userRepository.save(new User(
-                        null, "Admin", "Two", "admin2@example.com", "pass123", "2222222222",
-                        User.UserStatus.ACTIVE, User.UserRole.SYSTEM_ADMIN, LocalDateTime.now()));
+                                null, "Admin", "Two", "admin2@example.com", "pass123", "2222222222",
+                                User.UserStatus.ACTIVE, User.UserRole.SYSTEM_ADMIN, LocalDateTime.now()));
                 User passenger1 = userRepository.save(new User(
-                        null, "Ibrahim", "Client", "ibrahim@example.com", "pass123", "3333333333",
-                        User.UserStatus.ACTIVE, User.UserRole.CLIENT, LocalDateTime.now()));
+                                null, "Ibrahim", "Client", "ibrahim@example.com", "pass123", "3333333333",
+                                User.UserStatus.ACTIVE, User.UserRole.CLIENT, LocalDateTime.now()));
                 User passenger2 = userRepository.save(new User(
-                        null, "Sara", "Client", "sara@example.com", "pass123", "4444444444",
-                        User.UserStatus.ACTIVE, User.UserRole.CLIENT, LocalDateTime.now()));
+                                null, "Sara", "Client", "sara@example.com", "pass123", "4444444444",
+                                User.UserStatus.ACTIVE, User.UserRole.CLIENT, LocalDateTime.now()));
 
                 Airport dubai = airportRepository.save(new Airport(null, "Dubai International", "Dubai", "UAE"));
                 Airport cairo = airportRepository.save(new Airport(null, "Cairo International", "Cairo", "Egypt"));
                 Airport doha = airportRepository.save(new Airport(null, "Hamad International", "Doha", "Qatar"));
 
                 Airline emirates = airlineRepository.save(new Airline(
-                        null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(), Airline.Status.ACTIVE));
+                                null, "Emirates", 4.5f, "UAE", admin1, "emirates.png", 2, LocalDateTime.now(),
+                                Airline.Status.ACTIVE));
                 Airline qatar = airlineRepository.save(new Airline(
-                        null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(), Airline.Status.INACTIVE));
+                                null, "Qatar Airways", 4.7f, "Qatar", admin2, "qatar.png", 0, LocalDateTime.now(),
+                                Airline.Status.INACTIVE));
 
                 Flight emiratesFlight = flightRepository.save(new Flight(
-                        null, emirates, dubai, cairo,
-                        LocalDateTime.of(2025, 12, 1, 10, 0),
-                        LocalDateTime.of(2025, 12, 1, 12, 30),
-                        Flight.FlightStatus.ON_TIME, "DXB → CAI", "Boeing 777", null));
+                                null, emirates, dubai, cairo,
+                                LocalDateTime.of(2025, 12, 1, 10, 0),
+                                LocalDateTime.of(2025, 12, 1, 12, 30),
+                                Flight.FlightStatus.ON_TIME, "DXB → CAI", "Boeing 777", null));
                 Flight qatarFlight = flightRepository.save(new Flight(
-                        null, qatar, doha, dubai,
-                        LocalDateTime.of(2025, 12, 2, 14, 0),
-                        LocalDateTime.of(2025, 12, 2, 16, 30),
-                        Flight.FlightStatus.PENDING, "DOH → DXB", "Airbus A350", null));
+                                null, qatar, doha, dubai,
+                                LocalDateTime.of(2025, 12, 2, 14, 0),
+                                LocalDateTime.of(2025, 12, 2, 16, 30),
+                                Flight.FlightStatus.PENDING, "DOH → DXB", "Airbus A350", null));
 
                 TripType economy = tripTypeRepository.save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
                 TripType business = tripTypeRepository.save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
                 TripType firstClass = tripTypeRepository.save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
 
                 FlightTicket emiratesTicket1 = flightTicketRepository.save(new FlightTicket(
-                        null, emiratesFlight, emirates, LocalDate.of(2025, 12, 1),
-                        passenger1, economy, 500.0f, true));
+                                null, emiratesFlight, emirates, LocalDate.of(2025, 12, 1),
+                                passenger1, economy, 500.0f, true));
                 FlightTicket emiratesTicket2 = flightTicketRepository.save(new FlightTicket(
-                        null, emiratesFlight, emirates, LocalDate.of(2025, 12, 1),
-                        passenger2, business, 1500.0f, true));
+                                null, emiratesFlight, emirates, LocalDate.of(2025, 12, 1),
+                                passenger2, business, 1500.0f, true));
                 FlightTicket qatarTicket = flightTicketRepository.save(new FlightTicket(
-                        null, qatarFlight, qatar, LocalDate.of(2025, 12, 2),
-                        passenger1, firstClass, 3000.0f, true));
+                                null, qatarFlight, qatar, LocalDate.of(2025, 12, 2),
+                                passenger1, firstClass, 3000.0f, true));
 
-                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(),emiratesFlight.getFlightID(), emiratesTicket1, 5, 4, 5, 4, 4.2f, "Smooth flight", LocalDateTime.now(),false));
-                flightReviewRepository.save(new FlightReview(null, passenger2.getUserID(), emiratesFlight.getFlightID(),emiratesTicket2, 4, 5, 4, 5, 4.5f, "Excellent service", LocalDateTime.now(), false));
-                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), qatarFlight.getFlightID(),qatarTicket, 3, 5, 4, 2, 4.8f, "Outstanding experience", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), emiratesFlight.getFlightID(),
+                                emiratesTicket1, 5, 4, 5, 4, 4.2f, "Smooth flight", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger2.getUserID(), emiratesFlight.getFlightID(),
+                                emiratesTicket2, 4, 5, 4, 5, 4.5f, "Excellent service", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), qatarFlight.getFlightID(),
+                                qatarTicket, 3, 5, 4, 2, 4.8f, "Outstanding experience", LocalDateTime.now(), false));
         }
-
 
         @Test
         public void testStatisticsForSpecificAirline() {

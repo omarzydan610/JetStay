@@ -50,6 +50,12 @@ public class FlightServiceIntegrationTestComplete {
     @Autowired
     private FlightOfferRepository flightOfferRepository;
 
+    @Autowired
+    private FlightTicketRepository flightTicketRepository;
+
+    @Autowired
+    private FlightReviewRepository flightReviewRepository;
+
     @MockBean
     private JwtAuthService jwtAuthService;
 
@@ -60,11 +66,14 @@ public class FlightServiceIntegrationTestComplete {
 
     @BeforeEach
     void setup() {
+        flightReviewRepository.deleteAll();
+        flightTicketRepository.deleteAll();
+        tripTypeRepository.deleteAll();
+        flightOfferRepository.deleteAll();
         flightRepository.deleteAll();
         airlineRepository.deleteAll();
         airportRepository.deleteAll();
         userRepository.deleteAll();
-        flightOfferRepository.deleteAll();
 
         admin = new User();
         admin.setEmail("admin@test.com");
@@ -293,12 +302,6 @@ public class FlightServiceIntegrationTestComplete {
 
     @Test
     void getAllAirPorts_ReturnsList() {
-        Airport airport = new Airport();
-        airport.setAirportID(1);
-        airport.setAirportName("Test Airport");
-        airport.setCountry("Egypt");
-        airport.setCity("Cairo");
-        airportRepository.save(airport);
 
         List<Airport> result = flightService.getAllAirPorts("Egypt", "Cairo");
 
