@@ -19,8 +19,11 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import jakarta.persistence.EntityManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RoomBookingServiceTest {
 
@@ -57,6 +61,9 @@ public class RoomBookingServiceTest {
     @Autowired
     private BookingTransactionRepository bookingTransactionRepository;
 
+    @Autowired
+    private EntityManager entityManager;
+
     @MockBean
     private JwtAuthService jwtAuthService;
 
@@ -73,6 +80,17 @@ public class RoomBookingServiceTest {
         roomTypeRepository.deleteAll();
         hotelRepository.deleteAll();
         userRepository.deleteAll();
+
+        // Flush and clear entity manager to ensure all deletions are committed
+        // and to clear any stale references from the Hibernate session
+        // Only do this if we're in a transaction (concurrency tests suspend transactions)
+        try {
+            entityManager.flush();
+            entityManager.clear();
+        } catch (jakarta.persistence.TransactionRequiredException e) {
+            // If no transaction is active (e.g., in concurrency tests), skip flush/clear
+            // The deletions will still be effective when the transaction starts
+        }
 
         // Create test user
         testUser = new User();

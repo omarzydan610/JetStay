@@ -12,6 +12,10 @@ import java.util.List;
 @Repository
 public interface FlightTicketRepository extends JpaRepository<FlightTicket, Integer> {
 
+       @org.springframework.data.jpa.repository.Modifying
+       @Query("UPDATE FlightTicket ft SET ft.state = 'CANCELLED' WHERE ft.state = 'PENDING' AND ft.createdAt < :thresholdDate")
+       void cancelPendingTicketsCreatedBefore(@Param("thresholdDate") LocalDate thresholdDate);
+
        // Find tickets by user ID
        List<FlightTicket> findByUserUserID(Integer userId);
 
@@ -107,9 +111,20 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
                      @Param("airlineId") Long airlineId);
 
        @Query("SELECT ft FROM FlightTicket ft WHERE ft.createdAt BETWEEN :startDate AND :endDate")
-       List<FlightTicket> getFlightTicketsDetailBetweenDate(LocalDate startDate,LocalDate endDate);
+       List<FlightTicket> getFlightTicketsDetailBetweenDate(LocalDate startDate, LocalDate endDate);
 
        @Query("SELECT ft FROM FlightTicket ft WHERE ft.createdAt BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId")
-       List<FlightTicket> getFlightTicketsDetailBetweenDateForArline(LocalDate startDate,LocalDate endDate,Long airlineId);
+       List<FlightTicket> getFlightTicketsDetailBetweenDateForArline(LocalDate startDate, LocalDate endDate,
+                     Long airlineId);
+
+       @Query("SELECT count(*) FROM FlightTicket ft WHERE ft.tripType.typeID = :tripTypeId AND ft.state != 'CANCELLED'")
+       long getNoOFBookedTickets(Integer tripTypeId);
+       // Find upcoming flights for a user (future flight dates)
+       @Query("SELECT ft FROM FlightTicket ft WHERE ft.user.userID = :userId AND ft.flightDate >= CURRENT_DATE AND ft.isPaid = true ORDER BY ft.flightDate ASC")
+       List<FlightTicket> findUpcomingFlightsByUserId(@Param("userId") Integer userId);
+
+       // Find past flights for a user
+       @Query("SELECT ft FROM FlightTicket ft WHERE ft.user.userID = :userId AND ft.flightDate < CURRENT_DATE ORDER BY ft.createdAt DESC")
+       List<FlightTicket> findPastFlightsByUserId(@Param("userId") Integer userId);
 
 }

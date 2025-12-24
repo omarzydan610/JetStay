@@ -381,10 +381,10 @@ class HotelReviewServiceTest {
     void getHotelReviews_Success() {
         // Arrange
         HotelReviewItemDTO review1 = new HotelReviewItemDTO(
-                "User1", "Deluxe Room", 3L, 4.5f, "Great stay!", Timestamp.valueOf(LocalDateTime.now())
+                "User1", "Deluxe Room", 3, 4.5f, "Great stay!", Timestamp.valueOf(LocalDateTime.now())
         );
         HotelReviewItemDTO review2 = new HotelReviewItemDTO(
-                "User2", "Standard Room", 2L, 4.0f, "Good value", Timestamp.valueOf(LocalDateTime.now())
+                "User2", "Standard Room", 2, 4.0f, "Good value", Timestamp.valueOf(LocalDateTime.now())
         );
 
         Page<HotelReviewItemDTO> expectedPage = new PageImpl<>(
@@ -439,7 +439,7 @@ class HotelReviewServiceTest {
     void getHotelReviews_DifferentPageSize() {
         // Arrange
         HotelReviewItemDTO review1 = new HotelReviewItemDTO(
-                "User1", "Suite", 5L, 5.0f, "Amazing!", Timestamp.valueOf(LocalDateTime.now())
+                "User1", "Suite", 5, 5.0f, "Amazing!", Timestamp.valueOf(LocalDateTime.now())
         );
 
         Page<HotelReviewItemDTO> expectedPage = new PageImpl<>(

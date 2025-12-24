@@ -52,7 +52,8 @@ public class FlightService {
     public Flight getFlightById(int id, int airlineID) {
         Flight flight;
         flight = flightCacheManager.getFlightById(id);
-        if (flight != null) return flight;
+        if (flight != null)
+            return flight;
         flight = flightRepository.findById(id).orElse(null);
         if (flight == null) {
             throw new ResourceNotFoundException("Flight not found with id: " + id);
@@ -101,7 +102,7 @@ public class FlightService {
                 TripType tripType = new TripType();
                 tripType.setFlight(savedFlight);
                 tripType.setTypeName(ticketTypeDTO.getTypeName().toLowerCase());
-                tripType.setPrice(ticketTypeDTO.getPrice().intValue());
+                tripType.setPrice(ticketTypeDTO.getPrice());
                 tripType.setQuantity(ticketTypeDTO.getQuantity());
                 tripTypeRepository.save(tripType);
             }
@@ -192,12 +193,12 @@ public class FlightService {
 
     public FlightOfferResponse addOfferToFlight(Integer flightId, FlightOfferRequest request, Integer airlineId) {
         Flight flight = flightRepository.findById(flightId)
-            .orElseThrow(() -> new ResourceNotFoundException("Flight not found with id: " + flightId));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with id: " + flightId));
+
         if (flight.getAirline().getAirlineID() != airlineId) {
             throw new UnauthorizedException("Flight does not belong to your airline");
         }
-        
+
         FlightOffer offer = new FlightOffer();
         offer.setOfferName(request.getOfferName());
         offer.setDiscountValue(request.getDiscountValue());
@@ -209,9 +210,9 @@ public class FlightService {
         offer.setDescription(request.getDescription());
         offer.setIsActive(true);
         offer.setCurrentUsage(0);
-        
+
         FlightOffer savedOffer = flightOfferRepository.save(offer);
-        
+
         FlightOfferResponse response = new FlightOfferResponse();
         response.setFlightOfferId(savedOffer.getFlightOfferId());
         response.setOfferName(savedOffer.getOfferName());
@@ -223,20 +224,39 @@ public class FlightService {
         response.setIsActive(savedOffer.getIsActive());
         response.setDescription(savedOffer.getDescription());
         response.setCreatedAt(savedOffer.getCreatedAt());
-        
+
         return response;
     }
 
     public List<FlightOfferResponse> getOffersForFlight(Integer flightId, Integer airlineId) {
         Flight flight = flightRepository.findById(flightId)
-            .orElseThrow(() -> new ResourceNotFoundException("Flight not found with id: " + flightId));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with id: " + flightId));
+
         if (flight.getAirline().getAirlineID() != airlineId) {
             throw new UnauthorizedException("Flight does not belong to your airline");
         }
-        
+
         List<FlightOffer> offers = flightOfferRepository.findByApplicableFlight_FlightID(flightId);
-        
+
+        return offers.stream().map(offer -> {
+            FlightOfferResponse response = new FlightOfferResponse();
+            response.setFlightOfferId(offer.getFlightOfferId());
+            response.setOfferName(offer.getOfferName());
+            response.setDiscountValue(offer.getDiscountValue());
+            response.setStartDate(offer.getStartDate());
+            response.setEndDate(offer.getEndDate());
+            response.setMaxUsage(offer.getMaxUsage());
+            response.setCurrentUsage(offer.getCurrentUsage());
+            response.setIsActive(offer.getIsActive());
+            response.setDescription(offer.getDescription());
+            response.setCreatedAt(offer.getCreatedAt());
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    public List<FlightOfferResponse> getPublicOffersForFlight(Integer flightId) {
+        List<FlightOffer> offers = flightOfferRepository.findByApplicableFlight_FlightID(flightId);
+
         return offers.stream().map(offer -> {
             FlightOfferResponse response = new FlightOfferResponse();
             response.setFlightOfferId(offer.getFlightOfferId());
@@ -255,14 +275,13 @@ public class FlightService {
 
     public void deleteFlightOffer(Integer offerId, Integer airlineId) {
         FlightOffer offer = flightOfferRepository.findById(offerId)
-            .orElseThrow(() -> new ResourceNotFoundException("Offer not found with id: " + offerId));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Offer not found with id: " + offerId));
+
         if (offer.getApplicableAirline().getAirlineID() != airlineId) {
             throw new UnauthorizedException("Offer does not belong to your airline");
         }
-        
+
         flightOfferRepository.delete(offer);
     }
 
-    
 }

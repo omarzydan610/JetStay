@@ -92,6 +92,16 @@ class AuthService {
     }
   }
 
+  parseJwt (){
+    const token = this.getToken();
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+      console.error('Error parsing JWT:', e);
+      return null;
+    }
+  };
+
   handleError(error) {
     if (error.response) {
       const { status, data } = error.response;
