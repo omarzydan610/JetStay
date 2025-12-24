@@ -104,9 +104,21 @@ jobs:
 
           indicator = "🟢" if rate >= 80 else "🟡" if rate >= 60 else "🔴"
 
-          main = {f.stem for f in Path("backend/src/main/java").rglob("*.java")}
+          # Exclude specific directories: config, dto, entity, exception, repository
+          excluded_dirs = {"config", "dto", "entity", "exception", "repository"}
+          main_files = {}
+          for f in Path("backend/src/main/java").rglob("*.java"):
+              if not any(excluded in f.parts for excluded in excluded_dirs):
+                  # Extract route from java/com/example/backend/ onwards
+                  parts = f.parts
+                  backend_idx = next((i for i, p in enumerate(parts) if p == "backend"), -1)
+                  if backend_idx != -1:
+                      route = "/".join(parts[backend_idx+1:]).replace(".java", "").replace("/", "/").lstrip("/")
+                      main_files[f.stem] = route
+          
           tests = {f.stem.replace("Test", "") for f in Path("backend/src/test/java").rglob("*Test.java")}
-          untested = sorted(main - tests)
+          untested_names = sorted(set(main_files.keys()) - tests)
+          untested = [main_files[name] for name in untested_names]
 
           out = os.environ["GITHUB_OUTPUT"]
           with open(out, "a") as f:
