@@ -33,12 +33,6 @@ type TripType {
     price: Float
 }
 
-enum TripTypeName {
-ECONOMY,
-BUSINESS,
-FIRST_CLASS
-}
-
 enum FlightStatus {
     PENDING
     ON_TIME
