@@ -224,34 +224,9 @@ public class RoomOfferServiceTest {
         assertEquals("Winter Discount", offers.get(0).getOfferName());
     }
 
-    // @Test
-    // @Order(6)
-    // void testDeleteRoomOffer_Success() {
-    //     // Add an offer
-    //     RoomOfferRequest request = new RoomOfferRequest();
-    //     request.setOfferName("Delete Test Offer");
-    //     request.setDiscountValue(25.0f);
-    //     request.setRoomTypeId(roomType.getRoomTypeID());
-    //     request.setHotelId(hotel.getHotelID());
-    //     request.setStartDate(LocalDateTime.now().plusDays(1));
-    //     request.setEndDate(LocalDateTime.now().plusDays(30));
-    //     request.setMaxUsage(10);
-    //     request.setMinStayNights(3);
-    //     request.setMinBookingAmount(100.0f);
-    //     request.setDescription("Offer to delete");
-
-    //     RoomOfferResponse addedOffer = roomOfferService.addRoomOffer(request);
-
-    //     // Delete the offer
-    //     roomOfferService.deleteRoomOffer(addedOffer.getRoomOfferId(), hotel.getHotelID());
-
-    //     // Verify it's deleted
-    //     List<RoomOfferResponse> offers = roomOfferService.getRoomOffersByHotel(hotel.getHotelID());
-    //     assertEquals(0, offers.size());
-    // }
 
     @Test
-    @Order(7)
+    @Order(6)
     void testDeleteRoomOffer_NotFound() {
         RuntimeException exception = assertThrows(RuntimeException.class, () -> {
             roomOfferService.deleteRoomOffer(999, hotel.getHotelID()); // Non-existent offer
@@ -260,7 +235,7 @@ public class RoomOfferServiceTest {
     }
 
     @Test
-    @Order(8)
+    @Order(7)
     void testDeleteRoomOffer_NotAuthorized() {
         // Create another admin user
         User anotherAdmin = new User();
