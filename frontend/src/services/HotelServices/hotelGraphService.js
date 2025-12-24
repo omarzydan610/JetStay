@@ -35,10 +35,15 @@ export const getRoomsGraph = async (page = 0, size = 10, filter = {}) => {
     const variables = { filter, page, size };
     console.log("Requesting rooms, page:", page, "filter:", filter);
 
+    const headers = {};
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
     const res = await apiClient.post(
       `/graphql`,
       { query, variables },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers }
     );
     console.log(res.data)
 

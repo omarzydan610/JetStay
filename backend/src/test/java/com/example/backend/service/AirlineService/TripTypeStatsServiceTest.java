@@ -93,9 +93,9 @@ public class TripTypeStatsServiceTest {
                         LocalDateTime.of(2025, 12, 2, 16, 30),
                         Flight.FlightStatus.PENDING, "DOH → DXB", "Airbus A350", null));
 
-                TripType economy = tripTypeRepository.save(new TripType(null, emiratesFlight, 100, 500, "ECONOMY"));
-                TripType business = tripTypeRepository.save(new TripType(null, emiratesFlight, 20, 1500, "BUSINESS"));
-                TripType firstClass = tripTypeRepository.save(new TripType(null, qatarFlight, 10, 3000, "FIRST_CLASS"));
+                TripType economy = tripTypeRepository.save(new TripType(null, emiratesFlight, 100, 500.0f, "ECONOMY"));
+                TripType business = tripTypeRepository.save(new TripType(null, emiratesFlight, 20, 1500.0f, "BUSINESS"));
+                TripType firstClass = tripTypeRepository.save(new TripType(null, qatarFlight, 10, 3000.0f, "FIRST_CLASS"));
 
                 FlightTicket emiratesTicket1 = flightTicketRepository.save(new FlightTicket(
                         null, emiratesFlight, emirates, LocalDate.of(2025, 12, 1),

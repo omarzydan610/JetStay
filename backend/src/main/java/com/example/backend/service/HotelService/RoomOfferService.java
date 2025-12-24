@@ -31,13 +31,13 @@ public class RoomOfferService {
     @Transactional
     public RoomOfferResponse addRoomOffer(RoomOfferRequest request) {
         Hotel hotel = hotelRepository.findById(request.getHotelId())
-            .orElseThrow(() -> new RuntimeException("Hotel not found"));
+                .orElseThrow(() -> new RuntimeException("Hotel not found"));
 
         RoomType roomType = null;
         if (request.getRoomTypeId() != null) {
             roomType = roomTypeRepository.findById(request.getRoomTypeId())
-                .orElseThrow(() -> new RuntimeException("Room type not found"));
-            
+                    .orElseThrow(() -> new RuntimeException("Room type not found"));
+
             if (!roomType.getHotel().getHotelID().equals(request.getHotelId())) {
                 throw new RuntimeException("Room type does not belong to your hotel");
             }
@@ -66,9 +66,15 @@ public class RoomOfferService {
         return offers.stream().map(RoomOfferMapper::mapToResponse).collect(Collectors.toList());
     }
 
+    public List<RoomOfferResponse> getPublicRoomOffersByHotel(Integer hotelId) {
+        List<RoomOffer> offers = roomOfferRepository.findByApplicableHotel_HotelID(hotelId);
+        return offers.stream().map(RoomOfferMapper::mapToResponse).collect(Collectors.toList());
+    }
+
     @Transactional
     public void deleteRoomOffer(Integer offerId, Integer hotelId) {
-        RoomOffer offer = roomOfferRepository.findById(offerId).orElseThrow(() -> new RuntimeException("Offer not found"));
+        RoomOffer offer = roomOfferRepository.findById(offerId)
+                .orElseThrow(() -> new RuntimeException("Offer not found"));
 
         if (!offer.getApplicableHotel().getHotelID().equals(hotelId)) {
             throw new RuntimeException("You are not authorized to delete this offer");

@@ -59,7 +59,7 @@ class HotelReviewControllerTest {
         HotelReviewItemDTO review1 = new HotelReviewItemDTO(
                 "John Doe",
                 "Deluxe Room",
-                3L,
+                3,
                 4.5f,
                 "Excellent stay! Very comfortable and clean.",
                 Timestamp.valueOf(LocalDateTime.of(2024, 12, 1, 10, 30))
@@ -67,7 +67,7 @@ class HotelReviewControllerTest {
         HotelReviewItemDTO review2 = new HotelReviewItemDTO(
                 "Jane Smith",
                 "Standard Room",
-                2L,
+                2,
                 4.0f,
                 "Good value for money. Would recommend.",
                 Timestamp.valueOf(LocalDateTime.of(2024, 12, 5, 14, 20))
@@ -82,7 +82,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 10)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -114,7 +114,7 @@ class HotelReviewControllerTest {
         HotelReviewItemDTO review = new HotelReviewItemDTO(
                 "Alice Johnson",
                 "Suite",
-                5L,
+                5,
                 5.0f,
                 "Amazing experience!",
                 Timestamp.valueOf(LocalDateTime.of(2024, 12, 10, 16, 45))
@@ -129,7 +129,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 2, 5)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .param("page", "2")
                         .param("size", "5")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -163,7 +163,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 10)).thenReturn(emptyPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -183,7 +183,7 @@ class HotelReviewControllerTest {
         HotelReviewItemDTO review = new HotelReviewItemDTO(
                 "Bob Williams",
                 "Economy Room",
-                1L,
+                1,
                 3.5f,
                 null, // Null comment
                 Timestamp.valueOf(LocalDateTime.of(2024, 12, 15, 9, 0))
@@ -198,7 +198,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 10)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -223,7 +223,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 100)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .param("page", "0")
                         .param("size", "100")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -249,7 +249,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(eq(hotelId), anyInt(), anyInt())).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .param("page", "-1")
                         .param("size", "10")
                         .contentType(MediaType.APPLICATION_JSON))
@@ -264,13 +264,13 @@ class HotelReviewControllerTest {
         // Arrange
         Integer hotelId = 10;
         HotelReviewItemDTO review1 = new HotelReviewItemDTO(
-                "User1", "Room A", 1L, 5.0f, "Perfect!", Timestamp.valueOf(LocalDateTime.now())
+                "User1", "Room A", 1, 5.0f, "Perfect!", Timestamp.valueOf(LocalDateTime.now())
         );
         HotelReviewItemDTO review2 = new HotelReviewItemDTO(
-                "User2", "Room B", 2L, 3.0f, "Average", Timestamp.valueOf(LocalDateTime.now())
+                "User2", "Room B", 2, 3.0f, "Average", Timestamp.valueOf(LocalDateTime.now())
         );
         HotelReviewItemDTO review3 = new HotelReviewItemDTO(
-                "User3", "Room C", 4L, 4.5f, "Great!", Timestamp.valueOf(LocalDateTime.now())
+                "User3", "Room C", 4, 4.5f, "Great!", Timestamp.valueOf(LocalDateTime.now())
         );
 
         Page<HotelReviewItemDTO> reviewPage = new PageImpl<>(
@@ -282,7 +282,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 10)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -312,7 +312,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(summary);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -339,7 +339,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(summary);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -365,7 +365,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(summary);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -387,7 +387,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(null);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -408,7 +408,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(summary);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -429,7 +429,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(summary);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -449,7 +449,7 @@ class HotelReviewControllerTest {
     void getHotelReviews_InvalidHotelId_PathVariable() throws Exception {
         // This tests the path variable binding
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/invalid")
+        mockMvc.perform(get("/api/hotel/reviews/invalid")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -461,7 +461,7 @@ class HotelReviewControllerTest {
     void getHotelReviewSummary_InvalidHotelId_PathVariable() throws Exception {
         // This tests the path variable binding
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/invalid/summary")
+        mockMvc.perform(get("/api/hotel/reviews/invalid/summary")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -482,7 +482,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 10)).thenReturn(emptyPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -498,7 +498,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviewSummary(hotelId)).thenReturn(null);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}/summary", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}/summary", hotelId)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk());
@@ -519,7 +519,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 3, 10)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .param("page", "3")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -543,7 +543,7 @@ class HotelReviewControllerTest {
         when(hotelReviewService.getHotelReviews(hotelId, 0, 25)).thenReturn(reviewPage);
 
         // Act & Assert
-        mockMvc.perform(get("/api/hotels/reviews/{hotelId}", hotelId)
+        mockMvc.perform(get("/api/hotel/reviews/{hotelId}", hotelId)
                         .param("size", "25")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())

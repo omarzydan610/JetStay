@@ -203,11 +203,11 @@ class FlightGraphQLServiceTest {
     void testTripTypeFilters() {
         TripType t1 = new TripType();
         t1.setTypeName("Economy");
-        t1.setPrice((int) 100.0);
+        t1.setPrice((float) 100.0);
 
         TripType t2 = new TripType();
         t2.setTypeName("Business");
-        t2.setPrice((int) 500.0);
+        t2.setPrice((float) 500.0);
 
         Flight f = createFlight(1, "A", 4, "X",
                 "CAI", "Cairo", "EG",

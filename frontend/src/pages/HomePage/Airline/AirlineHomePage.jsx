@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import StatisticsSection from "../../../components/HomePages/Airline/HomePage/StatisticsSection.jsx";
 import FlightListSection from "../../../components/HomePages/Airline/HomePage/FlightListSection.jsx";
+import AirlineReviews from "../../../components/HomePages/User/FlightReview/AirlineReviewsList.jsx";
+import authService from "../../../services/AuthServices/authService.js";
 
 function AirlineHomePage() {
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState("");
+  const clamis = authService.parseJwt();
 
   useEffect(() => {
     setLoading(false);
@@ -107,6 +110,11 @@ function AirlineHomePage() {
         {/* Flight List Section */}
         <motion.div variants={itemVariants}>
           <FlightListSection />
+        </motion.div>
+
+        {/* Reviews List Section */}
+        <motion.div variants={itemVariants}>
+          <AirlineReviews airlineId={clamis.airline_id} />
         </motion.div>
       </motion.div>
     </div>

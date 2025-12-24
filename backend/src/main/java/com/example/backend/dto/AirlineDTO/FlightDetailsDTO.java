@@ -23,7 +23,7 @@ public class FlightDetailsDTO {
 
     private String planeType;
     private String tripType;
-    private Integer price;
+    private Float price;
 
     private String airlineLogoURL;
     private String airlineName;
