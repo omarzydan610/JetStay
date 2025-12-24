@@ -55,7 +55,7 @@ jobs:
   backend-test:
     name: Backend - Test & Coverage
     runs-on: ubuntu-latest
-    needs: backend-build
+    needs: [backend-build, payment-check]
     permissions:
       contents: read
       pull-requests: write
@@ -123,12 +123,14 @@ jobs:
 
       # ---------- Download payment coverage ----------
       - name: Download payment coverage metadata
+        if: needs.payment-check.outputs.exists == 'true'
         uses: actions/download-artifact@v4
         with:
           name: payment-coverage-meta
           path: payment
 
       - name: Read payment coverage
+        if: needs.payment-check.outputs.exists == 'true'
         id: payment
         run: |
           {
@@ -139,8 +141,8 @@ jobs:
           } >> $GITHUB_OUTPUT
 
       # ---------- Unified PR comment ----------
-      - name: Comment Coverage on PR
-        if: github.event_name == 'pull_request'
+      - name: Comment Coverage on PR (with Payment Service)
+        if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'true'
         uses: marocchino/sticky-pull-request-comment@v2
         with:
           recreate: true
@@ -175,6 +177,38 @@ jobs:
             ```
             ${{ steps.payment.outputs.covered }} / ${{ steps.payment.outputs.total }} statements covered
             ```
+
+            ---
+
+            📦 Full HTML reports are available in CI Artifacts
+
+      - name: Comment Coverage on PR (without Payment Service)
+        if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'false'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            ## 📊 JetStay Coverage Report
+
+            ---
+
+            ### 🧠 Backend Service
+            **${{ steps.backend.outputs.indicator }} Line Coverage: `${{ steps.backend.outputs.rate }}%`**
+
+            ```
+            ${{ steps.backend.outputs.covered }} / ${{ steps.backend.outputs.total }} lines covered
+            ```
+
+            **Files without tests:** `${{ steps.backend.outputs.untested_count }}`
+
+            <details>
+            <summary>🚨 Untested Backend Files</summary>
+
+            ```
+            ${{ steps.backend.outputs.untested }}
+            ```
+
+            </details>
 
             ---
 
