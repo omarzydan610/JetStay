@@ -16,6 +16,7 @@ type Flight {
 }
 
 type Airline {
+    airlineID: Int
     airlineName: String
     airlineRate: Float
     airlineNationality: String

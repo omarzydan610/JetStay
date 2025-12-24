@@ -51,6 +51,7 @@ export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
             country
           }
           airline {
+            airlineID
             airlineName
             airlineRate
             airlineNationality
