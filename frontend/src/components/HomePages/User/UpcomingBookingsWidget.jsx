@@ -161,7 +161,7 @@ export default function UpcomingBookingsWidget() {
                                     size={16}
                                     className="text-sky-600 flex-shrink-0"
                                   />
-                                  {booking.room?.hotel?.name || "N/A"}
+                                  {booking.room?.hotel?.name}
                                 </>
                               ) : (
                                 <>
@@ -169,21 +169,15 @@ export default function UpcomingBookingsWidget() {
                                     size={16}
                                     className="text-cyan-600 flex-shrink-0"
                                   />
-                                  {booking.ticket?.flight?.airline?.name ||
-                                    "N/A"}{" "}
-                                  - Flight{" "}
-                                  {booking.ticket?.flight?.flightNumber ||
-                                    "N/A"}
+                                  {booking.ticket?.flight?.airline?.name}
                                 </>
                               )}
                             </h4>
                             <p className="text-sm text-gray-600 truncate flex items-center gap-1 mt-0.5">
                               <MapPin size={12} />
                               {booking.type === "HOTEL"
-                                ? booking.room?.hotel?.location || "N/A"
-                                : `${booking.ticket?.flight?.from || "N/A"} → ${
-                                    booking.ticket?.flight?.to || "N/A"
-                                  }`}
+                                ? booking.room?.hotel?.location
+                                : `${booking.ticket?.flight?.from} → ${booking.ticket?.flight?.to}`}
                             </p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                               <span className="flex items-center gap-1">
@@ -192,10 +186,11 @@ export default function UpcomingBookingsWidget() {
                                 {booking.type === "HOTEL" &&
                                   ` - ${formatDate(booking.checkOutDate)}`}
                               </span>
-                              {booking.type === "HOTEL" ? (
-                                <span>Room {booking.room?.roomNumber}</span>
-                              ) : (
-                                <span>Seat {booking.ticket?.seatNumber}</span>
+                              {booking.type === "HOTEL" && (
+                                <span>{booking.room?.type}</span>
+                              )}
+                              {booking.type === "FLIGHT" && (
+                                <span>{booking.ticket?.type}</span>
                               )}
                             </div>
                           </div>

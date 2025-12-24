@@ -10,8 +10,6 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Phone,
-  Mail,
   User,
   Bed,
   Plane,
@@ -209,7 +207,7 @@ const BookingDetailPage = () => {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Hotel Name</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.hotel?.name || "N/A"}
+                  {booking.room?.hotel?.name}
                 </p>
               </div>
               <div>
@@ -218,25 +216,7 @@ const BookingDetailPage = () => {
                   Location
                 </p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.hotel?.location || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                  <Phone size={14} />
-                  Contact
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.hotel?.phoneNumber || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                  <Mail size={14} />
-                  Email
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.hotel?.email || "N/A"}
+                  {booking.room?.hotel?.location}
                 </p>
               </div>
             </div>
@@ -255,21 +235,15 @@ const BookingDetailPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Room Number</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.roomNumber || "N/A"}
-                </p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-500 mb-1">Room Type</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.type || "N/A"}
+                  {booking.room?.type}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">Capacity</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.room?.capacity || "N/A"} Guests
+                  {booking.room?.capacity} Guests
                 </p>
               </div>
               <div>
@@ -297,25 +271,19 @@ const BookingDetailPage = () => {
               <div>
                 <p className="text-sm text-gray-500 mb-1">Airline</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.flight?.airline?.name || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Flight Number</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.flight?.flightNumber || "N/A"}
+                  {booking.ticket?.flight?.airline?.name}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">From</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.flight?.departureAirport || "N/A"}
+                  {booking.ticket?.flight?.departureAirport}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-gray-500 mb-1">To</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.flight?.arrivalAirport || "N/A"}
+                  {booking.ticket?.flight?.arrivalAirport}
                 </p>
               </div>
             </div>
@@ -334,21 +302,9 @@ const BookingDetailPage = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm text-gray-500 mb-1">Seat Number</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.seatNumber || "N/A"}
-                </p>
-              </div>
-              <div>
                 <p className="text-sm text-gray-500 mb-1">Class</p>
                 <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.type || "N/A"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-500 mb-1">Baggage Allowance</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {booking.ticket?.baggageAllowance || "N/A"} kg
+                  {booking.ticket?.type}
                 </p>
               </div>
               <div>
@@ -388,34 +344,27 @@ const BookingDetailPage = () => {
                 {formatDate(booking.checkOutDate)}
               </p>
             </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                <Users size={14} />
-                Adults
-              </p>
-              <p className="text-lg font-semibold text-gray-900">
-                {booking.adults || 0}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                <Users size={14} />
-                Children
-              </p>
-              <p className="text-lg font-semibold text-gray-900">
-                {booking.children || 0}
-              </p>
-            </div>
             {booking.type === "HOTEL" && (
-              <div>
-                <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
-                  <Clock size={14} />
-                  Number of Nights
-                </p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {calculateNights(booking.checkInDate, booking.checkOutDate)}
-                </p>
-              </div>
+              <>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
+                    <Users size={14} />
+                    Number of Guests
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {booking.numberOfGuests}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 mb-1 flex items-center gap-1">
+                    <Clock size={14} />
+                    Number of Nights
+                  </p>
+                  <p className="text-lg font-semibold text-gray-900">
+                    {calculateNights(booking.checkInDate, booking.checkOutDate)}
+                  </p>
+                </div>
+              </>
             )}
             <div>
               <p className="text-sm text-gray-500 mb-1">Booking Date</p>

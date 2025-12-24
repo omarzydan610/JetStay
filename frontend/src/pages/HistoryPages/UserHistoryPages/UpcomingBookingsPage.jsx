@@ -82,8 +82,8 @@ export default function UpcomingBookingsPage() {
         (booking) =>
           booking.id?.toString().includes(query) ||
           booking.room?.hotel?.name?.toLowerCase().includes(query) ||
-          booking.room?.roomNumber?.toLowerCase().includes(query) ||
-          booking.room?.hotel?.location?.toLowerCase().includes(query)
+          booking.room?.hotel?.location?.toLowerCase().includes(query) ||
+          booking.ticket?.flight?.airline?.name?.toLowerCase().includes(query)
       );
     }
 
@@ -306,15 +306,12 @@ export default function UpcomingBookingsPage() {
                             {booking.type === "HOTEL" ? (
                               <>
                                 <Hotel size={20} className="text-sky-600" />
-                                {booking.room?.hotel?.name || "N/A"}
+                                {booking.room?.hotel?.name}
                               </>
                             ) : (
                               <>
                                 <Plane size={20} className="text-cyan-600" />
-                                {booking.ticket?.flight?.airline?.name ||
-                                  "N/A"}{" "}
-                                - Flight{" "}
-                                {booking.ticket?.flight?.flightNumber || "N/A"}
+                                {booking.ticket?.flight?.airline?.name}
                               </>
                             )}
                           </h3>
@@ -348,8 +345,8 @@ export default function UpcomingBookingsPage() {
                           </p>
                           <p className="font-medium text-gray-900">
                             {booking.type === "HOTEL"
-                              ? booking.room?.roomNumber || "N/A"
-                              : booking.ticket?.seatNumber || "N/A"}
+                              ? booking.room?.type
+                              : booking.ticket?.type}
                           </p>
                         </div>
                         <div>
@@ -374,21 +371,22 @@ export default function UpcomingBookingsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
-                        <span className="flex items-center gap-1">
-                          <Users size={16} />
-                          {booking.adults || 0} Adults, {booking.children || 0}{" "}
-                          Children
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock size={16} />
-                          {calculateNights(
-                            booking.checkInDate,
-                            booking.checkOutDate
-                          )}{" "}
-                          Night(s)
-                        </span>
-                      </div>
+                      {booking.type === "HOTEL" && (
+                        <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <Users size={16} />
+                            {booking.numberOfGuests} Guest(s)
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={16} />
+                            {calculateNights(
+                              booking.checkInDate,
+                              booking.checkOutDate
+                            )}{" "}
+                            Night(s)
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Right Section - Price & Actions */}

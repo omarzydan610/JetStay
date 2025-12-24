@@ -49,23 +49,20 @@ const BookingCard = ({ booking, itemVariants }) => {
                 {booking.type === "HOTEL" ? (
                   <>
                     <Hotel size={20} className="text-sky-600" />
-                    {booking.room?.hotel?.name || "N/A"}
+                    {booking.room?.hotel?.name}
                   </>
                 ) : (
                   <>
                     <Plane size={20} className="text-cyan-600" />
-                    {booking.ticket?.flight?.airline?.name || "N/A"} - Flight{" "}
-                    {booking.ticket?.flight?.flightNumber || "N/A"}
+                    {booking.ticket?.flight?.airline?.name}
                   </>
                 )}
               </h3>
               <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
                 <MapPin size={14} />
                 {booking.type === "HOTEL"
-                  ? booking.room?.hotel?.location || "N/A"
-                  : `${booking.ticket?.flight?.from || "N/A"} → ${
-                      booking.ticket?.flight?.to || "N/A"
-                    }`}
+                  ? booking.room?.hotel?.location
+                  : `${booking.ticket?.flight?.from} → ${booking.ticket?.flight?.to}`}
               </p>
             </div>
             <BookingStatusBadge status={booking.status} />
@@ -78,12 +75,12 @@ const BookingCard = ({ booking, itemVariants }) => {
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">
-                {booking.type === "HOTEL" ? "Room" : "Seat"}
+                {booking.type === "HOTEL" ? "Room Type" : "Class"}
               </p>
               <p className="font-medium text-gray-900">
                 {booking.type === "HOTEL"
-                  ? booking.room?.roomNumber || "N/A"
-                  : booking.ticket?.seatNumber || "N/A"}
+                  ? booking.room?.type
+                  : booking.ticket?.type}
               </p>
             </div>
             <div>
@@ -106,17 +103,18 @@ const BookingCard = ({ booking, itemVariants }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
-            <span className="flex items-center gap-1">
-              <Users size={16} />
-              {booking.adults || 0} Adults, {booking.children || 0} Children
-            </span>
-            <span className="flex items-center gap-1">
-              <Clock size={16} />
-              {calculateNights(booking.checkInDate, booking.checkOutDate)}{" "}
-              Night(s)
-            </span>
-          </div>
+          {booking.type === "HOTEL" && (
+            <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
+              <span className="flex items-center gap-1">
+                <Users size={16} />
+                {booking.numberOfGuests} Guest(s)
+              </span>
+              <span className="flex items-center gap-1">
+                <Clock size={16} />
+                {calculateNights(booking.checkInDate, booking.checkOutDate)} Night(s)
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right Section - Price */}
