@@ -4,6 +4,13 @@ import { useState } from "react";
 import { RoomTypeItem } from "./RoomTypeItem";
 import { useNavigate } from "react-router-dom";
 import HotelReviews from "../HotelReview/HotelReviewsList";
+import { motion } from "framer-motion";
+import { X, Star, MapPin as MapPinIcon } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { RoomTypeItem } from "./RoomTypeItem";
+import roomsService from "../../../../services/HotelServices/roomsService";
+import { isOfferActive } from "../../../../utils/offerUtils";
 
 export default function HotelDetailsPanel({
   hotel,
@@ -14,6 +21,34 @@ export default function HotelDetailsPanel({
   const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [showReviews, setShowReviews] = useState(false);
+  const [roomOffers, setRoomOffers] = useState([]);
+
+  // Fetch room offers when hotel changes
+  useEffect(() => {
+    const fetchRoomOffers = async () => {
+      if (!hotel?.hotelID) return;
+      
+
+      try {
+        const offers = await roomsService.getPublicRoomOffers(hotel.hotelID);
+        setRoomOffers(offers || []);
+      } catch (error) {
+        console.error("Error fetching room offers:", error);
+        setRoomOffers([]);
+      } finally {
+      }
+    };
+
+    fetchRoomOffers();
+  }, [hotel?.hotelID]);
+
+  const getBestOfferForPrice = (price) => {
+    const activeOffers = roomOffers.filter(offer => isOfferActive(offer));
+    if (activeOffers.length === 0) return null;
+    
+    // For simplicity, return the first active offer (could be improved to find best)
+    return activeOffers[0];
+  };
 
   return (
     <>
@@ -93,6 +128,30 @@ export default function HotelDetailsPanel({
               />
             ))}
           </div>
+      {/* Room Types */}
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            Available Room Types
+          </h2>
+          {roomOffers.length > 0 && (
+            <div className="text-sm text-green-600 font-semibold">
+              {roomOffers.filter(offer => isOfferActive(offer)).length} active offer{roomOffers.filter(offer => isOfferActive(offer)).length !== 1 ? 's' : ''}
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          {hotel.roomTypes.map((roomType) => (
+            <RoomTypeItem
+              key={roomType.roomTypeID}
+              roomType={roomType}
+              isSelected={selectedRoomType?.roomTypeID === roomType.roomTypeID}
+              onSelect={setSelectedRoomType}
+              getRoomImage={getRoomImage}
+              getBestOffer={getBestOfferForPrice}
+            />
+          ))}
         </div>
 
         {/* Booking Button */}

@@ -118,11 +118,11 @@ public class FlightController {
     public ResponseEntity<?> addFlightOffer(
             @PathVariable int flightId,
             @RequestBody FlightOfferRequest request) {
-        
+
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
         int airlineId = claims.get("airline_id", Integer.class);
-        
+
         FlightOfferResponse response = flightService.addOfferToFlight(flightId, request, airlineId);
         return ResponseEntity.ok(SuccessResponse.of("Flight offer added successfully", response));
     }
@@ -132,8 +132,14 @@ public class FlightController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
         int airlineId = claims.get("airline_id", Integer.class);
-        
+
         List<FlightOfferResponse> offers = flightService.getOffersForFlight(flightId, airlineId);
+        return ResponseEntity.ok(SuccessResponse.of("Flight offers retrieved successfully", offers));
+    }
+
+    @GetMapping("/{flightId}/offers/public")
+    public ResponseEntity<?> getPublicFlightOffers(@PathVariable int flightId) {
+        List<FlightOfferResponse> offers = flightService.getPublicOffersForFlight(flightId);
         return ResponseEntity.ok(SuccessResponse.of("Flight offers retrieved successfully", offers));
     }
 
@@ -142,7 +148,7 @@ public class FlightController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         Claims claims = (Claims) auth.getCredentials();
         int airlineId = claims.get("airline_id", Integer.class);
-        
+
         flightService.deleteFlightOffer(offerId, airlineId);
         return ResponseEntity.ok(SuccessResponse.of("Flight offer deleted successfully"));
     }
