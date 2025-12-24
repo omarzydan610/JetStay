@@ -48,6 +48,7 @@ def test_health():
 def test_stripe_ticket_success(monkeypatch):
     # avoid DB writes
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
+    monkeypatch.setattr(routes_mod, "update_payment", stub_update)
     # mock stripe intent creation
     monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="succeeded", id_="pi_ok"))
 
@@ -61,6 +62,7 @@ def test_stripe_ticket_success(monkeypatch):
 
 def test_stripe_ticket_requires_payment(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
+    monkeypatch.setattr(routes_mod, "update_payment", stub_update)
     monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="requires_payment_method", id_="pi_fail"))
     payload = {"amount": 10.0, "currency": "USD", "paymentMethod": "pm_invalid", "ticketId": 1}
     r = client.post("/api/payment/pay/ticket", json=payload)
@@ -70,6 +72,7 @@ def test_stripe_ticket_requires_payment(monkeypatch):
 
 def test_stripe_booking_success(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
+    monkeypatch.setattr(routes_mod, "update_payment", stub_update)
     monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="succeeded", id_="pi_booking"))
 
     payload = {"amount": 50.0, "currency": "USD", "paymentMethod": "pm_card", "bookingTransactionId": 2}
@@ -82,6 +85,7 @@ def test_stripe_booking_success(monkeypatch):
 
 def test_stripe_booking_requires_payment(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
+    monkeypatch.setattr(routes_mod, "update_payment", stub_update)
     monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="requires_payment_method", id_="pi_fail_booking"))
 
     payload = {"amount": 50.0, "currency": "USD", "paymentMethod": "pm_invalid", "bookingTransactionId": 2}
