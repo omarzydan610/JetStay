@@ -114,15 +114,9 @@ public class AirlineStatisticsServiceTest {
                                 null, qatarFlight, qatar, LocalDate.of(2025, 12, 2),
                                 passenger1, firstClass, 3000.0f, true));
 
-                flightReviewRepository.save(new FlightReview(
-                                null, passenger1.getUserID(), emiratesFlight.getFlightID(),
-                                emiratesTicket1.getTicketId(), 4.2f, "Smooth flight", LocalDateTime.now()));
-                flightReviewRepository.save(new FlightReview(
-                                null, passenger2.getUserID(), emiratesFlight.getFlightID(),
-                                emiratesTicket2.getTicketId(), 4.5f, "Excellent service", LocalDateTime.now()));
-                flightReviewRepository.save(new FlightReview(
-                                null, passenger1.getUserID(), qatarFlight.getFlightID(), qatarTicket.getTicketId(),
-                                4.8f, "Outstanding experience", LocalDateTime.now()));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), emiratesFlight.getFlightID(), emiratesTicket1, 5, 4, 5, 4, 4.2f, "Smooth flight", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger2.getUserID(), emiratesFlight.getFlightID(), emiratesTicket2, 4, 5, 4, 5, 4.5f, "Excellent service", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), qatarFlight.getFlightID(), qatarTicket, 3, 5, 4, 2, 4.8f, "Outstanding experience", LocalDateTime.now(), false));
         }
 
         @Test
