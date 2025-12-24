@@ -12,126 +12,53 @@ import BaseProfile from "./pages/Profiles/BaseProfile";
 import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage";
 import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
 import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
-import StripePaymentPage from "./pages/payment/stripePaymentPage";
 import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
+import StripePaymentPage from "./pages/payment/stripePaymentPage";
 import RoomBookingPage from "./pages/BookingPage/RoomBookingPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
+  const protectedRoutes = [
+    { path: "/", element: <BaseHomePage /> },
+    { path: "/profile", element: <BaseProfile /> },
+    { path: "/airline/manage-flights", element: <FlightManagementPage /> },
+    { path: "/hotel/manage-rooms", element: <HotelManagementPage /> },
+    { path: "/admin/booking-details", element: <BookingDetailsPage /> },
+    { path: "/admin/tickets-details", element: <TicketsDetailsPage /> },
+    { path: "/payment", element: <StripePaymentPage /> },
+    { path: "/payment/:bookingTransactionId", element: <PaymentPage /> },
+    { path: "/booking", element: <RoomBookingPage /> },
+  ];
+
+  const publicRoutes = [
+    { path: "/auth", element: <AuthPage /> },
+    { path: "/partnership-request", element: <PartnerShipRequestPage /> },
+    { path: "/forgot-password", element: <ForgotPasswordPage /> },
+    { path: "/verify-otp", element: <VerifyOtpPage /> },
+    { path: "/reset-password", element: <ResetPasswordPage /> },
+  ];
+
   return (
     <AppProvider>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <BaseHomePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/auth"
-            element={
-              <PublicRoute>
-                <AuthPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/partnership-request"
-            element={
-              <PublicRoute>
-                <PartnerShipRequestPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <PublicRoute>
-                <ForgotPasswordPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/verify-otp"
-            element={
-              <PublicRoute>
-                <VerifyOtpPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <PublicRoute>
-                <ResetPasswordPage />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <BaseProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/airline/manage-flights"
-            element={
-              <ProtectedRoute>
-                <FlightManagementPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/hotel/manage-rooms"
-            element={
-              <ProtectedRoute>
-                <HotelManagementPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/booking-details"
-            element={
-              <ProtectedRoute>
-                <BookingDetailsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/tickets-details"
-            element={
-              <ProtectedRoute>
-                <TicketsDetailsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment"
-            element={
-              <ProtectedRoute>
-                <StripePaymentPage />
-            path="/booking"
-            element={
-              <ProtectedRoute>
-                <RoomBookingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/payment/:bookingTransactionId"
-            element={
-              <ProtectedRoute>
-                <PaymentPage />
-              </ProtectedRoute>
-            }
-          />
+          {protectedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<ProtectedRoute>{element}</ProtectedRoute>}
+            />
+          ))}
+
+          {publicRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<PublicRoute>{element}</PublicRoute>}
+            />
+          ))}
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={2500} />

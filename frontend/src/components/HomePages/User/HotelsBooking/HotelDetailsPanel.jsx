@@ -13,7 +13,7 @@ export default function HotelDetailsPanel({
 }) {
   const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
-  const navigate = useNavigate();
+  
 
   return (
     <motion.div
