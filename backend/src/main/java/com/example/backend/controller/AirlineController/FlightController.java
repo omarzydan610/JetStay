@@ -20,6 +20,8 @@ import com.example.backend.dto.AirlineDTO.FlightRequest;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Flight;
 import com.example.backend.service.AirlineService.FlightService;
+import com.example.backend.dto.AirlineDTO.FlightOfferRequest;
+import com.example.backend.dto.AirlineDTO.FlightOfferResponse;
 
 import org.springframework.security.core.Authentication;
 import io.jsonwebtoken.Claims;
@@ -112,4 +114,36 @@ public class FlightController {
         return ResponseEntity.ok(SuccessResponse.of("Flight Details retrieved successfully", flightDetailsDTOS));
     }
 
+    @PostMapping("/{flightId}/offers/add")
+    public ResponseEntity<?> addFlightOffer(
+            @PathVariable int flightId,
+            @RequestBody FlightOfferRequest request) {
+        
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        int airlineId = claims.get("airline_id", Integer.class);
+        
+        FlightOfferResponse response = flightService.addOfferToFlight(flightId, request, airlineId);
+        return ResponseEntity.ok(SuccessResponse.of("Flight offer added successfully", response));
+    }
+
+    @GetMapping("/{flightId}/offers")
+    public ResponseEntity<?> getFlightOffers(@PathVariable int flightId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        int airlineId = claims.get("airline_id", Integer.class);
+        
+        List<FlightOfferResponse> offers = flightService.getOffersForFlight(flightId, airlineId);
+        return ResponseEntity.ok(SuccessResponse.of("Flight offers retrieved successfully", offers));
+    }
+
+    @DeleteMapping("/offers/delete/{offerId}")
+    public ResponseEntity<?> deleteFlightOffer(@PathVariable int offerId) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        int airlineId = claims.get("airline_id", Integer.class);
+        
+        flightService.deleteFlightOffer(offerId, airlineId);
+        return ResponseEntity.ok(SuccessResponse.of("Flight offer deleted successfully"));
+    }
 }

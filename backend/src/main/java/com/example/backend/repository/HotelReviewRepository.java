@@ -1,5 +1,6 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.AdminDashboard.FlaggedReviewDTO;
 import com.example.backend.dto.HotelDTO.HotelReviewItemDTO;
 import com.example.backend.dto.HotelDTO.HotelReviewSummaryDTO;
 import com.example.backend.entity.HotelReview;
@@ -29,7 +30,7 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
             AVG(r.locationRate)
         )
         FROM HotelReview r
-        WHERE r.hotel.hotelID = :hotelId
+        WHERE r.hotel.hotelID = :hotelId AND r.toxicFlag = false
     """)
     HotelReviewSummaryDTO getHotelReviewSummary(@Param("hotelId") Integer hotelId);
 
@@ -45,7 +46,7 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
         JOIN users u ON r.user_id = u.user_id
         JOIN room_booking rb ON rb.booking_transaction_id = r.booking_transaction_id
         JOIN room_types rt ON rb.room_type_id = rt.room_type_id
-        WHERE r.hotel_id = :hotelId
+        WHERE r.hotel_id = :hotelId AND r.toxic_flag = false
         ORDER BY r.created_at DESC """,
 
             countQuery = """
@@ -62,7 +63,23 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
     @Query("""
         SELECT COALESCE(AVG(r.rating), 0.0)
         FROM HotelReview r
-        WHERE r.hotel.hotelID = :hotelId
+        WHERE r.hotel.hotelID = :hotelId AND r.toxicFlag = false
     """)
     Double calculateHotelAverageRate(@Param("hotelId") Integer hotelId);
+
+    @Query("""
+        SELECT new com.example.backend.dto.AdminDashboard.FlaggedReviewDTO(
+            r.reviewId,
+            r.comment,
+            r.rating,
+            r.createdAt,
+            CONCAT(u.firstName, ' ', u.lastName),
+            h.hotelName
+        )
+        FROM HotelReview r
+        JOIN r.user u
+        JOIN r.hotel h
+        WHERE r.toxicFlag = true
+    """)
+    Page<FlaggedReviewDTO> findFlaggedReviews(Pageable pageable);
 }

@@ -11,6 +11,7 @@ export default function HotelDetailsPanel({
   getRoomImage,
   placeholderImages,
 }) {
+  const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const navigate = useNavigate();
 
@@ -118,6 +119,14 @@ export default function HotelDetailsPanel({
                 bookingTransaction: dummyBookingTransaction,
               },
             });
+            if (selectedRoomType) {
+              navigate("/booking", {
+                state: {
+                  hotel: hotel,
+                  selectedRoomType: selectedRoomType,
+                },
+              });
+            }
           }}
 
           className={`w-full py-3 rounded-lg font-bold text-lg transition ${

@@ -9,11 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.backend.dto.RoomTypeRequest;
 import com.example.backend.dto.RoomTypeResponse;
+import com.example.backend.dto.HotelDTO.RoomOfferRequest;
+import com.example.backend.dto.HotelDTO.RoomOfferResponse;
 import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.RoomImage;
 import com.example.backend.entity.RoomType;
 import com.example.backend.service.HotelService.RoomService;
 import com.example.backend.service.HotelService.RoomImageService;
+import com.example.backend.service.HotelService.RoomOfferService;
 
 import java.io.IOException;
 import io.jsonwebtoken.Claims;
@@ -29,6 +32,10 @@ public class RoomController {
 
         @Autowired
         private RoomImageService roomImageService;
+        
+        @Autowired
+        private RoomOfferService roomOfferService;
+
 
         // Get room types for a hotel
         @GetMapping("/")
@@ -111,4 +118,40 @@ public class RoomController {
                 return ResponseEntity.ok(
                                 SuccessResponse.of("Room images retrieved successfully", images));
         }
+
+        @PostMapping("/offers/add")
+        public ResponseEntity<SuccessResponse<RoomOfferResponse>> addRoomOffer(@RequestBody RoomOfferRequest request) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Claims claims = (Claims) auth.getCredentials();
+                request.setHotelId(claims.get("hotel_id", Integer.class));
+                
+                RoomOfferResponse response = roomOfferService.addRoomOffer(request);
+                return ResponseEntity.ok(
+                SuccessResponse.of("Room offer added successfully", response));
+        }
+
+        @GetMapping("/offers")
+        public ResponseEntity<SuccessResponse<List<RoomOfferResponse>>> getRoomOffers() {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Claims claims = (Claims) auth.getCredentials();
+                int hotelId = claims.get("hotel_id", Integer.class);
+                
+                List<RoomOfferResponse> offers = roomOfferService.getRoomOffersByHotel(hotelId);
+                return ResponseEntity.ok(
+                SuccessResponse.of("Room offers retrieved successfully", offers));
+        }
+
+        @DeleteMapping("/offers/delete/{offerId}")
+        public ResponseEntity<SuccessResponse<Void>> deleteRoomOffer(@PathVariable Integer offerId) {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                Claims claims = (Claims) auth.getCredentials();
+                int hotelId = claims.get("hotel_id", Integer.class);
+                
+                roomOfferService.deleteRoomOffer(offerId, hotelId);
+                return ResponseEntity.ok(
+                SuccessResponse.of("Room offer deleted successfully"));
+        }
+
 }
+
+

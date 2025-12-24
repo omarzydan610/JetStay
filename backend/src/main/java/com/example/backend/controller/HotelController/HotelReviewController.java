@@ -23,24 +23,29 @@ public class HotelReviewController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addReview(@RequestBody HotelReviewRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
-        hotelReviewService.addReview(claims.get("user_id", Integer.class), request);
-        return ResponseEntity.ok(SuccessResponse.of("Review is added successfully"));
+        Claims claims = getClaims();
+        boolean flag = hotelReviewService.addReview(claims.get("user_id", Integer.class), request);
+        if(flag) {
+            return ResponseEntity.ok(SuccessResponse.of("Review is added successfully"));
+        }else {
+            return ResponseEntity.ok(SuccessResponse.of("Your comment needs System Admin approval !"));
+        }
     }
 
     @PutMapping("/edit")
     public ResponseEntity<?> editReview(@RequestBody HotelReviewRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
-        hotelReviewService.editReview(claims.get("user_id", Integer.class), request);
-        return ResponseEntity.ok(SuccessResponse.of("Review is edited successfully"));
+        Claims claims = getClaims();
+        boolean flag = hotelReviewService.editReview(claims.get("user_id", Integer.class), request);
+        if(flag) {
+            return ResponseEntity.ok(SuccessResponse.of("Review is edited successfully"));
+        }else {
+            return ResponseEntity.ok(SuccessResponse.of("Your comment needs System Admin approval !"));
+        }
     }
 
     @DeleteMapping("/delete/{bookingTransactionId}")
     public ResponseEntity<?> deleteReview(@PathVariable Integer bookingTransactionId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
+        Claims claims = getClaims();
         hotelReviewService.deleteReview(claims.get("user_id", Integer.class),bookingTransactionId);
         return ResponseEntity.ok(SuccessResponse.of("Review is deleted successfully"));
     }
@@ -59,5 +64,11 @@ public class HotelReviewController {
     public ResponseEntity<?> getHotelReviewSummary(@PathVariable Integer hotelId) {
         HotelReviewSummaryDTO data = hotelReviewService.getHotelReviewSummary(hotelId);
         return ResponseEntity.ok(SuccessResponse.of("Review Summary of the hotel fetched successfully",data));
+    }
+
+    private static Claims getClaims() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        return claims;
     }
 }

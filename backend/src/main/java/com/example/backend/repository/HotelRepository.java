@@ -43,4 +43,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Integer> {
   @Query("SELECT new com.example.backend.dto.AdminDTO.PartnerShipNameResponse(h.hotelID, h.hotelName) FROM Hotel h")
   List<PartnerShipNameResponse> findAllHotel();
 
+
+  Hotel getByHotelID(Integer hotelID);
+
 }

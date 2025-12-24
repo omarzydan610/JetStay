@@ -13,21 +13,23 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-  Optional<User> findByEmail(String email);
+        Optional<User> findByEmail(String email);
 
-  boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
-  @Query("SELECT u FROM User u WHERE " +
-          "(:search IS NULL OR :search = '' OR " +
-          "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-          "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
-          "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
-          "(:role IS NULL OR :role = '' OR u.role = :role) AND " +
-          "(:status IS NULL OR :status = '' OR u.status = :status)")
-  Page<User> findUsersWithFilters(
-          @Param("search") String search,
-          @Param("role") User.UserRole role,
-          @Param("status") User.UserStatus status,
-          Pageable pageable);
+        @Query("SELECT u FROM User u WHERE " +
+                        "(:search IS NULL OR :search = '' OR " +
+                        "LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :search, '%'))) AND " +
+                        "(:role IS NULL OR :role = '' OR u.role = :role) AND " +
+                        "(:status IS NULL OR :status = '' OR u.status = :status)")
+        Page<User> findUsersWithFilters(
+                        @Param("search") String search,
+                        @Param("role") User.UserRole role,
+                        @Param("status") User.UserStatus status,
+                        Pageable pageable);
+
+        public User getByUserID(Integer user_id);
 
 }

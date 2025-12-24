@@ -66,6 +66,10 @@ public class FlightTicket {
     @Column(name = "created_at")
     private LocalDate createdAt;
 
+    @ManyToOne
+    @JoinColumn(name = "applied_offer_id")
+    private FlightOffer appliedOffer;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDate.now();
