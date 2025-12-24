@@ -1,7 +1,11 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.TripType;
+
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -24,4 +28,10 @@ public interface TripTypeRepository extends JpaRepository<TripType, Integer> {
                         "FROM TripType t " +
                         "GROUP BY t.typeName")
         List<Object[]> findAverageTicketsByTypeForAllAirlines();
+
+        TripType findByTypeIDAndFlightFlightID(Integer typeID, Integer flightID);
+
+        @Lock(LockModeType.PESSIMISTIC_WRITE)
+        @Query("SELECT tt FROM TripType tt WHERE tt.typeID = :typeID")
+        TripType lockTripTypeById(@Param("typeID") Integer typeID);
 }

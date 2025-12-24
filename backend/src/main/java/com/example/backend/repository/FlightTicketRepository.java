@@ -112,4 +112,8 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
        @Query("SELECT ft FROM FlightTicket ft WHERE ft.createdAt BETWEEN :startDate AND :endDate AND ft.airline.airlineID = :airlineId")
        List<FlightTicket> getFlightTicketsDetailBetweenDateForArline(LocalDate startDate,LocalDate endDate,Long airlineId);
 
+       @Query("SELECT count(*) FROM FlightTicket ft WHERE ft.tripType.typeID = :tripTypeId AND ft.state != 'CANCELLED'")
+       long getNoOFBookedTickets(Integer tripTypeId);
+       
+
 }
