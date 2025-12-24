@@ -45,7 +45,7 @@ public class RoomOfferServiceTest {
     private UserRepository userRepository;
 
     @Autowired
-    private AirportRepository airportRepository;
+    private AirportRepository airLineRepository;
 
     @MockBean
     private JwtAuthService jwtAuthService;
@@ -59,7 +59,7 @@ public class RoomOfferServiceTest {
         roomOfferRepository.deleteAll();
         roomTypeRepository.deleteAll();
         hotelRepository.deleteAll();
-        airportRepository.deleteAll();
+        airLineRepository.deleteAll();
         userRepository.deleteAll();
 
         // Create admin user
