@@ -32,9 +32,23 @@ export default function FlightSearchCard({ flight, onClick }) {
   const departureCode = getAirportCode(flight?.departureAirport?.airportName);
   const arrivalCode = getAirportCode(flight?.arrivalAirport?.airportName);
   const duration = getDuration(flight?.departureDate, flight?.arrivalDate);
-  const minPrice = flight.tripTypes
-    ? Math.min(...flight.tripTypes.map((t) => t.price || 0))
-    : 0;
+  const calculateMinPrice = () => {
+    // Check for tripsTypes array (from your data)
+    if (flight?.tripsTypes && Array.isArray(flight.tripsTypes) && flight.tripsTypes.length > 0) {
+      const validPrices = flight.tripsTypes
+        .map(trip => trip?.price)
+        .filter(price => typeof price === 'number' && !isNaN(price));
+      
+      if (validPrices.length > 0) {
+        return Math.min(...validPrices);
+      }
+    }
+    
+    // Fallback to 0 if no valid prices found
+    return 0;
+  };
+
+  const minPrice = calculateMinPrice();
 
   return (
     <motion.div
