@@ -159,6 +159,18 @@ const roomsService = {
       return [];
     }
   },
+
+  // 5.1. Get public room offers for hotel
+  getPublicRoomOffers: async (hotelId) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/offers/public/${hotelId}`);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Error fetching public room offers:", error);
+      return [];
+    }
+  },
+
     // 6. Delete room offer
   deleteRoomOffer: async (offerId) => {
     try {

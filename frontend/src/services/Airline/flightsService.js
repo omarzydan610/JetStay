@@ -232,6 +232,23 @@ export const addFlightOffer = async (flightId, offerData) => {
 };
 
 /**
+ * Get flight offers (public access)
+ * GET /api/flight/{flightId}/offers/public
+ */
+export const getPublicFlightOffers = async (flightId) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}/${flightId}/offers/public`,{
+      headers: { Authorization: `Bearer ${token}` }
+  });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch flight offers:", error);
+    return { data: [] };
+  }
+};
+
+/**
  * Get flight offers
  * GET /api/flight/{flightId}/offers
  */

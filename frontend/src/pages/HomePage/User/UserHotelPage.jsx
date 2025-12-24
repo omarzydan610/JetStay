@@ -60,13 +60,11 @@ export default function UserRoomPage() {
 
       for (const hotelId of hotelIds) {
         try {
-          // We need to temporarily set the hotel context or use a different approach
-          // For now, we'll skip fetching offers since the roomsService.getRoomOffers()
-          // requires hotel authentication. We'll need to modify the backend to allow
-          // public access to offers or create a public offers endpoint.
-          // offersData[hotelId] = await roomsService.getRoomOffers();
+          const hotelOffers = await roomsService.getPublicRoomOffers(hotelId);
+          offersData[hotelId] = hotelOffers;
         } catch (error) {
           console.error(`Error fetching offers for hotel ${hotelId}:`, error);
+          offersData[hotelId] = [];
         }
       }
 
@@ -242,7 +240,11 @@ export default function UserRoomPage() {
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {rooms.map((room) => (
-                <UserRoomCard key={room.roomTypeID} room={room} />
+                <UserRoomCard 
+                  key={room.roomTypeID} 
+                  room={room} 
+                  offers={offers[room.hotel?.hotelID] || []} 
+                />
                 ))}
             </div>
             )}

@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  isOfferActive,
   calculateDiscountedPrice,
   getBestActiveOffer,
   formatPriceDisplay,
@@ -31,7 +30,14 @@ export default function UserRoomCard({ room, offers = [] }) {
 
   if (expanded) {
     return (
-      <div className="bg-white rounded-xl shadow-xl transition p-6 flex flex-col gap-6">
+      <div className="bg-white rounded-xl shadow-xl transition p-6 flex flex-col gap-6 relative">
+        {bestOffer && (
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+            <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm px-4 py-2 rounded-full font-bold shadow-lg">
+              🎉 SPECIAL OFFER AVAILABLE! 🎉
+            </div>
+          </div>
+        )}
         {/* Close Button */}
         <button
           onClick={() => setExpanded(false)}
@@ -92,6 +98,46 @@ export default function UserRoomCard({ room, offers = [] }) {
               </span>
             )}
           </p>
+          {bestOffer && (
+            <div className="bg-gradient-to-br from-red-50 via-pink-50 to-red-100 border-2 border-red-300 rounded-xl p-5 mt-4 shadow-lg relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-16 h-16 bg-red-500 rounded-full -mr-8 -mt-8 opacity-20"></div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-shrink-0">
+                    <span className="bg-red-500 text-white text-lg px-4 py-2 rounded-full font-bold shadow-md animate-pulse">
+                      {getOfferBadgeText(bestOffer.discountValue)}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="text-red-800 font-bold text-xl mb-1">
+                      {bestOffer.offerName}
+                    </h4>
+                    <div className="text-sm text-red-600 font-semibold flex items-center gap-1">
+                      <span>⚡</span> Limited Time Offer!
+                    </div>
+                  </div>
+                </div>
+                {bestOffer.description && (
+                  <p className="text-red-700 text-base mb-4 leading-relaxed bg-white bg-opacity-50 p-3 rounded-lg">
+                    {bestOffer.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between">
+                  <div className="text-sm text-red-600 font-semibold bg-white bg-opacity-70 px-3 py-1 rounded-full">
+                    Valid until: {new Date(bestOffer.endDate).toLocaleDateString('en-US', { 
+                      month: 'short', 
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                  <div className="text-green-600 font-bold text-lg bg-white bg-opacity-70 px-3 py-1 rounded-full">
+                    💰 Save ${((originalPrice - discountedPrice) || 0).toFixed(2)}!
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           <p className="text-lg text-gray-700">
             <strong>Remaining rooms:</strong> {room.quantity}
           </p>
@@ -116,7 +162,14 @@ export default function UserRoomCard({ room, offers = [] }) {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-4 flex flex-col gap-4">
+    <div className="bg-white rounded-xl shadow-md hover:shadow-lg transition p-4 flex flex-col gap-4 relative">
+      {bestOffer && (
+        <div className="absolute -top-2 -right-2 z-10">
+          <div className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold shadow-lg animate-bounce">
+            🔥 OFFER
+          </div>
+        </div>
+      )}
       <div className="relative w-full aspect-[16/9] rounded-lg overflow-hidden">
         <img
           src={mainImage}
@@ -133,9 +186,19 @@ export default function UserRoomCard({ room, offers = [] }) {
             {priceDisplay.displayPrice}
           </p>
           {bestOffer && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
-              {getOfferBadgeText(bestOffer.discountValue)}
-            </span>
+            <div className="flex flex-col gap-1 p-2 bg-red-50 rounded-lg border border-red-200">
+              <div className="flex items-center gap-2">
+                <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
+                  {getOfferBadgeText(bestOffer.discountValue)}
+                </span>
+                <span className="text-red-700 text-xs font-bold">
+                  {bestOffer.offerName}
+                </span>
+              </div>
+              <div className="text-xs text-green-600 font-semibold">
+                Save ${((originalPrice - discountedPrice) || 0).toFixed(2)}!
+              </div>
+            </div>
           )}
         </div>
         {priceDisplay.originalPrice && (
