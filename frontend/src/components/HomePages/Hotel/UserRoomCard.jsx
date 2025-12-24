@@ -1,9 +1,25 @@
 import { useState } from "react";
+import {
+  isOfferActive,
+  calculateDiscountedPrice,
+  getBestActiveOffer,
+  formatPriceDisplay,
+  getOfferBadgeText
+} from "../../../utils/offerUtils";
 
-export default function UserRoomCard({ room }) {
+export default function UserRoomCard({ room, offers = [] }) {
   const [expanded, setExpanded] = useState(false);
   const fallbackHotelImage = "/images/logo.jpg";
   const fallbackRoomImage = "/images/logo.jpg";
+
+  // Calculate offer information
+  const bestOffer = getBestActiveOffer(offers.filter(offer =>
+    !offer.roomTypeName || offer.roomTypeName === room.roomTypeName
+  ));
+
+  const originalPrice = room.price;
+  const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : null;
+  const priceDisplay = formatPriceDisplay(originalPrice, discountedPrice);
 
   const roomImages =
     room.images && room.images.length > 0
@@ -66,7 +82,15 @@ export default function UserRoomCard({ room }) {
             <strong>Number of Guests:</strong> {room.numberOfGuests} Guests
           </p>
           <p className="text-lg text-gray-700">
-            <strong>Price:</strong> {room.price}$
+            <strong>Price:</strong>{" "}
+            <span className={priceDisplay.isDiscounted ? "text-red-600 font-bold" : ""}>
+              {priceDisplay.displayPrice}
+            </span>
+            {priceDisplay.originalPrice && (
+              <span className="text-gray-400 line-through ml-2">
+                {priceDisplay.originalPrice}
+              </span>
+            )}
           </p>
           <p className="text-lg text-gray-700">
             <strong>Remaining rooms:</strong> {room.quantity}
@@ -104,9 +128,21 @@ export default function UserRoomCard({ room }) {
 
       <div className="flex flex-col gap-2">
         <h3 className="text-lg font-bold text-gray-800">{room.roomTypeName}</h3>
-        <p className="text-sm text-gray-600">
-          ${room.price}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-sm text-gray-600">
+            {priceDisplay.displayPrice}
+          </p>
+          {bestOffer && (
+            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold">
+              {getOfferBadgeText(bestOffer.discountValue)}
+            </span>
+          )}
+        </div>
+        {priceDisplay.originalPrice && (
+          <p className="text-xs text-gray-400 line-through">
+            {priceDisplay.originalPrice}
+          </p>
+        )}
         {room.description && <p className="text-sm text-gray-500">{room.description}</p>}
       </div>
 

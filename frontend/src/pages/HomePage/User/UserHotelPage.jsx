@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getRoomsGraph } from "../../../services/HotelServices/hotelGraphService";
+import roomsService from "../../../services/HotelServices/roomsService";
 import UserRoomCard from "../../../components/HomePages/Hotel/UserRoomCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 import { toast } from "react-toastify";
 
 export default function UserRoomPage() {
   const [rooms, setRooms] = useState([]);
+  const [offers, setOffers] = useState({});
   const [page, setPage] = useState(0);
   const size = 20;
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,26 @@ export default function UserRoomPage() {
     try {
       setLoading(true);
       const res = await getRoomsGraph(page, size, filter);
-      setRooms(res?.data ?? []);
+      const roomsData = res?.data ?? [];
+      setRooms(roomsData);
+
+      // Fetch offers for each unique hotel
+      const hotelIds = [...new Set(roomsData.map(room => room.hotel?.hotelID).filter(id => id))];
+      const offersData = {};
+
+      for (const hotelId of hotelIds) {
+        try {
+          // We need to temporarily set the hotel context or use a different approach
+          // For now, we'll skip fetching offers since the roomsService.getRoomOffers()
+          // requires hotel authentication. We'll need to modify the backend to allow
+          // public access to offers or create a public offers endpoint.
+          // offersData[hotelId] = await roomsService.getRoomOffers();
+        } catch (error) {
+          console.error(`Error fetching offers for hotel ${hotelId}:`, error);
+        }
+      }
+
+      setOffers(offersData);
     } catch (err) {
       console.error("Error loading rooms", err);
       toast.error("Failed to load rooms");

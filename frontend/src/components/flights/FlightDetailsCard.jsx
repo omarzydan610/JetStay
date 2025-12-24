@@ -1,8 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { getFlightDetails } from '../../services/Airline/flightsService.js';
+import { getFlightOffers } from '../../services/Airline/flightsService.js';
+import {
+  isOfferActive,
+  calculateDiscountedPrice,
+  getBestActiveOffer,
+  formatPriceDisplay,
+  getOfferBadgeText
+} from '../../utils/offerUtils';
 
 const FlightDetailsCard = ({ id }) => {
   const [flights, setFlights] = useState([]);
+  const [offers, setOffers] = useState([]);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -11,6 +20,15 @@ const FlightDetailsCard = ({ id }) => {
         console.log('API response:', response);
         // Ensure it's always an array
         setFlights(response?.data ?? []);
+
+        // Fetch offers for this flight
+        try {
+          const offersResponse = await getFlightOffers(id);
+          setOffers(offersResponse || []);
+        } catch (offersError) {
+          console.error('Error fetching offers:', offersError);
+          setOffers([]);
+        }
       } catch (error) {
         console.error(error);
       }
@@ -110,7 +128,32 @@ const FlightDetailsCard = ({ id }) => {
                 </div>
 
                 <div className="text-right">
-                  <div className="text-3xl font-bold text-gray-900">{flight?.price ?? "--"}£</div>
+                  <div className="text-3xl font-bold text-gray-900">
+                    {(() => {
+                      const bestOffer = getBestActiveOffer(offers);
+                      const originalPrice = flight?.price;
+                      const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : null;
+                      const priceDisplay = formatPriceDisplay(originalPrice, discountedPrice);
+
+                      return (
+                        <div className="flex flex-col items-end">
+                          <span className={priceDisplay.isDiscounted ? "text-red-600" : ""}>
+                            {priceDisplay.displayPrice}
+                          </span>
+                          {priceDisplay.originalPrice && (
+                            <span className="text-sm text-gray-500 line-through">
+                              {priceDisplay.originalPrice}
+                            </span>
+                          )}
+                          {bestOffer && (
+                            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-semibold mt-1">
+                              {getOfferBadgeText(bestOffer.discountValue)}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
                   <button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-md font-semibold text-sm transition-colors w-full">
                     Select
                   </button>

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../../../components/Navbar";
 import EditableRoomList from "../../../components/HomePages/Hotel/RoomManagement/EditableRoomList";
 import AddRoomSection from "../../../components/HomePages/Hotel/RoomManagement/AddRoomSection";
+import OfferManagement from "../../../components/HomePages/Hotel/RoomManagement/OfferManagement";
 import PrimaryButton from "../../../components/HomePages/PrimaryButton";
 import GlassCard from "../../../components/HomePages/Hotel/GlassCard";
 
@@ -151,6 +152,18 @@ function HotelManagementPage() {
               >
                 ➕ Add New Room
               </motion.button>
+              <motion.button
+                onClick={() => setActiveTab("offers")}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-6 py-3 font-semibold rounded-lg transition-all duration-300 ${
+                  activeTab === "offers"
+                    ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-sky-600"
+                }`}
+              >
+                🎯 Manage Offers
+              </motion.button>
             </div>
           </GlassCard>
         </motion.div>
@@ -175,6 +188,17 @@ function HotelManagementPage() {
             exit={{ opacity: 0, y: -20 }}
           >
             <AddRoomSection onRoomCreated={() => setActiveTab("manage")} />
+          </motion.div>
+        )}
+
+        {activeTab === "offers" && (
+          <motion.div
+            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <OfferManagement />
           </motion.div>
         )}
       </motion.div>

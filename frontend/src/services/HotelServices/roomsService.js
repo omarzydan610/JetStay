@@ -129,6 +129,51 @@ const roomsService = {
       throw error;
     }
   },
+    // 4. Add room offer
+  addRoomOffer: async (offerData) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/offers/add`, offerData, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data?.data || null;
+    } catch (error) {
+      console.error("Error adding room offer:", error);
+      throw error;
+    }
+  },
+
+    // 5. Get room offers for hotel
+  getRoomOffers: async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/offers`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+      });
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Error fetching room offers:", error);
+      return [];
+    }
+  },
+    // 6. Delete room offer
+  deleteRoomOffer: async (offerId) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/offers/delete/${offerId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+        },
+      });
+      return response.data || null;
+    } catch (error) {
+      console.error("Error deleting room offer:", error);
+      throw error;
+    }
+  },
+  
 };
 
 export default roomsService;
