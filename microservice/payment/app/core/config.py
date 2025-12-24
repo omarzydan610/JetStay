@@ -12,7 +12,7 @@ PAYPAL_CLIENT_ID = environ.get(
 )
 PAYPAL_CLIENT_SECRET = environ.get(
     "PAYPAL_CLIENT_SECRET",
-    "Ab0xIQ2Fl3Ij0qs4I_eRiGsBY88ca1ddrmTg9WbmejrKZpR2mast8KVeigv0sjJOlPpH4Xw3_9Ly6GXw",
+    "EGox2eGFuwVUA10zuz8YyKqJXrD1EwAVguOCn_K8i3uYZazh9X-D7RyoywRzpXBQfIMHwqAIOAi15bog",
 )
 
 DATABASE_URL = environ.get(

@@ -18,3 +18,9 @@ class PaymentOut(BaseModel):
     status: str
     stripe_payment_intent: Optional[str] = None
     error: Optional[str] = None
+    approval_link: Optional[str] = None
+
+
+class PayPalCaptureIn(BaseModel):
+    payment_id: int
+    order_id: str

@@ -2,22 +2,16 @@ package com.example.backend.service.PaymentService;
 
 import com.example.backend.config.StripeResponseErrorHandler;
 import com.example.backend.dto.PaymentDTO.TicketPaymentDTO;
-import com.example.backend.dto.PaymentDTO.StripeDTO;
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.entity.PaymentMethod;
 import com.example.backend.entity.TicketPayment;
 import com.example.backend.repository.FlightTicketRepository;
 import com.example.backend.repository.PaymentMethodRepository;
 import com.example.backend.repository.TicketPaymentRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.ResponseErrorHandler;
-
-import java.io.IOException;
 
 @Service
 public class TicketPaymentService {
@@ -31,59 +25,61 @@ public class TicketPaymentService {
     @Autowired
     private PaymentMethodRepository paymentMethodRepository;
 
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay/ticket";
+    private final RestTemplate restTemplate;
+    private final String STRIPE_URL = "http://localhost:8000/api/payment/pay/ticket";
+    private final String PAYPAL_URL = "http://localhost:8000/api/payment/paypal/ticket";
 
     public TicketPaymentService() {
-        restTemplate.setErrorHandler(new StripeResponseErrorHandler());
+        this.restTemplate = new RestTemplate();
+        this.restTemplate.setErrorHandler(new StripeResponseErrorHandler());
     }
 
     public ResponseEntity<String> pay(TicketPaymentDTO dto) {
+        return processPayment(dto, STRIPE_URL);
+    }
 
+    public ResponseEntity<String> payPayPal(TicketPaymentDTO dto) {
+        return processPayment(dto, PAYPAL_URL);
+    }
+
+    private ResponseEntity<String> processPayment(TicketPaymentDTO dto, String apiUrl) {
+        // Validate ticket
         FlightTicket ticket = flightTicketRepository.findById(dto.getTicketId()).orElse(null);
-        if (ticket == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"status\":\"failed\",\"error\":\"Flight ticket not found\"}");
-        }
+        if (ticket == null) return badResponse("Flight ticket not found", HttpStatus.BAD_REQUEST);
 
         if (Boolean.TRUE.equals(ticket.getIsPaid())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body("{\"status\":\"failed\",\"error\":\"Flight ticket was just purchased moments before\"}");
+            return badResponse("Flight ticket was just purchased moments before", HttpStatus.CONFLICT);
         }
 
+        // Validate payment method
         PaymentMethod method = paymentMethodRepository.findById(dto.getMethodId()).orElse(null);
-        if (method == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("{\"status\":\"failed\",\"error\":\"Payment method not found\"}");
-        }
+        if (method == null) return badResponse("Payment method not found", HttpStatus.BAD_REQUEST);
 
-        Integer paymentID = null;
-
+        boolean success = false;
         ResponseEntity<String> fastApiResponse;
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-
             HttpEntity<TicketPaymentDTO> request = new HttpEntity<>(dto, headers);
 
-            fastApiResponse = restTemplate.postForEntity(FASTAPI_URL, request, String.class);
+            fastApiResponse = restTemplate.postForEntity(apiUrl, request, String.class);
 
             // Determine success by parsing JSON "status" field manually
-            boolean success = fastApiResponse.getBody() != null && fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
+            success = fastApiResponse.getBody() != null && fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
 
             if (success) {
                 ticket.setIsPaid(true);
                 flightTicketRepository.save(ticket);
             }
 
-            confirmPayment(paymentID, success);
-
         } catch (Exception e) {
-            fastApiResponse = ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("{\"status\":\"failed\",\"error\":\"" + e.getMessage() + "\"}");
-            confirmPayment(paymentID, false);
+            fastApiResponse = badResponse("Payment failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            success = false;
         }
+
+        // Optionally confirm payment in DB if paymentID exists
+        confirmPayment(null, success);
 
         return fastApiResponse;
     }
@@ -96,5 +92,10 @@ public class TicketPaymentService {
 
         payment.setStatus(success ? TicketPayment.Status.COMPLETED : TicketPayment.Status.FAILED);
         ticketPaymentRepository.save(payment);
+    }
+
+    private ResponseEntity<String> badResponse(String message, HttpStatus status) {
+        return ResponseEntity.status(status)
+                .body("{\"status\":\"failed\",\"error\":\"" + message + "\"}");
     }
 }

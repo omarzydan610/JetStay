@@ -43,6 +43,20 @@ public class PaymentController {
                 .body(fastApiResponse.getBody());
     }
 
+    @PostMapping("/paypal/ticket")
+    public ResponseEntity<String> payPaypalTicket(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody TicketPaymentDTO ticketPaymentDTO) {
+
+        User user = authenticateAndValidateUser(authorizationHeader);
+        ticketPaymentDTO.setUserId(user.getUserID());
+
+        ResponseEntity<String> fastApiResponse = ticketPaymentService.payPayPal(ticketPaymentDTO);
+        return ResponseEntity
+                .status(fastApiResponse.getStatusCode())
+                .body(fastApiResponse.getBody());
+    }
+
     // Room payment
     @PostMapping("/pay/room")
     public ResponseEntity<String> payRoom(
@@ -53,6 +67,20 @@ public class PaymentController {
         roomPaymentDTO.setUserId(user.getUserID());
 
         ResponseEntity<String> fastApiResponse = hotelPaymentService.pay(roomPaymentDTO);
+        return ResponseEntity
+                .status(fastApiResponse.getStatusCode())
+                .body(fastApiResponse.getBody());
+    }
+
+    @PostMapping("/paypal/room")
+    public ResponseEntity<String> payPayPalRoom(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody RoomPaymentDTO roomPaymentDTO) {
+
+        User user = authenticateAndValidateUser(authorizationHeader);
+        roomPaymentDTO.setUserId(user.getUserID());
+
+        ResponseEntity<String> fastApiResponse = hotelPaymentService.payPayPal(roomPaymentDTO);
         return ResponseEntity
                 .status(fastApiResponse.getStatusCode())
                 .body(fastApiResponse.getBody());

@@ -13,7 +13,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
   const [message, setMessage] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [email, setEmail] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("stripe"); // 'stripe' | 'paypal'
+  const paymentMethod = "stripe";
 
   const isTicketPayment = Boolean(ticket);
   const isBookingPayment = Boolean(bookingTransaction);
@@ -177,106 +177,63 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex flex-1">
-        {/* LEFT SIDE — PAYMENT FORM */}
-        <div className="w-full md:w-1/2 relative bg-gradient-to-br from-white via-blue-100 to-black-100 flex flex-col items-center justify-center p-12 animated-gradient">
-          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-10 transform transition duration-300 hover:scale-105">
-            <h1 className="text-4xl font-extrabold mb-8 text-gray-800 tracking-tight">
+        {/* LEFT — PAYMENT */}
+        <div className="w-full md:w-1/2 relative bg-gradient-to-br from-white via-blue-100 to-black-100 flex items-center justify-center p-12 animated-gradient">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-10 hover:scale-105 transition">
+            <h1 className="text-4xl font-extrabold mb-8 text-gray-800">
               Checkout
             </h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Default: show Stripe card form. PayPal option is below the submit button. */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Name on Card
-                </label>
-                <input
-                  type="text"
-                  value={cardholderName}
-                  onChange={(e) => setCardholderName(e.target.value)}
-                  required
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-indigo-400 focus:border-indigo-400"
-                />
-              </div>
+              <input
+                type="text"
+                placeholder="Name on Card"
+                value={cardholderName}
+                onChange={(e) => setCardholderName(e.target.value)}
+                required
+                className="w-full border rounded-md px-3 py-2"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="w-full border rounded-md px-3 py-2 mt-1 focus:ring-indigo-400 focus:border-indigo-400"
-                />
-              </div>
+              <input
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full border rounded-md px-3 py-2"
+              />
 
               <div className="border rounded-md p-4 bg-gray-50 shadow-sm">
-                {paymentMethod === "stripe" ? (
-                  <CardElement options={{ hidePostalCode: true }} />
-                ) : (
-                  <div className="text-center text-sm text-gray-600">
-                    Use the PayPal button below to complete the payment.
-                  </div>
-                )}
+                <CardElement options={{ hidePostalCode: true }} />
               </div>
 
-              {paymentMethod === "stripe" ? (
-                <button
-                  disabled={!stripe || loading}
-                  className="w-full bg-indigo-600 text-white py-3 font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition"
-                >
-                  {loading ? "Processing..." : "Pay Now"}
-                </button>
-              ) : null}
+              <button
+                disabled={!stripe || loading}
+                className="w-full bg-indigo-600 text-white py-3 rounded-md font-semibold"
+              >
+                {loading ? "Processing..." : "Pay Now"}
+              </button>
 
-              {/* PayPal alternative below submit */}
-              <div className="mt-4 text-center">
+              <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600 mb-2">Or pay with PayPal</p>
-                <div className="inline-block">
-                  <PayPalButtons
-                    style={{ layout: "horizontal" }}
-                    createOrder={createPayPalOrder}
-                    onApprove={onApprovePayPal}
-                    forceReRender={[amount]}
-                    onClick={(data, actions) => {
-                      const fs = data && data.fundingSource ? String(data.fundingSource).toLowerCase() : "";
-                      if (fs.includes("card") || fs.includes("credit") || fs.includes("debit")) {
-                        // user chose Debit/Credit — switch to Stripe card form
-                        setPaymentMethod("stripe");
-                        setMessage("You selected card — switching to Stripe payment form.");
-                        if (actions && typeof actions.reject === "function") {
-                          return actions.reject();
-                        }
-                        return;
-                      }
-                      // proceed with PayPal account flow
-                      setPaymentMethod("paypal");
-                      return;
-                    }}
-                  />
-                  {paymentMethod === "paypal" && (
-                    <div className="mt-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setPaymentMethod("stripe");
-                          setMessage("");
-                        }}
-                        className="text-sm text-indigo-600 hover:underline"
-                      >
-                        Pay with card instead
-                      </button>
-                    </div>
-                  )}
-                </div>
+                <PayPalButtons
+                  style={{ layout: "horizontal", tagline: false }}
+                  createOrder={createPayPalOrder}
+                  onApprove={onApprovePayPal}
+                  onCancel={() => {
+                  setMessage("PayPal payment was cancelled ❌");
+                }}
+
+                onError={(err) => {
+                  console.error("PayPal error:", err);
+                  setMessage("PayPal payment failed ❌");
+                }}
+                  forceReRender={[amount]}
+                />
               </div>
 
               {message && (
-                <p className="text-sm text-center mt-4 text-red-500">
-                  {message}
-                </p>
+                <p className="text-center text-red-500 mt-4">{message}</p>
               )}
             </form>
           </div>
@@ -284,7 +241,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
           <div className="absolute top-6 left-6">
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-white rounded-full shadow hover:scale-105 transition"
+              className="px-4 py-2 bg-white rounded-full shadow hover:scale-105"
             >
               ← Back
             </button>

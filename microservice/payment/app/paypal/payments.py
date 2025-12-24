@@ -24,8 +24,11 @@ def create_order(amount: float, currency: str = "USD", description: str = ""):
             "description": description
         }]
     })
-    response = client.execute(request)
-    result = response.result
+    try:
+        response = client.execute(request)
+        result = response.result
+    except Exception as e:
+        raise RuntimeError(f"PayPal create_order failed: {e}")
     # attach approval link to result for convenience
     approve = _extract_approval_link(result)
     if approve:
@@ -36,5 +39,8 @@ def create_order(amount: float, currency: str = "USD", description: str = ""):
 def capture_order(order_id: str):
     request = OrdersCaptureRequest(order_id)
     request.prefer("return=representation")
-    response = client.execute(request)
-    return response.result
+    try:
+        response = client.execute(request)
+        return response.result
+    except Exception as e:
+        raise RuntimeError(f"PayPal capture_order failed: {e}")

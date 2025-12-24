@@ -2,12 +2,8 @@ from sqlalchemy import Column, Integer, Float, String, DateTime, ForeignKey, Enu
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.database.database import Base
-import enum
+from app.models.status import StatusEnum
 
-class StatusEnum(str, enum.Enum):
-    PENDING = "PENDING"
-    COMPLETED = "COMPLETED"
-    FAILED = "FAILED"
 
 class TicketPayment(Base):
     __tablename__ = "ticket_payment"
