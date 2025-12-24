@@ -196,6 +196,113 @@ jobs:
             📦 Full HTML coverage report is available in CI Artifacts
 
   # =========================================================
+  # ================= PAYMENT SERVICE ======================
+  # =========================================================
+
+  payment-test:
+    name: Payment Service - Test & Coverage
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install pytest-cov
+        working-directory: microservice/payment
+
+      - name: Run tests with coverage
+        run: |
+          pytest --cov=app --cov-report=html --cov-report=term-summary tests/
+        working-directory: microservice/payment
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: payment-coverage-report
+          path: microservice/payment/htmlcov/
+
+      - name: Extract coverage statistics
+        id: coverage
+        run: |
+          python3 << 'EOF'
+          import re
+          import os
+
+          # Parse coverage report
+          with open("microservice/payment/.coverage", "rb") as f:
+              content = f.read()
+
+          # Run pytest with json output for more reliable parsing
+          import subprocess
+          result = subprocess.run(
+              ["pytest", "--cov=app", "--cov-report=term-summary", "tests/"],
+              cwd="microservice/payment",
+              capture_output=True,
+              text=True
+          )
+
+          # Extract coverage percentage from output
+          match = re.search(r"TOTAL\s+(\d+)\s+(\d+)\s+([\d.]+)%", result.stdout)
+          if match:
+              statements = int(match.group(1))
+              missing = int(match.group(2))
+              coverage_rate = float(match.group(3))
+              covered = statements - missing
+          else:
+              coverage_rate = 0
+              covered = 0
+              statements = 0
+
+          indicator = "🟢" if coverage_rate >= 80 else "🟡" if coverage_rate >= 60 else "🔴"
+
+          out = os.environ["GITHUB_OUTPUT"]
+          with open(out, "a") as f:
+              f.write(f"coverage_rate={coverage_rate:.2f}\n")
+              f.write(f"covered_lines={covered}\n")
+              f.write(f"total_lines={statements}\n")
+              f.write(f"indicator={indicator}\n")
+          EOF
+
+      - name: Add coverage to GitHub Summary
+        run: |
+          echo "## 📊 Payment Service Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**${{ steps.coverage.outputs.indicator }} Coverage:** **${{ steps.coverage.outputs.coverage_rate }}%**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Statements: ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment Coverage on PR
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            ## 📊 Payment Service Coverage Report
+
+            **${{ steps.coverage.outputs.indicator }} Coverage: `${{ steps.coverage.outputs.coverage_rate }}%`**
+
+            ```
+            ${{ steps.coverage.outputs.covered_lines }} / ${{ steps.coverage.outputs.total_lines }} statements covered
+            ```
+
+            📦 Full HTML coverage report is available in CI Artifacts
+
+  # =========================================================
   # ================= FRONTEND ==============================
   # =========================================================
 
