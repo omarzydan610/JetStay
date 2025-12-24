@@ -15,6 +15,9 @@ import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
 import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
 import RoomBookingPage from "./pages/BookingPage/RoomBookingPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
+import BookingHistoryPage from "./pages/HistoryPages/UserHistoryPages/BookingHistoryPage";
+import UpcomingBookingsPage from "./pages/HistoryPages/UserHistoryPages/UpcomingBookingsPage";
+import BookingDetailPage from "./pages/HistoryPages/UserHistoryPages/BookingDetailPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -124,6 +127,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <PaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/history"
+            element={
+              <ProtectedRoute>
+                <BookingHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/upcoming"
+            element={
+              <ProtectedRoute>
+                <UpcomingBookingsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/bookings/:bookingId"
+            element={
+              <ProtectedRoute>
+                <BookingDetailPage />
               </ProtectedRoute>
             }
           />
