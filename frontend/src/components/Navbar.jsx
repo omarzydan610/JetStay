@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Calendar, History } from "lucide-react";
 import { useAppContext } from "../contexts/AppContext";
 
 const Navbar = () => {
@@ -31,6 +31,11 @@ const Navbar = () => {
 
   const handleProfileClick = () => {
     navigate("/profile");
+    setIsDropdownOpen(false);
+  };
+
+  const handleBookingHistoryClick = () => {
+    navigate("/bookings/history");
     setIsDropdownOpen(false);
   };
 
@@ -98,6 +103,18 @@ const Navbar = () => {
                     <span>Profile</span>
                   </motion.button>
 
+                  {userData?.role === "CLIENT" && (
+                    <>
+                      <motion.button
+                        onClick={handleBookingHistoryClick}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-slate-50 transition-colors duration-150"
+                        whileHover={{ x: 4 }}
+                      >
+                        <History className="w-4 h-4 text-sky-600" />
+                        <span>Booking History</span>
+                      </motion.button>
+                    </>
+                  )}
 
                   <div className="border-t border-slate-200 my-1"></div>
 
