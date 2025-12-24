@@ -13,7 +13,7 @@ public class HotelReviewItemDTO {
 
     private String userName;
     private String roomType;
-    private Long nights;
+    private Integer nights;
     private float rating;
     private String comment;
     private Timestamp createdAt;
