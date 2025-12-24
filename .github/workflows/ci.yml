@@ -238,13 +238,7 @@ jobs:
           python3 << 'EOF'
           import json, os
 
-          # Debug: list files in the directory
-          for root, dirs, files in os.walk("microservice/payment"):
-              for file in files:
-                  if "coverage" in file.lower():
-                      print(f"Found: {os.path.join(root, file)}")
-
-          with open("microservice/payment/.coverage.json") as f:
+          with open("microservice/payment/coverage.json") as f:
               data = json.load(f)
 
           total_statements = data["totals"]["num_statements"]
