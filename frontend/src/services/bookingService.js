@@ -12,20 +12,20 @@ const mockBookings = [
     checkOutDate: "2026-01-02T11:00:00",
     adults: 2,
     children: 1,
-    totalPrice: 750.00,
+    totalPrice: 750.0,
     createdAt: "2025-12-10T10:30:00",
     room: {
       roomNumber: "305",
       type: "Deluxe Suite",
       capacity: 4,
-      price: 150.00,
+      price: 150.0,
       hotel: {
         name: "Grand Plaza Hotel",
         location: "New York, NY",
         phoneNumber: "+1 (212) 555-0123",
-        email: "info@grandplaza.com"
-      }
-    }
+        email: "info@grandplaza.com",
+      },
+    },
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ const mockBookings = [
     checkOutDate: "2025-12-26T11:45:00",
     adults: 1,
     children: 0,
-    totalPrice: 350.00,
+    totalPrice: 350.0,
     createdAt: "2025-12-15T14:20:00",
     ticket: {
       ticketNumber: "AA1234567",
@@ -47,12 +47,12 @@ const mockBookings = [
         to: "Los Angeles (LAX)",
         airline: {
           name: "American Airlines",
-          code: "AA"
+          code: "AA",
         },
         departureTime: "2025-12-26T08:30:00",
-        arrivalTime: "2025-12-26T11:45:00"
-      }
-    }
+        arrivalTime: "2025-12-26T11:45:00",
+      },
+    },
   },
   {
     id: 3,
@@ -62,20 +62,20 @@ const mockBookings = [
     checkOutDate: "2026-01-18T11:00:00",
     adults: 1,
     children: 0,
-    totalPrice: 270.00,
+    totalPrice: 270.0,
     createdAt: "2025-12-20T09:15:00",
     room: {
       roomNumber: "208",
       type: "Standard Room",
       capacity: 2,
-      price: 90.00,
+      price: 90.0,
       hotel: {
         name: "City Center Inn",
         location: "Chicago, IL",
         phoneNumber: "+1 (312) 555-0789",
-        email: "contact@citycenterinn.com"
-      }
-    }
+        email: "contact@citycenterinn.com",
+      },
+    },
   },
   {
     id: 4,
@@ -85,7 +85,7 @@ const mockBookings = [
     checkOutDate: "2024-10-10T14:30:00",
     adults: 2,
     children: 1,
-    totalPrice: 890.00,
+    totalPrice: 890.0,
     createdAt: "2024-09-25T11:45:00",
     ticket: {
       ticketNumber: "DL9876543",
@@ -97,12 +97,12 @@ const mockBookings = [
         to: "Miami (MIA)",
         airline: {
           name: "Delta Airlines",
-          code: "DL"
+          code: "DL",
         },
         departureTime: "2024-10-10T09:00:00",
-        arrivalTime: "2024-10-10T14:30:00"
-      }
-    }
+        arrivalTime: "2024-10-10T14:30:00",
+      },
+    },
   },
   {
     id: 5,
@@ -112,7 +112,7 @@ const mockBookings = [
     checkOutDate: "2026-01-05T19:40:00",
     adults: 2,
     children: 0,
-    totalPrice: 520.00,
+    totalPrice: 520.0,
     createdAt: "2025-12-22T10:30:00",
     ticket: {
       ticketNumber: "UA5551234",
@@ -124,12 +124,12 @@ const mockBookings = [
         to: "Seattle (SEA)",
         airline: {
           name: "United Airlines",
-          code: "UA"
+          code: "UA",
         },
         departureTime: "2026-01-05T15:20:00",
-        arrivalTime: "2026-01-05T19:40:00"
-      }
-    }
+        arrivalTime: "2026-01-05T19:40:00",
+      },
+    },
   },
   {
     id: 6,
@@ -139,21 +139,21 @@ const mockBookings = [
     checkOutDate: "2026-02-17T11:00:00",
     adults: 2,
     children: 0,
-    totalPrice: 450.00,
+    totalPrice: 450.0,
     createdAt: "2025-12-23T16:30:00",
     room: {
       roomNumber: "701",
       type: "Romantic Suite",
       capacity: 2,
-      price: 150.00,
+      price: 150.0,
       hotel: {
         name: "Paradise Hotel & Spa",
         location: "San Francisco, CA",
         phoneNumber: "+1 (415) 555-0654",
-        email: "reservations@paradisehotel.com"
-      }
-    }
-  }
+        email: "reservations@paradisehotel.com",
+      },
+    },
+  },
 ];
 
 class BookingService {
@@ -164,22 +164,26 @@ class BookingService {
   async getBookingHistory() {
     if (MOCK_ENABLED) {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       // Filter past bookings (completed or cancelled)
       const today = new Date();
-      const historyBookings = mockBookings.filter(booking => {
+      const historyBookings = mockBookings.filter((booking) => {
         const checkOutDate = new Date(booking.checkOutDate);
-        return checkOutDate < today || booking.status === "CANCELLED" || booking.status === "COMPLETED";
+        return (
+          checkOutDate < today ||
+          booking.status === "CANCELLED" ||
+          booking.status === "COMPLETED"
+        );
       });
-      
+
       return {
         success: true,
         message: "Booking history retrieved successfully",
-        data: historyBookings
+        data: historyBookings,
       };
     }
-    
+
     try {
       const response = await apiClient.get("/api/user/bookings/history");
       return response.data;
@@ -196,22 +200,25 @@ class BookingService {
   async getUpcomingBookings() {
     if (MOCK_ENABLED) {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
       // Filter upcoming bookings (confirmed or pending, check-in date in future)
       const today = new Date();
-      const upcomingBookings = mockBookings.filter(booking => {
+      const upcomingBookings = mockBookings.filter((booking) => {
         const checkInDate = new Date(booking.checkInDate);
-        return checkInDate >= today && (booking.status === "CONFIRMED" || booking.status === "PENDING");
+        return (
+          checkInDate >= today &&
+          (booking.status === "CONFIRMED" || booking.status === "PENDING")
+        );
       });
-      
+
       return {
         success: true,
         message: "Upcoming bookings retrieved successfully",
-        data: upcomingBookings
+        data: upcomingBookings,
       };
     }
-    
+
     try {
       const response = await apiClient.get("/api/user/bookings/upcoming");
       return response.data;
@@ -229,21 +236,21 @@ class BookingService {
   async getBookingDetails(bookingId) {
     if (MOCK_ENABLED) {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 600));
-      
-      const booking = mockBookings.find(b => b.id === parseInt(bookingId));
-      
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      const booking = mockBookings.find((b) => b.id === parseInt(bookingId));
+
       if (!booking) {
         throw "Booking not found";
       }
-      
+
       return {
         success: true,
         message: "Booking details retrieved successfully",
-        data: booking
+        data: booking,
       };
     }
-    
+
     try {
       const response = await apiClient.get(`/api/user/bookings/${bookingId}`);
       return response.data;
@@ -261,26 +268,30 @@ class BookingService {
   async cancelBooking(bookingId) {
     if (MOCK_ENABLED) {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const bookingIndex = mockBookings.findIndex(b => b.id === parseInt(bookingId));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const bookingIndex = mockBookings.findIndex(
+        (b) => b.id === parseInt(bookingId)
+      );
+
       if (bookingIndex === -1) {
         throw "Booking not found";
       }
-      
+
       // Update mock booking status
       mockBookings[bookingIndex].status = "CANCELLED";
-      
+
       return {
         success: true,
         message: "Booking cancelled successfully",
-        data: mockBookings[bookingIndex]
+        data: mockBookings[bookingIndex],
       };
     }
-    
+
     try {
-      const response = await apiClient.post(`/api/user/bookings/${bookingId}/cancel`);
+      const response = await apiClient.post(
+        `/api/user/bookings/${bookingId}/cancel`
+      );
       return response.data;
     } catch (error) {
       console.error("Error canceling booking:", error);

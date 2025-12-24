@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Calendar, 
-  Hotel, 
-  MapPin, 
+import {
+  Calendar,
+  Hotel,
+  MapPin,
   Clock,
   ChevronRight,
   AlertCircle,
   X,
-  Plane
+  Plane,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import bookingService from "../../../services/bookingService";
@@ -28,8 +28,8 @@ export default function UpcomingBookingsWidget() {
     try {
       const response = await bookingService.getUpcomingBookings();
       // Sort by check-in date (earliest first) and get only the first 3 upcoming bookings
-      const sorted = (response.data || []).sort((a, b) => 
-        new Date(a.checkInDate) - new Date(b.checkInDate)
+      const sorted = (response.data || []).sort(
+        (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
       );
       setBookings(sorted.slice(0, 3));
     } catch (error) {
@@ -98,7 +98,7 @@ export default function UpcomingBookingsWidget() {
         className="bg-gradient-to-r from-sky-600 to-cyan-600 rounded-xl shadow-lg overflow-hidden"
       >
         {/* Header */}
-          <div className="bg-white/10 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
+        <div className="bg-white/10 backdrop-blur-sm px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2 text-white">
             <Calendar size={20} />
             <h3 className="font-semibold">Upcoming Bookings</h3>
@@ -139,7 +139,11 @@ export default function UpcomingBookingsWidget() {
                         {/* Left Section */}
                         <div className="flex items-center gap-4 flex-1">
                           {/* Countdown Badge */}
-                          <div className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg ${getCountdownColor(daysUntil)} min-w-[80px]`}>
+                          <div
+                            className={`flex flex-col items-center justify-center px-3 py-2 rounded-lg ${getCountdownColor(
+                              daysUntil
+                            )} min-w-[80px]`}
+                          >
                             <span className="text-xs font-medium opacity-75">
                               {daysUntil === 0 ? "Check-in" : "In"}
                             </span>
@@ -153,28 +157,40 @@ export default function UpcomingBookingsWidget() {
                             <h4 className="font-semibold text-gray-900 truncate flex items-center gap-2">
                               {booking.type === "HOTEL" ? (
                                 <>
-                                  <Hotel size={16} className="text-sky-600 flex-shrink-0" />
+                                  <Hotel
+                                    size={16}
+                                    className="text-sky-600 flex-shrink-0"
+                                  />
                                   {booking.room?.hotel?.name || "N/A"}
                                 </>
                               ) : (
                                 <>
-                                  <Plane size={16} className="text-cyan-600 flex-shrink-0" />
-                                  {booking.ticket?.flight?.airline?.name || "N/A"} - Flight {booking.ticket?.flight?.flightNumber || "N/A"}
+                                  <Plane
+                                    size={16}
+                                    className="text-cyan-600 flex-shrink-0"
+                                  />
+                                  {booking.ticket?.flight?.airline?.name ||
+                                    "N/A"}{" "}
+                                  - Flight{" "}
+                                  {booking.ticket?.flight?.flightNumber ||
+                                    "N/A"}
                                 </>
                               )}
                             </h4>
                             <p className="text-sm text-gray-600 truncate flex items-center gap-1 mt-0.5">
                               <MapPin size={12} />
-                              {booking.type === "HOTEL" 
-                                ? (booking.room?.hotel?.location || "N/A")
-                                : `${booking.ticket?.flight?.from || "N/A"} → ${booking.ticket?.flight?.to || "N/A"}`
-                              }
+                              {booking.type === "HOTEL"
+                                ? booking.room?.hotel?.location || "N/A"
+                                : `${booking.ticket?.flight?.from || "N/A"} → ${
+                                    booking.ticket?.flight?.to || "N/A"
+                                  }`}
                             </p>
                             <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                               <span className="flex items-center gap-1">
                                 <Calendar size={12} />
                                 {formatDate(booking.checkInDate)}
-                                {booking.type === "HOTEL" && ` - ${formatDate(booking.checkOutDate)}`}
+                                {booking.type === "HOTEL" &&
+                                  ` - ${formatDate(booking.checkOutDate)}`}
                               </span>
                               {booking.type === "HOTEL" ? (
                                 <span>Room {booking.room?.roomNumber}</span>
