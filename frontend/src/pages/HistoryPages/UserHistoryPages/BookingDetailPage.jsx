@@ -22,7 +22,6 @@ const BookingDetailPage = () => {
   const { bookingId } = useParams();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showCancelModal, setShowCancelModal] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -45,21 +44,21 @@ const BookingDetailPage = () => {
   };
 
   useEffect(() => {
-    fetchBookingDetails();
-  }, [bookingId]);
+    const fetchBookingDetails = async () => {
+      setLoading(true);
+      try {
+        const response = await bookingService.getBookingDetails(bookingId);
+        setBooking(response.data);
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+        navigate("/bookings/history");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const fetchBookingDetails = async () => {
-    setLoading(true);
-    try {
-      const response = await bookingService.getBookingDetails(bookingId);
-      setBooking(response.data);
-    } catch (error) {
-      console.error("Error fetching booking details:", error);
-      navigate("/bookings/history");
-    } finally {
-      setLoading(false);
-    }
-  };
+    fetchBookingDetails();
+  }, [bookingId, navigate]);
 
   const handleCancelBooking = async () => {
     try {

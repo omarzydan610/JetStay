@@ -41,10 +41,6 @@ export default function BookingHistoryPage() {
     fetchBookingHistory();
   }, []);
 
-  useEffect(() => {
-    filterBookings();
-  }, [searchQuery, statusFilter, bookings]);
-
   const fetchBookingHistory = async () => {
     setLoading(true);
     try {
@@ -60,31 +56,39 @@ export default function BookingHistoryPage() {
     }
   };
 
-  const filterBookings = () => {
-    let filtered = [...bookings];
+  useEffect(() => {
+    fetchBookingHistory();
+  }, []);
 
-    // Apply status filter
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(
-        (booking) =>
-          booking.status?.toLowerCase() === statusFilter.toLowerCase()
-      );
-    }
+  useEffect(() => {
+    const filterBookings = () => {
+      let filtered = [...bookings];
 
-    // Apply search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (booking) =>
-          booking.id?.toString().includes(query) ||
-          booking.room?.hotel?.name?.toLowerCase().includes(query) ||
-          booking.room?.roomNumber?.toLowerCase().includes(query) ||
-          booking.room?.hotel?.location?.toLowerCase().includes(query)
-      );
-    }
+      // Apply status filter
+      if (statusFilter !== "all") {
+        filtered = filtered.filter(
+          (booking) =>
+            booking.status?.toLowerCase() === statusFilter.toLowerCase()
+        );
+      }
 
-    setFilteredBookings(filtered);
-  };
+      // Apply search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (booking) =>
+            booking.id?.toString().includes(query) ||
+            booking.room?.hotel?.name?.toLowerCase().includes(query) ||
+            booking.room?.roomNumber?.toLowerCase().includes(query) ||
+            booking.room?.hotel?.location?.toLowerCase().includes(query)
+        );
+      }
+
+      setFilteredBookings(filtered);
+    };
+
+    filterBookings();
+  }, [searchQuery, statusFilter, bookings]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-cyan-50 p-8">

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, ChevronDown, Calendar, History } from "lucide-react";
+import { User, LogOut, ChevronDown, History } from "lucide-react";
 import { useAppContext } from "../contexts/AppContext";
 
 const Navbar = () => {

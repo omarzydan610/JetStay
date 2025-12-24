@@ -53,10 +53,6 @@ export default function UpcomingBookingsPage() {
     fetchUpcomingBookings();
   }, []);
 
-  useEffect(() => {
-    filterAndSortBookings();
-  }, [searchQuery, sortBy, bookings]);
-
   const fetchUpcomingBookings = async () => {
     setLoading(true);
     try {
@@ -72,32 +68,40 @@ export default function UpcomingBookingsPage() {
     }
   };
 
-  const filterAndSortBookings = () => {
-    let filtered = [...bookings];
+  useEffect(() => {
+    fetchUpcomingBookings();
+  }, []);
 
-    // Apply search query
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (booking) =>
-          booking.id?.toString().includes(query) ||
-          booking.room?.hotel?.name?.toLowerCase().includes(query) ||
-          booking.room?.hotel?.location?.toLowerCase().includes(query) ||
-          booking.ticket?.flight?.airline?.name?.toLowerCase().includes(query)
-      );
-    }
+  useEffect(() => {
+    const filterAndSortBookings = () => {
+      let filtered = [...bookings];
 
-    // Apply sorting
-    if (sortBy === "date") {
-      filtered.sort(
-        (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
-      );
-    } else if (sortBy === "price") {
-      filtered.sort((a, b) => (b.totalPrice || 0) - (a.totalPrice || 0));
-    }
+      // Apply search query
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        filtered = filtered.filter(
+          (booking) =>
+            booking.id?.toString().includes(query) ||
+            booking.room?.hotel?.name?.toLowerCase().includes(query) ||
+            booking.room?.hotel?.location?.toLowerCase().includes(query) ||
+            booking.ticket?.flight?.airline?.name?.toLowerCase().includes(query)
+        );
+      }
 
-    setFilteredBookings(filtered);
-  };
+      // Apply sorting
+      if (sortBy === "date") {
+        filtered.sort(
+          (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
+        );
+      } else if (sortBy === "price") {
+        filtered.sort((a, b) => (b.totalPrice || 0) - (a.totalPrice || 0));
+      }
+
+      setFilteredBookings(filtered);
+    };
+
+    filterAndSortBookings();
+  }, [searchQuery, sortBy, bookings]);
 
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;

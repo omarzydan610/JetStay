@@ -4,9 +4,7 @@ import {
   Calendar,
   Hotel,
   MapPin,
-  Clock,
   ChevronRight,
-  AlertCircle,
   X,
   Plane,
 } from "lucide-react";
