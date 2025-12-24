@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { X, Plane } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export default function FlightDetailsPanel({ flight, onClose }) {
+  const navigate = useNavigate();
   const [selectedTripTypeIndex, setSelectedTripTypeIndex] = useState(null);
 
   // Reset selected trip type when flight changes
@@ -58,11 +60,12 @@ export default function FlightDetailsPanel({ flight, onClose }) {
     if (selectedTripTypeIndex !== null) {
       const tripTypes = flight?.tripTypes || flight?.tripsTypes || [];
       const selectedTripType = tripTypes[selectedTripTypeIndex];
-      toast.success(
-        `Booking ${selectedTripType.typeName || selectedTripType.name} on ${
-          flight?.airline?.airlineName || "Flight"
-        }`
-      );
+      navigate("/ticket-booking", {
+        state: {
+          flight: flight,
+          selectedTripType: selectedTripType,
+        },
+      });
     }
   };
 
