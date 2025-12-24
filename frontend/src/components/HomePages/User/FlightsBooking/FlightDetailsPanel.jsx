@@ -19,7 +19,6 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
 
-  const navigate = useNavigate();
 
   // Reset selected trip type when flight changes
   useEffect(() => {
@@ -183,7 +182,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
     // Navigate and pass the dummy ticket
     navigate("/payment", { state: { ticket: dummyTicket } });
 
-  };
+  
   }, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
 
   // Calculate active offers count

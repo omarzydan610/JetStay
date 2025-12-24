@@ -1,5 +1,4 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "react-toastify";
 import { X, Star, MapPin as MapPinIcon, MessageSquare } from "lucide-react";
 import { RoomTypeItem } from "./RoomTypeItem";
 import HotelReviews from "../HotelReview/HotelReviewsList";
@@ -16,7 +15,7 @@ export default function HotelDetailsPanel({
 }) {
   const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
-  
+
   const [showReviews, setShowReviews] = useState(false);
   const [roomOffers, setRoomOffers] = useState([]);
 
@@ -40,7 +39,7 @@ export default function HotelDetailsPanel({
   const getBestOfferForPrice = useCallback((price) => {
     const activeOffers = roomOffers.filter(offer => isOfferActive(offer));
     if (activeOffers.length === 0) return null;
-    
+
     // For simplicity, return the first active offer (could be improved to find best)
     return activeOffers[0];
   }, [roomOffers]);
@@ -68,7 +67,7 @@ export default function HotelDetailsPanel({
             <img
               src={
                 placeholderImages?.[
-                  parseInt(hotel?.hotelID || "0", 10) % (placeholderImages?.length || 1)
+                parseInt(hotel?.hotelID || "0", 10) % (placeholderImages?.length || 1)
                 ]
               }
               alt={hotel?.hotelName}
@@ -175,117 +174,64 @@ export default function HotelDetailsPanel({
                   });
                 }
               }}
-              className={`w-full py-3 rounded-lg font-bold text-lg transition ${
-                selectedRoomType
-                  ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+              className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedRoomType
+                ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
             >
               {selectedRoomType ? "Book Now" : "Select a Room Type"}
             </button>
           </div>
         </div>
 
-      {/* Booking Button */}
-      <div className="p-6 border-t-2 border-gray-200 bg-gray-50">
-        <button
-          disabled={!selectedRoomType}
-          onClick={() => {
-            if (!selectedRoomType) return;
 
-            const dummyBookingTransaction = {
-              bookingTransactionId: 2, // temp ID for frontend
-              totalPrice: selectedRoomType.price,
-              isPaid: false,
-              status: "PENDING",
-              numberOfGuests : 2, // default for demo
-              numberOfRooms : 1, // default for demo
-              checkInDate : "2024-12-01", // default for demo
-              checkOutDate : "2024-12-05", // default for demo
-              bookingDate: new Date().toISOString().split("T")[0],
-
-              hotel: {
-                hotelId: hotel.hotelId,
-                hotelName: hotel.hotelName,
-                city: hotel.city,
-              },
-            };
-
-            toast.success(
-              `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
-            );
-
-            navigate("/payment", {
-              state: {
-                bookingTransaction: dummyBookingTransaction,
-              },
-            });
-            if (selectedRoomType) {
-              navigate("/booking", {
-                state: {
-                  hotel: hotel,
-                  selectedRoomType: selectedRoomType,
-                },
-              });
-            }
-          }}
-
-          className={`w-full py-3 rounded-lg font-bold text-lg transition ${
-            selectedRoomType
-              ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          {selectedRoomType ? "Book Now" : "Select a Room Type"}
-        </button>
-      </div>
-    </motion.div>
-        {/* Reviews Modal */}
-        <AnimatePresence>
-          {showReviews && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowReviews(false)}
-                className="fixed inset-0 bg-black/50 z-[60]"
-              />
-
-              {/* Modal Content */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-4 md:inset-10 lg:inset-20 bg-white rounded-lg shadow-2xl z-[70] flex flex-col overflow-hidden"
-              >
-                {/* Modal Header */}
-                <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white">
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-900">
-                    Reviews - {hotel?.hotelName || "Hotel"}
-                  </h2>
-                  <button
-                    onClick={() => setShowReviews(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <X size={24} className="text-gray-600" />
-                  </button>
-                </div>
-
-                {/* Modal Body */}
-                <div className="flex-1 overflow-y-auto">
-                  <HotelReviews
-                    hotelId={hotel?.hotelID}
-                    hotelName={hotel?.hotelName}
-                  />
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </motion.div>
+      {/* Reviews Modal */}
+      <AnimatePresence>
+        {showReviews && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowReviews(false)}
+              className="fixed inset-0 bg-black/50 z-[60]"
+            />
+
+            {/* Modal Content */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-4 md:inset-10 lg:inset-20 bg-white rounded-lg shadow-2xl z-[70] flex flex-col overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 bg-white">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-900">
+                  Reviews - {hotel?.hotelName || "Hotel"}
+                </h2>
+                <button
+                  onClick={() => setShowReviews(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={24} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto">
+                <HotelReviews
+                  hotelId={hotel?.hotelID}
+                  hotelName={hotel?.hotelName}
+                />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
     </>
   );
 }
