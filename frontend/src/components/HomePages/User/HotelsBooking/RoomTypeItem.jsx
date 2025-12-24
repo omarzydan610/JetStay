@@ -1,7 +1,8 @@
 import React from "react";
+import { calculateDiscountedPrice, formatPriceDisplay, getOfferBadgeText } from "../../../../utils/offerUtils";
 
 export const RoomTypeItem = React.memo(
-  ({ roomType, isSelected, onSelect, getRoomImage }) => (
+  ({ roomType, isSelected, onSelect, getRoomImage, getBestOffer }) => (
     <div
       className={`rounded-lg border-2 overflow-hidden cursor-pointer transition ${
         isSelected
@@ -25,9 +26,31 @@ export const RoomTypeItem = React.memo(
               {roomType.description}
             </p>
           </div>
-          <span className="text-2xl font-bold text-sky-600 ml-4">
-            ${roomType.price}
-          </span>
+          <div className="text-right ml-4">
+            {(() => {
+              const originalPrice = roomType.price;
+              const bestOffer = getBestOffer ? getBestOffer(originalPrice) : null;
+              const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
+              
+              return bestOffer ? (
+                <div className="flex flex-col items-end">
+                  <span className="text-lg text-gray-500 line-through">
+                    ${originalPrice}
+                  </span>
+                  <span className="text-2xl font-bold text-green-600">
+                    ${discountedPrice.toFixed(2)}
+                  </span>
+                  <span className="text-xs text-red-500 font-semibold">
+                    {getOfferBadgeText(bestOffer.discountValue)}
+                  </span>
+                </div>
+              ) : (
+                <span className="text-2xl font-bold text-sky-600">
+                  ${originalPrice}
+                </span>
+              );
+            })()}
+          </div>
         </div>
       </button>
 
@@ -88,9 +111,29 @@ export const RoomTypeItem = React.memo(
           <div className="bg-white rounded-lg p-3 border-2 border-sky-200">
             <div className="flex justify-between items-center">
               <span className="text-gray-700 font-semibold">Total Price</span>
-              <span className="text-3xl font-bold text-sky-600">
-                ${roomType.price}
-              </span>
+              {(() => {
+                const originalPrice = roomType.price;
+                const bestOffer = getBestOffer ? getBestOffer(originalPrice) : null;
+                const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
+                
+                return bestOffer ? (
+                  <div className="text-right">
+                    <div className="text-lg text-gray-500 line-through">
+                      ${originalPrice}
+                    </div>
+                    <div className="text-3xl font-bold text-green-600">
+                      ${discountedPrice.toFixed(2)}
+                    </div>
+                    <div className="text-sm text-green-600 font-semibold">
+                      Save ${formatPriceDisplay(originalPrice, discountedPrice).savings?.toFixed(2)}
+                    </div>
+                  </div>
+                ) : (
+                  <span className="text-3xl font-bold text-sky-600">
+                    ${originalPrice}
+                  </span>
+                );
+              })()}
             </div>
             <p className="text-gray-500 text-xs mt-1">per night</p>
           </div>
