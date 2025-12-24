@@ -211,7 +211,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
       - uses: actions/cache@v4
         with:
@@ -227,7 +227,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov=app --cov-report=html --cov-report=term-summary tests/
+          PYTHONPATH=$(pwd):$PYTHONPATH pytest --cov=app --cov-report=html --cov-report=term-missing tests/
         working-directory: microservice/payment
 
       - name: Upload coverage report
@@ -250,7 +250,7 @@ jobs:
           # Run pytest with json output for more reliable parsing
           import subprocess
           result = subprocess.run(
-              ["pytest", "--cov=app", "--cov-report=term-summary", "tests/"],
+              ["pytest", "--cov=app", "--cov-report=term-missing", "tests/"],
               cwd="microservice/payment",
               capture_output=True,
               text=True
