@@ -49,13 +49,17 @@ public class RoomBookingService {
         }
 
         float totalPrice = 0;
+        int noOfRooms = 0 ;
+    
 
         BookingTransaction bookingTransaction = getBookingTransaction(user, hotel, checkIn, checkOut, noOfGuests);
         for (RoomTypeBookingDTO roomTypeBookingDTO : createBookingDTO.getRoomTypeBookingDTO()) {
+            noOfRooms += roomTypeBookingDTO.getNoOfRooms();
             totalPrice += bookRoom(roomTypeBookingDTO, user, hotel, checkIn, checkOut, bookingTransaction,
                     numberOfNights);
         }
         bookingTransaction.setTotalPrice(totalPrice);
+        bookingTransaction.setNumberOfRooms(noOfRooms);
         bookingTransactionRepository.save(bookingTransaction);
         return bookingTransaction.getBookingTransactionId();
     }
