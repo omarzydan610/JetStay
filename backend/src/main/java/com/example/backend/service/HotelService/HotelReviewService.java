@@ -11,6 +11,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingTransactionRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.HotelReviewRepository;
+import com.example.backend.service.CommentModerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -29,8 +30,11 @@ public class HotelReviewService {
     @Autowired
     private HotelRepository hotelRepository;
 
+    @Autowired
+    private CommentModerationService moderationService;
 
-    public void addReview(Integer userId, HotelReviewRequest reviewdto) {
+
+    public boolean addReview(Integer userId, HotelReviewRequest reviewdto) {
 
         if (reviewRepository.existsByBookingTransaction_BookingTransactionId(reviewdto.getBookingTransactionId())) {
             throw new BadRequestException("Review already exists for this booking");
@@ -52,22 +56,26 @@ public class HotelReviewService {
         review.setHotel(booking.getHotel());
         review.setBookingTransaction(booking);
 
-        review.setStaffRate(reviewdto.getStaffRate());
-        review.setComfortRate(reviewdto.getComfortRate());
-        review.setFacilitiesRate(reviewdto.getFacilitiesRate());
-        review.setCleanlinessRate(reviewdto.getCleanlinessRate());
-        review.setValueForMoneyRate(reviewdto.getValueForMoneyRate());
-        review.setLocationRate(reviewdto.getLocationRate());
-        review.setComment(reviewdto.getComment());
+        reviewMapper(reviewdto, review);
 
+        if (moderationService.isToxic(reviewdto.getComment())) {
+            review.setToxicFlag(true);
+            reviewRepository.save(review);
+            return false;
+        }
+
+        review.setToxicFlag(false);
         reviewRepository.save(review);
 
         // Update Hotel rate
         updateHotelRating(booking.getHotel(), 1);
 
+        return true;
     }
 
-    public void editReview(Integer userId, HotelReviewRequest reviewdto) {
+
+
+    public boolean editReview(Integer userId, HotelReviewRequest reviewdto) {
 
         HotelReview review = reviewRepository
                 .findByBookingTransaction_BookingTransactionId(reviewdto.getBookingTransactionId())
@@ -77,19 +85,22 @@ public class HotelReviewService {
             throw new BadRequestException("You cannot edit this review");
         }
 
-        review.setStaffRate(reviewdto.getStaffRate());
-        review.setComfortRate(reviewdto.getComfortRate());
-        review.setFacilitiesRate(reviewdto.getFacilitiesRate());
-        review.setCleanlinessRate(reviewdto.getCleanlinessRate());
-        review.setValueForMoneyRate(reviewdto.getValueForMoneyRate());
-        review.setLocationRate(reviewdto.getLocationRate());
+        reviewMapper(reviewdto, review);
         review.setRating((float)calculateOverallRate(reviewdto));
-        review.setComment(reviewdto.getComment());
 
+        if (moderationService.isToxic(reviewdto.getComment())) {
+            review.setToxicFlag(true);
+            reviewRepository.save(review);
+            return false;
+        }
+
+        review.setToxicFlag(false);
         reviewRepository.save(review);
 
         // Update Hotel rate
         updateHotelRating(review.getHotel(), 0);
+
+        return true;
     }
 
     public void deleteReview(Integer userId, Integer transactionId){
@@ -136,5 +147,15 @@ public class HotelReviewService {
         hotel.setHotelRate((float) newAverageRate);
         hotel.setNumberOfRates(hotel.getNumberOfRates() + rateCountDelta);
         hotelRepository.save(hotel);
+    }
+
+    private static void reviewMapper(HotelReviewRequest reviewdto, HotelReview review) {
+        review.setStaffRate(reviewdto.getStaffRate());
+        review.setComfortRate(reviewdto.getComfortRate());
+        review.setFacilitiesRate(reviewdto.getFacilitiesRate());
+        review.setCleanlinessRate(reviewdto.getCleanlinessRate());
+        review.setValueForMoneyRate(reviewdto.getValueForMoneyRate());
+        review.setLocationRate(reviewdto.getLocationRate());
+        review.setComment(reviewdto.getComment());
     }
 }

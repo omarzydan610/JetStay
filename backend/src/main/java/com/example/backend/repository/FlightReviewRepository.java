@@ -35,7 +35,7 @@ public interface FlightReviewRepository extends JpaRepository<FlightReview, Inte
             AVG(r.staffRate)
         )
         FROM FlightReview r
-        WHERE r.ticket.airline.airlineID = :airlineId
+        WHERE r.ticket.airline.airlineID = :airlineId AND r.toxicFlag = false
     """)
     AirlineReviewSummaryDTO getAirlineReviewSummary(@Param("airlineId") Integer airlineId);
 
@@ -60,7 +60,7 @@ public interface FlightReviewRepository extends JpaRepository<FlightReview, Inte
     @Query("""
         SELECT COALESCE(AVG(r.rating), 0.0)
         FROM FlightReview r
-        WHERE r.ticket.airline.airlineID = :airlineId
+        WHERE r.ticket.airline.airlineID = :airlineId AND r.toxicFlag = false
     """)
     Double calculateAirlineAverageRate(@Param("airlineId") Integer airlineId);
 
