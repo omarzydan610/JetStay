@@ -50,6 +50,12 @@ public class FlightServiceIntegrationTestComplete {
     @Autowired
     private FlightOfferRepository flightOfferRepository;
 
+    @Autowired
+    private FlightTicketRepository flightTicketRepository;
+
+    @Autowired
+    private FlightReviewRepository flightReviewRepository;
+
     @MockBean
     private JwtAuthService jwtAuthService;
 
@@ -60,11 +66,14 @@ public class FlightServiceIntegrationTestComplete {
 
     @BeforeEach
     void setup() {
+        flightReviewRepository.deleteAll();
+        flightTicketRepository.deleteAll();
+        tripTypeRepository.deleteAll();
+        flightOfferRepository.deleteAll();
         flightRepository.deleteAll();
         airlineRepository.deleteAll();
         airportRepository.deleteAll();
         userRepository.deleteAll();
-        flightOfferRepository.deleteAll();
 
         admin = new User();
         admin.setEmail("admin@test.com");
