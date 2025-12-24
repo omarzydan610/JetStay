@@ -1,8 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon, MessageSquare } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { RoomTypeItem } from "./RoomTypeItem";
+import { toast } from "react-toastify";
 import HotelReviews from "../HotelReview/HotelReviewsList";
 
 export default function HotelDetailsPanel({
@@ -11,7 +11,6 @@ export default function HotelDetailsPanel({
   getRoomImage,
   placeholderImages,
 }) {
-  const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [showReviews, setShowReviews] = useState(false);
 
