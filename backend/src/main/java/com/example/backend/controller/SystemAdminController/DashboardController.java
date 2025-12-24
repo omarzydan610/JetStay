@@ -6,6 +6,7 @@ import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.service.SystemAdminService.AdminDashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,5 +46,41 @@ public class DashboardController {
     public ResponseEntity<?> getHotelAdmin(@PathVariable int id){
         UserDataResponse adminData = adminDashboardService.getHotelAdmin(id);
         return ResponseEntity.ok(SuccessResponse.of("Get Hotel Admin Successfully", adminData));
+    }
+
+    @GetMapping("/hotel/flagged-reviews")
+    public ResponseEntity<?> getHotelFlaggedReviews(@RequestParam("page") int page, @RequestParam("size") int size){
+        Page<FlaggedReviewDTO> reviews = adminDashboardService.getHotelFlaggedReviews(page, size);
+        return ResponseEntity.ok(SuccessResponse.of("Get Hotel Flagged Reviews Successfully", reviews));
+    }
+
+    @GetMapping("/airline/flagged-reviews")
+    public ResponseEntity<?> getAirlineFlaggedReviews(@RequestParam("page") int page, @RequestParam("size") int size){
+        Page<FlaggedReviewDTO> reviews = adminDashboardService.getAirlineFlaggedReviews(page, size);
+        return ResponseEntity.ok(SuccessResponse.of("Get Airline Flagged Reviews Successfully", reviews));
+    }
+
+    @DeleteMapping("/hotel/flagged-review/{id}")
+    public ResponseEntity<?> deleteHotelFlaggedReview(@PathVariable("id") int reviewID){
+        adminDashboardService.deleteHotelFlaggedReview(reviewID);
+        return ResponseEntity.ok(SuccessResponse.of("The Review has been deleted Successfully"));
+    }
+
+    @DeleteMapping("/airline/flagged-review/{id}")
+    public ResponseEntity<?> deleteFlightFlaggedReview(@PathVariable("id") int reviewID){
+        adminDashboardService.deleteFlightFlaggedReview(reviewID);
+        return ResponseEntity.ok(SuccessResponse.of("The Review has been deleted Successfully"));
+    }
+
+    @PutMapping("/hotel/flagged-review/{id}")
+    public ResponseEntity<?> approveHotelFlaggedReview(@PathVariable("id") int reviewID){
+        adminDashboardService.approveHotelFlaggedReview(reviewID);
+        return ResponseEntity.ok(SuccessResponse.of("The Review approved Successfully"));
+    }
+
+    @PutMapping("/airline/flagged-review/{id}")
+    public ResponseEntity<?> approveFlightFlaggedReview(@PathVariable("id") int reviewID){
+        adminDashboardService.approveFlightFlaggedReview(reviewID);
+        return ResponseEntity.ok(SuccessResponse.of("The Review approved Successfully"));
     }
 }

@@ -7,6 +7,8 @@ import com.example.backend.dto.response.SuccessResponse;
 import com.example.backend.entity.Airline;
 import com.example.backend.entity.Hotel;
 import com.example.backend.entity.User;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.service.AuthService.JwtAuthService;
 import com.example.backend.service.SystemAdminService.AdminDashboardService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,15 +19,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.MediaType;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
 import java.util.Collections;
 
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Import(TestSecurityConfig.class)
@@ -47,6 +53,8 @@ class DashboardControllerTest {
     private Page<UserDataDTO> userPage;
     private Page<HotelDataDTO> hotelPage;
     private Page<AirlineDataDTO> airlinePage;
+    private FlaggedReviewDTO flaggedReview1;
+    private FlaggedReviewDTO flaggedReview2;
 
     @BeforeEach
     void setUp() {
@@ -82,6 +90,9 @@ class DashboardControllerTest {
         airline.setRate(5.0f);
         airline.setStatus(Airline.Status.ACTIVE);
         airlinePage = new PageImpl<>(Collections.singletonList(airline));
+
+        flaggedReview1 = new FlaggedReviewDTO();
+        flaggedReview2 = new FlaggedReviewDTO();
     }
 
 
@@ -250,6 +261,327 @@ class DashboardControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content[0].email").value("john@mail.com"))
                 .andExpect(jsonPath("$.data.content[0].role").value("CLIENT"));
+    }
+
+
+    @Test
+    void testGetHotelFlaggedReviews_Success() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Page<FlaggedReviewDTO> reviewsPage = new PageImpl<>(
+                Arrays.asList(flaggedReview1, flaggedReview2),
+                PageRequest.of(page, size),
+                2
+        );
+
+        when(adminDashboardService.getHotelFlaggedReviews(page, size))
+                .thenReturn(reviewsPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/admin/dashboard/hotel/flagged-reviews")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Get Hotel Flagged Reviews Successfully"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.number").value(page))
+                .andExpect(jsonPath("$.data.size").value(size));
+
+        verify(adminDashboardService).getHotelFlaggedReviews(page, size);
+    }
+
+    @Test
+
+    void testGetHotelFlaggedReviews_EmptyResults() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Page<FlaggedReviewDTO> emptyPage = new PageImpl<>(
+                Collections.emptyList(),
+                PageRequest.of(page, size),
+                0
+        );
+
+        when(adminDashboardService.getHotelFlaggedReviews(page, size))
+                .thenReturn(emptyPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/admin/dashboard/hotel/flagged-reviews")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Get Hotel Flagged Reviews Successfully"))
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(0)))
+                .andExpect(jsonPath("$.data.totalElements").value(0));
+
+        verify(adminDashboardService).getHotelFlaggedReviews(page, size);
+    }
+
+    @Test
+    void testGetAirlineFlaggedReviews_Success() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Page<FlaggedReviewDTO> reviewsPage = new PageImpl<>(
+                Arrays.asList(flaggedReview1, flaggedReview2),
+                PageRequest.of(page, size),
+                2
+        );
+
+        when(adminDashboardService.getAirlineFlaggedReviews(page, size))
+                .thenReturn(reviewsPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/admin/dashboard/airline/flagged-reviews")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Get Airline Flagged Reviews Successfully"))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(2)))
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.number").value(page))
+                .andExpect(jsonPath("$.data.size").value(size));
+
+        verify(adminDashboardService).getAirlineFlaggedReviews(page, size);
+    }
+
+    @Test
+    void testGetAirlineFlaggedReviews_EmptyResults() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        Page<FlaggedReviewDTO> emptyPage = new PageImpl<>(
+                Collections.emptyList(),
+                PageRequest.of(page, size),
+                0
+        );
+
+        when(adminDashboardService.getAirlineFlaggedReviews(page, size))
+                .thenReturn(emptyPage);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/admin/dashboard/airline/flagged-reviews")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Get Airline Flagged Reviews Successfully"))
+                .andExpect(jsonPath("$.data.content").isArray())
+                .andExpect(jsonPath("$.data.content", hasSize(0)))
+                .andExpect(jsonPath("$.data.totalElements").value(0));
+
+        verify(adminDashboardService).getAirlineFlaggedReviews(page, size);
+    }
+
+
+
+    @Test
+    void testDeleteHotelFlaggedReview_Success() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review has been deleted Successfully"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testDeleteHotelFlaggedReview_NotFound() throws Exception {
+        // Arrange
+        int reviewID = 999;
+        doThrow(new ResourceNotFoundException("Review not found"))
+                .when(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testDeleteHotelFlaggedReview_BadRequest() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doThrow(new BadRequestException("Can't delete this review"))
+                .when(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(adminDashboardService).deleteHotelFlaggedReview(reviewID);
+    }
+
+
+    @Test
+    void testDeleteFlightFlaggedReview_Success() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review has been deleted Successfully"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testDeleteFlightFlaggedReview_NotFound() throws Exception {
+        // Arrange
+        int reviewID = 999;
+        doThrow(new ResourceNotFoundException("Review not found"))
+                .when(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testDeleteFlightFlaggedReview_BadRequest() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doThrow(new BadRequestException("Can't delete this review"))
+                .when(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(delete("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+
+        verify(adminDashboardService).deleteFlightFlaggedReview(reviewID);
+    }
+
+
+    @Test
+    void testApproveHotelFlaggedReview_Success() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).approveHotelFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(adminDashboardService).approveHotelFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testApproveHotelFlaggedReview_NotFound() throws Exception {
+        // Arrange
+        int reviewID = 999;
+        doThrow(new ResourceNotFoundException("Review not found"))
+                .when(adminDashboardService).approveHotelFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(adminDashboardService).approveHotelFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testApproveHotelFlaggedReview_Idempotent() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).approveHotelFlaggedReview(reviewID);
+
+        // Act & Assert - First approval
+        mockMvc.perform(put("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"));
+
+        // Act & Assert - Second approval (should succeed)
+        mockMvc.perform(put("/api/admin/dashboard/hotel/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"));
+
+        verify(adminDashboardService, times(2)).approveHotelFlaggedReview(reviewID);
+    }
+
+
+    @Test
+    void testApproveFlightFlaggedReview_Success() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).approveFlightFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"))
+                .andExpect(jsonPath("$.data").doesNotExist());
+
+        verify(adminDashboardService).approveFlightFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testApproveFlightFlaggedReview_NotFound() throws Exception {
+        // Arrange
+        int reviewID = 999;
+        doThrow(new ResourceNotFoundException("Review not found"))
+                .when(adminDashboardService).approveFlightFlaggedReview(reviewID);
+
+        // Act & Assert
+        mockMvc.perform(put("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+        verify(adminDashboardService).approveFlightFlaggedReview(reviewID);
+    }
+
+    @Test
+    void testApproveFlightFlaggedReview_Idempotent() throws Exception {
+        // Arrange
+        int reviewID = 1;
+        doNothing().when(adminDashboardService).approveFlightFlaggedReview(reviewID);
+
+        // Act & Assert - First approval
+        mockMvc.perform(put("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"));
+
+        // Act & Assert - Second approval (should succeed)
+        mockMvc.perform(put("/api/admin/dashboard/airline/flagged-review/{id}", reviewID)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("The Review approved Successfully"));
+
+        verify(adminDashboardService, times(2)).approveFlightFlaggedReview(reviewID);
     }
 
 }

@@ -66,6 +66,9 @@ public class HotelReview {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Column(name = "toxic_flag")
+    private boolean toxicFlag;
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
