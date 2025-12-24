@@ -73,24 +73,33 @@ public class AirlineStatisticsServiceTest {
 
         @BeforeEach
         void setupData() {
-                // Delete child entities first to respect Foreign Key constraints
+                // 1. Delete RoomBookings (Dependent on BookingTransaction, RoomType, Hotel,
+                // User)
                 roomBookingRepository.deleteAll();
 
-                // Hotel-related dependencies
-                hotelReviewRepository.deleteAll(); // User + Hotel + Booking dependent
+                // 2. Delete HotelReviews (Dependent on BookingTransaction, Hotel, User)
+                hotelReviewRepository.deleteAll();
+
+                // 3. Delete BookingTransactions (Dependent on Hotel, User)
+                // MUST be deleted before Hotel because it has a FK to Hotel
+                bookingTransactionRepository.deleteAll();
+
+                // 4. Delete other Hotel dependents
                 roomImageRepository.deleteAll();
                 roomTypeRepository.deleteAll();
                 hotelImageRepository.deleteAll();
                 hotelAmenityRepository.deleteAll();
-                hotelRepository.deleteAll(); // Now safe to delete Hotel
 
-                bookingTransactionRepository.deleteAll();
+                // 5. Delete Hotels (Dependent on User)
+                hotelRepository.deleteAll();
 
+                // 6. Delete Flight related entities
                 flightReviewRepository.deleteAll();
                 flightTicketRepository.deleteAll();
                 tripTypeRepository.deleteAll();
                 flightRepository.deleteAll();
 
+                // 7. Delete Reference Data & Users
                 airlineRepository.deleteAll();
                 airportRepository.deleteAll();
                 userRepository.deleteAll();
