@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import { RoomTypeItem } from "./RoomTypeItem";
 
 export default function HotelDetailsPanel({
@@ -10,6 +10,7 @@ export default function HotelDetailsPanel({
   getRoomImage,
   placeholderImages,
 }) {
+  const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
 
   return (
@@ -88,9 +89,12 @@ export default function HotelDetailsPanel({
           disabled={!selectedRoomType}
           onClick={() => {
             if (selectedRoomType) {
-              toast.success(
-                `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
-              );
+              navigate("/booking", {
+                state: {
+                  hotel: hotel,
+                  selectedRoomType: selectedRoomType,
+                },
+              });
             }
           }}
           className={`w-full py-3 rounded-lg font-bold text-lg transition ${
