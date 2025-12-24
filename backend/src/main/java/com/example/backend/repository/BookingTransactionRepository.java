@@ -97,4 +97,10 @@ public interface BookingTransactionRepository extends JpaRepository<BookingTrans
     @Query("SELECT bt From BookingTransaction bt WHERE bt.bookingDate BETWEEN :startDate AND :endDate AND bt.hotel.hotelID = :hotelId  ")
     List<BookingTransaction> getBookingBetweenDateForHotel(LocalDate startDate, LocalDate endDate, Long hotelId);
 
+    @Query("SELECT bt From BookingTransaction bt WHERE bt.status = 'PENDING' AND bt.checkIn < :nowDate + :days ")
+    List<BookingTransaction> getPendingBookingThatCheckedInAfterDays(LocalDate nowDate, int days);
+
+    @Query("UPDATE BookingTransaction bt SET bt.status = 'CANCELLED' WHERE bt.status = 'PENDING' AND bt.checkIn < :nowDate + :days ")
+    void updatePendingBookingThatCheckedInAfterDays(LocalDate nowDate, int days);
+
 }
