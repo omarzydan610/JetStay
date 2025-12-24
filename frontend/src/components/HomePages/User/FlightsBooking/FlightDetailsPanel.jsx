@@ -144,7 +144,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
 
       toast.success(bookingMessage);
     }
-  }, [selectedTripTypeIndex, flight, getBestOfferForPrice]);
+  }, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
 
   // Calculate active offers count
   const activeOffers = getActiveOffers();
@@ -423,37 +423,37 @@ export default function FlightDetailsPanel({ flight, onClose }) {
               </div>
             )}
           </div>
+        </div>
 
-          {/* Booking Button */}
-          <div className="p-6 border-t-2 border-gray-200 bg-gray-50 space-y-3">
-            <div className="bg-white rounded-lg p-4 flex items-center justify-between">
-              <span className="text-sm text-gray-600">Total Price:</span>
-              <span className="text-2xl font-bold text-sky-600">
-                {selectedTripTypeIndex !== null
-                  ? (() => {
-                    const tripType = (flight?.tripTypes || flight?.tripsTypes || [])[selectedTripTypeIndex];
-                    const originalPrice = tripType?.price || 0;
-                    const bestOffer = getBestOfferForPrice(originalPrice);
-                    const finalPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
-                    return `$${finalPrice.toFixed(2)}`;
-                  })()
-                  : "$0.00"}
-              </span>
-            </div>
-
-            <button
-              disabled={selectedTripTypeIndex === null}
-              onClick={handleBooking}
-              className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedTripTypeIndex !== null
-                ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-            >
+        {/* Booking Button - Fixed Footer */}
+        <div className="p-6 border-t-2 border-gray-200 bg-gray-50 space-y-3">
+          <div className="bg-white rounded-lg p-4 flex items-center justify-between">
+            <span className="text-sm text-gray-600">Total Price:</span>
+            <span className="text-2xl font-bold text-sky-600">
               {selectedTripTypeIndex !== null
-                ? "Book Flight"
-                : "Select a Trip Type"}
-            </button>
+                ? (() => {
+                  const tripType = (flight?.tripTypes || flight?.tripsTypes || [])[selectedTripTypeIndex];
+                  const originalPrice = tripType?.price || 0;
+                  const bestOffer = getBestOfferForPrice(originalPrice);
+                  const finalPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
+                  return `$${finalPrice.toFixed(2)}`;
+                })()
+                : "$0.00"}
+            </span>
           </div>
+
+          <button
+            disabled={selectedTripTypeIndex === null}
+            onClick={handleBooking}
+            className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedTripTypeIndex !== null
+              ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+          >
+            {selectedTripTypeIndex !== null
+              ? "Book Flight"
+              : "Select a Trip Type"}
+          </button>
         </div>
 
         {/* Reviews Modal */}
