@@ -184,9 +184,29 @@ jobs:
   # ================= PAYMENT SERVICE ======================
   # =========================================================
 
+  payment-check:
+    name: Payment Service - Check Existence
+    runs-on: ubuntu-latest
+    outputs:
+      exists: ${{ steps.check.outputs.exists }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if payment service exists
+        id: check
+        run: |
+          if [ -d "microservice/payment" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
   payment-setup:
     name: Payment Service - Setup
     runs-on: ubuntu-latest
+    needs: payment-check
+    if: needs.payment-check.outputs.exists == 'true'
 
     steps:
       - uses: actions/checkout@v4
@@ -211,6 +231,10 @@ jobs:
     name: Payment Service - Test & Coverage
     runs-on: ubuntu-latest
     needs: payment-setup
+    if: needs.payment-check.outputs.exists == 'true'
+    permissions:
+      contents: read
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -258,6 +282,26 @@ jobs:
         with:
           name: payment-coverage-meta
           path: coverage_meta/payment.txt
+
+  payment-not-found:
+    name: Payment Service - Not Found
+    runs-on: ubuntu-latest
+    needs: payment-check
+    if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'false'
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Comment on PR - Payment Service Not Found
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          recreate: true
+          message: |
+            ## ⚠️ Payment Service Not Found
+
+            The payment service (`microservice/payment`) does not exist in this repository.
+
+            To enable payment service tests and coverage reporting, please ensure the payment service directory is set up at `microservice/payment` with a valid Python project structure.
 
   # =========================================================
   # ================= FRONTEND ==============================
