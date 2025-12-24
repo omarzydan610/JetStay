@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { RoomTypeItem } from "./RoomTypeItem";
 
 export default function HotelDetailsPanel({

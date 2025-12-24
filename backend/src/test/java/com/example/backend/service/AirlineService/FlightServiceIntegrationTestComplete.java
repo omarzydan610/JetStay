@@ -121,8 +121,7 @@ public class FlightServiceIntegrationTestComplete {
                 Flight.FlightStatus.PENDING,
                 "Test flight",
                 "Airbus A320",
-                null
-        );
+                null);
 
         flight = flightRepository.save(flight);
 
@@ -146,8 +145,7 @@ public class FlightServiceIntegrationTestComplete {
                 Flight.FlightStatus.ON_TIME,
                 "Test",
                 "B737",
-                null
-        );
+                null);
 
         Flight savedFlight = flightRepository.save(flight);
 
@@ -184,8 +182,7 @@ public class FlightServiceIntegrationTestComplete {
                 Flight.FlightStatus.ON_TIME,
                 "Old desc",
                 "OldPlane",
-                null
-        );
+                null);
 
         flight = flightRepository.save(flight);
 
@@ -266,8 +263,7 @@ public class FlightServiceIntegrationTestComplete {
                 Flight.FlightStatus.ON_TIME,
                 "Direct Flight",
                 "Boeing 777",
-                null
-        );
+                null);
 
         flight = flightRepository.save(flight);
 
@@ -291,12 +287,6 @@ public class FlightServiceIntegrationTestComplete {
 
     @Test
     void getAllAirPorts_ReturnsList() {
-        Airport airport = new Airport();
-        airport.setAirportID(1);
-        airport.setAirportName("Test Airport");
-        airport.setCountry("Egypt");
-        airport.setCity("Cairo");
-        airportRepository.save(airport);
 
         List<Airport> result = flightService.getAllAirPorts("Egypt", "Cairo");
 
