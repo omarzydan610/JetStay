@@ -35,7 +35,7 @@ export STRIPE_API_KEY="sk_test_..."
 ```bash
 curl -X POST "http://localhost:8000/api/payment/pay/ticket" \
 	-H "Content-Type: application/json" \
-	-d '{"amount": 10.00, "currency": "usd", "paymentMethodID": "pm_card_visa"}'
+	-d '{"amount": 10.00, "currency": "usd", "paymentMethod": "pm_card_visa"}'
 ```
 
 - The endpoint `POST /api/payment/pay/ticket` will create and confirm a PaymentIntent in Stripe test mode.

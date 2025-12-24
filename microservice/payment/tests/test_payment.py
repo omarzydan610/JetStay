@@ -9,14 +9,14 @@ client = TestClient(app)
 valid_payment = {
     "amount": 500.0,
     "currency": "usd",
-    "paymentMethodID": "pm_card_visa",
+    "paymentMethod": "pm_card_visa",
     "description": "Ticket payment test"
 }
 
 invalid_payment = {
     "amount": 500.0,
     "currency": "usd",
-    "paymentMethodID": "pm_invalid",
+    "paymentMethod": "pm_invalid",
     "description": "Ticket payment test"
 }
 

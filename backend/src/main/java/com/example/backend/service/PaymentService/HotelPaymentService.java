@@ -2,7 +2,6 @@ package com.example.backend.service.PaymentService;
 
 import com.example.backend.config.StripeResponseErrorHandler;
 import com.example.backend.dto.PaymentDTO.RoomPaymentDTO;
-import com.example.backend.dto.PaymentDTO.StripeDTO;
 import com.example.backend.entity.BookingTransaction;
 import com.example.backend.entity.PaymentMethod;
 import com.example.backend.entity.RoomPayment;
@@ -28,7 +27,7 @@ public class HotelPaymentService {
     private PaymentMethodRepository paymentMethodRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay"; // same FastAPI endpoint
+    private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay/room"; // same FastAPI endpoint
 
     public HotelPaymentService() {
         restTemplate.setErrorHandler(new StripeResponseErrorHandler());
@@ -57,22 +56,7 @@ public class HotelPaymentService {
                     .body("{\"status\":\"failed\",\"error\":\"Payment method not found\"}");
         }
 
-        // Convert to Stripe DTO
-        StripeDTO stripeDTO = StripeDTO.builder()
-                .paymentMethodID(dto.getPaymentMethod())
-                .amount(dto.getAmount())
-                .currency(dto.getCurrency())
-                .description(dto.getDescription())
-                .build();
-
-        // Save initial payment as PENDING
-        RoomPayment payment = new RoomPayment();
-        payment.setBookingTransaction(booking);
-        payment.setMethod(method);
-        payment.setAmount(dto.getAmount());
-        payment.setStatus(RoomPayment.Status.PENDING);
-        roomPaymentRepository.save(payment);
-        Integer paymentID = payment.getPaymentId();
+        Integer paymentID = null;
 
         ResponseEntity<String> fastApiResponse;
         boolean success = false;
@@ -81,7 +65,7 @@ public class HotelPaymentService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<StripeDTO> request = new HttpEntity<>(stripeDTO, headers);
+            HttpEntity<RoomPaymentDTO> request = new HttpEntity<>(dto, headers);
 
             fastApiResponse = restTemplate.postForEntity(
                     FASTAPI_URL,

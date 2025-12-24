@@ -32,7 +32,7 @@ public class TicketPaymentService {
     private PaymentMethodRepository paymentMethodRepository;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay";
+    private final String FASTAPI_URL = "http://localhost:8000/api/payment/pay/ticket";
 
     public TicketPaymentService() {
         restTemplate.setErrorHandler(new StripeResponseErrorHandler());
@@ -57,20 +57,7 @@ public class TicketPaymentService {
                     .body("{\"status\":\"failed\",\"error\":\"Payment method not found\"}");
         }
 
-        StripeDTO stripeDTO = StripeDTO.builder()
-                .paymentMethodID(dto.getPaymentMethod())
-                .amount(dto.getAmount())
-                .currency(dto.getCurrency())
-                .description(dto.getDescription())
-                .build();
-
-        TicketPayment payment = new TicketPayment();
-        payment.setTicket(ticket);
-        payment.setMethod(method);
-        payment.setAmount(dto.getAmount());
-        payment.setStatus(TicketPayment.Status.PENDING);
-        ticketPaymentRepository.save(payment);
-        Integer paymentID = payment.getPaymentId();
+        Integer paymentID = null;
 
         ResponseEntity<String> fastApiResponse;
 
@@ -78,7 +65,7 @@ public class TicketPaymentService {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            HttpEntity<StripeDTO> request = new HttpEntity<>(stripeDTO, headers);
+            HttpEntity<TicketPaymentDTO> request = new HttpEntity<>(dto, headers);
 
             fastApiResponse = restTemplate.postForEntity(FASTAPI_URL, request, String.class);
 

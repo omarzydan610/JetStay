@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
+import { PayPalButtons } from "@paypal/react-paypal-js";
 import flightImage from "../../assets/logo.png";
 
 export default function CheckoutPage({ ticket, bookingTransaction }) {
@@ -12,6 +13,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
   const [message, setMessage] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [email, setEmail] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("stripe"); // 'stripe' | 'paypal'
 
   const isTicketPayment = Boolean(ticket);
   const isBookingPayment = Boolean(bookingTransaction);
@@ -32,8 +34,14 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
     setMessage("");
 
     try {
+      if (paymentMethod === "paypal") {
+        // PayPal flow is handled by PayPalButtons below.
+        setMessage("Please complete payment using the PayPal button below.");
+        setLoading(false);
+        return;
+      }
       const cardElement = elements.getElement(CardElement);
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
+      const { paymentMethod: stripePaymentMethod, error } = await stripe.createPaymentMethod({
         type: "card",
         card: cardElement,
         billing_details: {
@@ -59,7 +67,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
         ? {
             amount: ticket.price,
             currency: "usd",
-            paymentMethod: paymentMethod.id,
+            paymentMethod: stripePaymentMethod.id,
             description: "Flight ticket payment",
             ticketId: ticket.ticketId,
             methodId: 1,
@@ -67,7 +75,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
         : {
             amount: bookingTransaction.totalPrice,
             currency: "usd",
-            paymentMethod: paymentMethod.id,
+            paymentMethod: stripePaymentMethod.id,
             description: "Hotel booking payment",
             bookingTransactionId: bookingTransaction.bookingTransactionId,
             methodId: 1,
@@ -99,6 +107,73 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
     setLoading(false);
   };
 
+  const amount = isTicketPayment ? ticket.price : bookingTransaction?.totalPrice || 0;
+
+  const createPayPalOrder = (data, actions) => {
+    return actions.order.create({
+      purchase_units: [
+        {
+          amount: {
+            value: String(amount),
+          },
+        },
+      ],
+    });
+  };
+
+  const onApprovePayPal = async (data, actions) => {
+    try {
+      const details = await actions.order.capture();
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
+        setMessage("Authentication required ❌");
+        return;
+      }
+
+      const body = isTicketPayment
+        ? {
+            amount,
+            currency: "usd",
+            orderId: details.id,
+            payer: details.payer,
+            description: "Flight ticket payment (PayPal)",
+            ticketId: ticket.ticketId,
+            methodId: 2,
+          }
+        : {
+            amount,
+            currency: "usd",
+            orderId: details.id,
+            payer: details.payer,
+            description: "Hotel booking payment (PayPal)",
+            bookingTransactionId: bookingTransaction.bookingTransactionId,
+            methodId: 2,
+          };
+
+      const routeSuffix = isTicketPayment ? "ticket" : "room";
+      const response = await fetch(
+        `http://localhost:8080/api/payment/paypal/${routeSuffix}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(body),
+        }
+      );
+
+      const dataRes = await response.json();
+      if (response.ok) {
+        setMessage("Payment successful 🎉");
+      } else {
+        setMessage(dataRes.error || "Payment failed ❌");
+      }
+    } catch (err) {
+      setMessage(err.message || "PayPal payment failed ❌");
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <div className="flex flex-1">
@@ -110,6 +185,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
             </h1>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Default: show Stripe card form. PayPal option is below the submit button. */}
               <div>
                 <label className="block text-sm font-medium text-gray-700">
                   Name on Card
@@ -137,15 +213,65 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
               </div>
 
               <div className="border rounded-md p-4 bg-gray-50 shadow-sm">
-                <CardElement options={{ hidePostalCode: true }} />
+                {paymentMethod === "stripe" ? (
+                  <CardElement options={{ hidePostalCode: true }} />
+                ) : (
+                  <div className="text-center text-sm text-gray-600">
+                    Use the PayPal button below to complete the payment.
+                  </div>
+                )}
               </div>
 
-              <button
-                disabled={!stripe || loading}
-                className="w-full bg-indigo-600 text-white py-3 font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition"
-              >
-                {loading ? "Processing..." : "Pay Now"}
-              </button>
+              {paymentMethod === "stripe" ? (
+                <button
+                  disabled={!stripe || loading}
+                  className="w-full bg-indigo-600 text-white py-3 font-semibold rounded-md hover:bg-indigo-700 disabled:opacity-50 transition"
+                >
+                  {loading ? "Processing..." : "Pay Now"}
+                </button>
+              ) : null}
+
+              {/* PayPal alternative below submit */}
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600 mb-2">Or pay with PayPal</p>
+                <div className="inline-block">
+                  <PayPalButtons
+                    style={{ layout: "horizontal" }}
+                    createOrder={createPayPalOrder}
+                    onApprove={onApprovePayPal}
+                    forceReRender={[amount]}
+                    onClick={(data, actions) => {
+                      const fs = data && data.fundingSource ? String(data.fundingSource).toLowerCase() : "";
+                      if (fs.includes("card") || fs.includes("credit") || fs.includes("debit")) {
+                        // user chose Debit/Credit — switch to Stripe card form
+                        setPaymentMethod("stripe");
+                        setMessage("You selected card — switching to Stripe payment form.");
+                        if (actions && typeof actions.reject === "function") {
+                          return actions.reject();
+                        }
+                        return;
+                      }
+                      // proceed with PayPal account flow
+                      setPaymentMethod("paypal");
+                      return;
+                    }}
+                  />
+                  {paymentMethod === "paypal" && (
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPaymentMethod("stripe");
+                          setMessage("");
+                        }}
+                        className="text-sm text-indigo-600 hover:underline"
+                      >
+                        Pay with card instead
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {message && (
                 <p className="text-sm text-center mt-4 text-red-500">
