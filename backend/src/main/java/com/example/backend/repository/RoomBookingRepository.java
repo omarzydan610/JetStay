@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface RoomBookingRepository extends JpaRepository<RoomBooking, Integer> {
-    @Query("SELECT SUM(rb.noOfRooms) FROM RoomBooking rb WHERE rb.roomType.roomTypeID = :roomTypeID AND (rb.checkIn < :checkOut OR rb.checkOut > :checkIn)")
+    @Query("SELECT SUM(rb.noOfRooms) FROM RoomBooking rb WHERE rb.roomType.roomTypeID = :roomTypeID AND (rb.checkIn < :checkOut OR rb.checkOut > :checkIn) AND rb.bookingTransaction.status != 'CANCELLED'")
     public Integer getNumberOfBookedRoom(LocalDate checkIn , LocalDate checkOut , Integer roomTypeID);
 
     
