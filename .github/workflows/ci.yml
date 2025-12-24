@@ -214,7 +214,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Install dependencies
         working-directory: microservice/payment
         run: |
@@ -225,7 +225,7 @@ jobs:
         working-directory: microservice/payment
         run: |
           PYTHONPATH=$(pwd):$PYTHONPATH \
-          pytest --cov=app --cov-report=html --cov-report=term-missing tests/
+          pytest --cov=app --cov-report=html --cov-report=json --cov-report=term-missing tests/
 
       - name: Upload payment HTML coverage
         uses: actions/upload-artifact@v4
@@ -236,27 +236,21 @@ jobs:
       - name: Extract payment coverage
         run: |
           python3 << 'EOF'
-          import re, subprocess, os
+          import json, os
 
-          r = subprocess.run(
-              ["pytest", "--cov=app", "--cov-report=term-missing", "tests/"],
-              cwd="microservice/payment",
-              capture_output=True,
-              text=True
-          )
+          with open("microservice/payment/.coverage.json") as f:
+              data = json.load(f)
 
-          m = re.search(r"TOTAL\s+(\d+)\s+(\d+)\s+([\d.]+)%", r.stdout)
-          if m:
-              total, missing, rate = int(m[1]), int(m[2]), float(m[3])
-              covered = total - missing
-          else:
-              total = covered = rate = 0
+          total_statements = data["totals"]["num_statements"]
+          total_missing = data["totals"]["missing_lines"]
+          coverage_rate = data["totals"]["percent_covered"]
+          covered = total_statements - total_missing
 
-          indicator = "🟢" if rate >= 80 else "🟡" if rate >= 60 else "🔴"
+          indicator = "🟢" if coverage_rate >= 80 else "🟡" if coverage_rate >= 60 else "🔴"
 
           os.makedirs("coverage_meta", exist_ok=True)
           with open("coverage_meta/payment.txt", "w") as f:
-              f.write(f"{indicator}\n{rate:.2f}\n{covered}\n{total}\n")
+              f.write(f"{indicator}\n{coverage_rate:.2f}\n{covered}\n{total_statements}\n")
           EOF
 
       - name: Upload payment coverage metadata
