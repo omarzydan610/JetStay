@@ -21,11 +21,6 @@ export default function OfferManagement() {
   });
   const [roomTypes, setRoomTypes] = useState([]);
 
-  useEffect(() => {
-    loadOffers();
-    loadRoomTypes();
-  }, [loadOffers, loadRoomTypes]);
-
 
   const loadOffers = useCallback(async () => {
     try {
@@ -48,6 +43,11 @@ export default function OfferManagement() {
       console.error("Error loading room types:", error);
     }
   }, []);
+
+  useEffect(() => {
+    loadOffers();
+    loadRoomTypes();
+  }, [loadOffers, loadRoomTypes]);
 
 
   const handleInputChange = (e) => {
