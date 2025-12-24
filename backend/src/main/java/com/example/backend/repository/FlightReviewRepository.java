@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 
+import com.example.backend.dto.AdminDashboard.FlaggedReviewDTO;
 import com.example.backend.dto.AirlineDTO.AirlineReviewItemDTO;
 import com.example.backend.dto.AirlineDTO.AirlineReviewSummaryDTO;
 import com.example.backend.entity.FlightReview;
@@ -63,5 +64,24 @@ public interface FlightReviewRepository extends JpaRepository<FlightReview, Inte
         WHERE r.ticket.airline.airlineID = :airlineId AND r.toxicFlag = false
     """)
     Double calculateAirlineAverageRate(@Param("airlineId") Integer airlineId);
+
+    @Query("""
+        SELECT new com.example.backend.dto.AdminDashboard.FlaggedReviewDTO(
+            r.id,
+            r.comment,
+            r.rating,
+            r.createdAt,
+            CONCAT(u.firstName, ' ', u.lastName),
+            a.airlineName
+        )
+        FROM FlightReview r
+        JOIN r.ticket t
+        JOIN t.user u
+        JOIN t.flight f
+        JOIN f.airline a
+        WHERE r.toxicFlag = true
+    """)
+    Page<FlaggedReviewDTO> findFlaggedReviews(Pageable pageable);
+
 
 }

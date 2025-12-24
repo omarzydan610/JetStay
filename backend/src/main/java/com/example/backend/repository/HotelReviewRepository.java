@@ -1,5 +1,6 @@
 package com.example.backend.repository;
 
+import com.example.backend.dto.AdminDashboard.FlaggedReviewDTO;
 import com.example.backend.dto.HotelDTO.HotelReviewItemDTO;
 import com.example.backend.dto.HotelDTO.HotelReviewSummaryDTO;
 import com.example.backend.entity.HotelReview;
@@ -65,4 +66,20 @@ public interface HotelReviewRepository extends JpaRepository<HotelReview, Intege
         WHERE r.hotel.hotelID = :hotelId AND r.toxicFlag = false
     """)
     Double calculateHotelAverageRate(@Param("hotelId") Integer hotelId);
+
+    @Query("""
+        SELECT new com.example.backend.dto.AdminDashboard.FlaggedReviewDTO(
+            r.reviewId,
+            r.comment,
+            r.rating,
+            r.createdAt,
+            CONCAT(u.firstName, ' ', u.lastName),
+            h.hotelName
+        )
+        FROM HotelReview r
+        JOIN r.user u
+        JOIN r.hotel h
+        WHERE r.toxicFlag = true
+    """)
+    Page<FlaggedReviewDTO> findFlaggedReviews(Pageable pageable);
 }
