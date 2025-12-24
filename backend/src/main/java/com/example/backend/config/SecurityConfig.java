@@ -55,6 +55,7 @@ public class SecurityConfig {
                                 "/graphql")
                         .permitAll()
                         .requestMatchers("/api/partnership/**").permitAll()
+                        .requestMatchers("/api/room/offers/public/**").permitAll()
 
                         // Role-based endpoints
                         .requestMatchers("/api/admin/**").hasRole("SYSTEM_ADMIN")

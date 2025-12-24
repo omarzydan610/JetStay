@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import ticketBookingService from "../../services/Airline/ticketBookingService";
 import Navbar from "../../components/Navbar";
+import { calculateDiscountedPrice } from "../../utils/offerUtils";
 import {
   Plane,
   CreditCard,
@@ -10,6 +11,7 @@ import {
   Calendar,
   Users,
   Clock,
+  Tag,
 } from "lucide-react";
 
 export default function TicketBookingPage() {
@@ -17,8 +19,8 @@ export default function TicketBookingPage() {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
 
-  // Get flight and trip type from navigation state
-  const { flight, selectedTripType } = location.state || {};
+  // Get flight, trip type, and offer from navigation state
+  const { flight, selectedTripType, appliedOffer } = location.state || {};
 
   const [quantity, setQuantity] = useState(1);
 
@@ -64,7 +66,18 @@ export default function TicketBookingPage() {
 
   const calculateTotalPrice = () => {
     if (!selectedTripType?.price) return 0;
-    return selectedTripType.price * quantity;
+    const basePrice = selectedTripType.price;
+    const pricePerTicket = appliedOffer
+      ? calculateDiscountedPrice(basePrice, appliedOffer.discountValue)
+      : basePrice;
+    return pricePerTicket * quantity;
+  };
+
+  const getPricePerTicket = () => {
+    if (!selectedTripType?.price) return 0;
+    return appliedOffer
+      ? calculateDiscountedPrice(selectedTripType.price, appliedOffer.discountValue)
+      : selectedTripType.price;
   };
 
   const handleSubmit = async (e) => {
@@ -238,25 +251,46 @@ export default function TicketBookingPage() {
 
                   {/* Selected Trip Type */}
                   {selectedTripType && (
-                    <div className="mt-4 bg-cyan-50 border border-cyan-200 rounded-lg p-4">
-                      <p className="text-sm font-semibold text-cyan-900 mb-1">
+                    <div className={`mt-4 rounded-lg p-4 ${appliedOffer ? "bg-green-50 border border-green-200" : "bg-cyan-50 border border-cyan-200"}`}>
+                      <p className={`text-sm font-semibold mb-1 ${appliedOffer ? "text-green-900" : "text-cyan-900"}`}>
                         Selected Class:
                       </p>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-cyan-700 font-bold text-lg">
+                          <p className={`font-bold text-lg ${appliedOffer ? "text-green-700" : "text-cyan-700"}`}>
                             {selectedTripType.typeName ||
                               selectedTripType.name}
                           </p>
                           {selectedTripType.description && (
-                            <p className="text-sm text-cyan-600">
+                            <p className={`text-sm ${appliedOffer ? "text-green-600" : "text-cyan-600"}`}>
                               {selectedTripType.description}
                             </p>
                           )}
+                          {appliedOffer && (
+                            <div className="mt-2 flex items-center gap-1">
+                              <Tag className="w-4 h-4 text-green-600" />
+                              <p className="text-xs font-semibold text-green-600">
+                                {appliedOffer.offerName} ({appliedOffer.discountValue}% OFF)
+                              </p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-2xl font-bold text-cyan-700">
-                          ${selectedTripType.price?.toFixed(2)}
-                        </p>
+                        <div className="text-right">
+                          {appliedOffer ? (
+                            <>
+                              <p className="text-sm text-gray-500 line-through">
+                                ${selectedTripType.price?.toFixed(2)}
+                              </p>
+                              <p className="text-2xl font-bold text-green-700">
+                                ${getPricePerTicket().toFixed(2)}
+                              </p>
+                            </>
+                          ) : (
+                            <p className="text-2xl font-bold text-cyan-700">
+                              ${selectedTripType.price?.toFixed(2)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
@@ -305,25 +339,77 @@ export default function TicketBookingPage() {
                 </p>
               </div>
 
+              {/* Applied Offer */}
+              {appliedOffer && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Tag className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="font-bold text-green-800">
+                        {appliedOffer.offerName}
+                      </p>
+                      <p className="text-sm text-green-600">
+                        {appliedOffer.discountValue}% discount applied
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Price Summary */}
               <div className="bg-gray-50 rounded-lg p-6 space-y-3">
                 <h3 className="font-bold text-gray-800 mb-4">Price Summary</h3>
-                <div className="flex justify-between items-center text-gray-700">
-                  <span>Price per ticket:</span>
-                  <span className="font-semibold">
-                    ${selectedTripType?.price?.toFixed(2) || "0.00"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-gray-700">
-                  <span>Number of tickets:</span>
-                  <span className="font-semibold">{quantity}</span>
-                </div>
+
+                {appliedOffer ? (
+                  <>
+                    <div className="flex justify-between items-center text-gray-700">
+                      <span>Original price per ticket:</span>
+                      <span className="font-semibold line-through text-gray-500">
+                        ${selectedTripType?.price?.toFixed(2) || "0.00"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-green-700">
+                      <span>Discounted price per ticket:</span>
+                      <span className="font-semibold">
+                        ${getPricePerTicket().toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-700">
+                      <span>Number of tickets:</span>
+                      <span className="font-semibold">{quantity}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-green-600 text-sm">
+                      <span>Total savings:</span>
+                      <span className="font-semibold">
+                        -$
+                        {(
+                          (selectedTripType?.price - getPricePerTicket()) *
+                          quantity
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center text-gray-700">
+                      <span>Price per ticket:</span>
+                      <span className="font-semibold">
+                        ${selectedTripType?.price?.toFixed(2) || "0.00"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-gray-700">
+                      <span>Number of tickets:</span>
+                      <span className="font-semibold">{quantity}</span>
+                    </div>
+                  </>
+                )}
+
                 <div className="border-t border-gray-300 pt-3 mt-3">
                   <div className="flex justify-between items-center">
                     <span className="text-lg font-bold text-gray-800">
                       Total:
                     </span>
-                    <span className="text-2xl font-bold text-sky-600">
+                    <span className={`text-2xl font-bold ${appliedOffer ? "text-green-600" : "text-sky-600"}`}>
                       ${calculateTotalPrice().toFixed(2)}
                     </span>
                   </div>

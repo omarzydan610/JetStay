@@ -6,6 +6,7 @@ import { useAppContext } from "../../../contexts/AppContext";
 import Navbar from "../../../components/Navbar";
 import AddFlightSection from "../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
 import EditableFlightList from "../../../components/HomePages/Airline/FlightsMangment/EditableFlightList";
+import FlightOfferManagement from "../../../components/HomePages/Airline/FlightsMangment/FlightOfferManagement";
 import PrimaryButton from "../../../components/HomePages/PrimaryButton";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 
@@ -168,6 +169,18 @@ function FlightManagementPage() {
               >
                 ➕ Add New Flight
               </motion.button>
+              <motion.button
+                onClick={() => setActiveTab("offers")}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`px-6 py-3 font-semibold rounded-lg transition-all duration-300 ${
+                  activeTab === "offers"
+                    ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white shadow-lg"
+                    : "text-gray-600 hover:text-sky-600"
+                }`}
+              >
+                🎯 Manage Offers
+              </motion.button>
             </div>
           </GlassCard>
         </motion.div>
@@ -192,6 +205,17 @@ function FlightManagementPage() {
             exit={{ opacity: 0, y: -20 }}
           >
             <AddFlightSection />
+          </motion.div>
+        )}
+
+        {activeTab === "offers" && (
+          <motion.div
+            variants={itemVariants}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+          >
+            <FlightOfferManagement />
           </motion.div>
         )}
       </motion.div>
