@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/api/hotels/reviews")
+@RequestMapping("/api/hotel/reviews")
 public class HotelReviewController {
 
     @Autowired
