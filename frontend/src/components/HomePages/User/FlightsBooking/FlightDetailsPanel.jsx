@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { X, Plane } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
 import { getPublicFlightOffers } from "../../../../services/Airline/flightsService";
 import { isOfferActive, calculateDiscountedPrice, formatPriceDisplay, getOfferBadgeText } from "../../../../utils/offerUtils";
 
