@@ -238,6 +238,12 @@ jobs:
           python3 << 'EOF'
           import json, os
 
+          # Debug: list files in the directory
+          for root, dirs, files in os.walk("microservice/payment"):
+              for file in files:
+                  if "coverage" in file.lower():
+                      print(f"Found: {os.path.join(root, file)}")
+
           with open("microservice/payment/.coverage.json") as f:
               data = json.load(f)
 
@@ -252,12 +258,6 @@ jobs:
           with open("coverage_meta/payment.txt", "w") as f:
               f.write(f"{indicator}\n{coverage_rate:.2f}\n{covered}\n{total_statements}\n")
           EOF
-
-      - name: Upload payment coverage metadata
-        uses: actions/upload-artifact@v4
-        with:
-          name: payment-coverage-meta
-          path: coverage_meta/payment.txt
 
   # =========================================================
   # ================= FRONTEND ==============================
