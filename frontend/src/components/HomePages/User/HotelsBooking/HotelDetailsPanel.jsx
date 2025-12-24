@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import { RoomTypeItem } from "./RoomTypeItem";
 import roomsService from "../../../../services/HotelServices/roomsService";
-import { isOfferActive, calculateDiscountedPrice, formatPriceDisplay, getOfferBadgeText } from "../../../../utils/offerUtils";
+import { isOfferActive } from "../../../../utils/offerUtils";
 
 export default function HotelDetailsPanel({
   hotel,
@@ -14,14 +14,13 @@ export default function HotelDetailsPanel({
 }) {
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [roomOffers, setRoomOffers] = useState([]);
-  const [loadingOffers, setLoadingOffers] = useState(false);
 
   // Fetch room offers when hotel changes
   useEffect(() => {
     const fetchRoomOffers = async () => {
       if (!hotel?.hotelID) return;
       
-      setLoadingOffers(true);
+
       try {
         const offers = await roomsService.getPublicRoomOffers(hotel.hotelID);
         setRoomOffers(offers || []);
@@ -29,7 +28,6 @@ export default function HotelDetailsPanel({
         console.error("Error fetching room offers:", error);
         setRoomOffers([]);
       } finally {
-        setLoadingOffers(false);
       }
     };
 
