@@ -22,8 +22,7 @@ public class AirlineReviewController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addReview(@RequestBody AirlineReviewRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
+        Claims claims = getClaims();
         boolean flag = airlineReviewService.addReview(claims.get("user_id", Integer.class), request);
         if(flag) {
             return ResponseEntity.ok(SuccessResponse.of("Review is added successfully"));
@@ -34,8 +33,7 @@ public class AirlineReviewController {
 
     @PutMapping("/edit")
     public ResponseEntity<?> editReview(@RequestBody AirlineReviewRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
+        Claims claims = getClaims();
         boolean flag = airlineReviewService.editReview(claims.get("user_id", Integer.class), request);
         if(flag) {
             return ResponseEntity.ok(SuccessResponse.of("Review is edited successfully"));
@@ -46,8 +44,7 @@ public class AirlineReviewController {
 
     @DeleteMapping("/delete/{ticketId}")
     public ResponseEntity<?> deleteReview(@PathVariable Integer ticketId) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();
+        Claims claims = getClaims();
         airlineReviewService.deleteReview(claims.get("user_id", Integer.class),ticketId);
         return ResponseEntity.ok(SuccessResponse.of("Review is deleted successfully"));
     }
@@ -66,5 +63,11 @@ public class AirlineReviewController {
     public ResponseEntity<?> getAirlineReviewSummary(@PathVariable Integer airlineId) {
         AirlineReviewSummaryDTO data = airlineReviewService.getAirlineReviewSummary(airlineId);
         return ResponseEntity.ok(SuccessResponse.of("Review Summary of the airline fetched successfully",data));
+    }
+
+    private static Claims getClaims() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Claims claims = (Claims) auth.getCredentials();
+        return claims;
     }
 }
