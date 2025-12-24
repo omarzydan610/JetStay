@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Star, MapPin as MapPinIcon, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { RoomTypeItem } from "./RoomTypeItem";
-import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 import HotelReviews from "../HotelReview/HotelReviewsList";
 
 export default function HotelDetailsPanel({
@@ -11,6 +11,7 @@ export default function HotelDetailsPanel({
   getRoomImage,
   placeholderImages,
 }) {
+  const navigate = useNavigate();
   const [selectedRoomType, setSelectedRoomType] = useState(null);
   const [showReviews, setShowReviews] = useState(false);
 
@@ -100,14 +101,17 @@ export default function HotelDetailsPanel({
             disabled={!selectedRoomType}
             onClick={() => {
               if (selectedRoomType) {
-                toast.success(
-                  `Booking ${selectedRoomType.roomTypeName} at ${hotel.hotelName}`
-                );
+                navigate("/booking", {
+                  state: {
+                    hotel: hotel,
+                    selectedRoomType: selectedRoomType,
+                  },
+                });
               }
             }}
             className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedRoomType
-                ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
           >
             {selectedRoomType ? "Book Now" : "Select a Room Type"}
