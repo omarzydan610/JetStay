@@ -283,26 +283,6 @@ jobs:
           name: payment-coverage-meta
           path: coverage_meta/payment.txt
 
-  payment-not-found:
-    name: Payment Service - Not Found
-    runs-on: ubuntu-latest
-    needs: payment-check
-    if: github.event_name == 'pull_request' && needs.payment-check.outputs.exists == 'false'
-    permissions:
-      pull-requests: write
-
-    steps:
-      - name: Comment on PR - Payment Service Not Found
-        uses: marocchino/sticky-pull-request-comment@v2
-        with:
-          recreate: true
-          message: |
-            ## ⚠️ Payment Service Not Found
-
-            The payment service (`microservice/payment`) does not exist in this repository.
-
-            To enable payment service tests and coverage reporting, please ensure the payment service directory is set up at `microservice/payment` with a valid Python project structure.
-
   # =========================================================
   # ================= FRONTEND ==============================
   # =========================================================
