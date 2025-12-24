@@ -59,8 +59,8 @@ public class RoomOfferServiceTest {
         roomOfferRepository.deleteAll();
         roomTypeRepository.deleteAll();
         hotelRepository.deleteAll();
-        userRepository.deleteAll();
         airportRepository.deleteAll();
+        userRepository.deleteAll();
 
         // Create admin user
         admin = new User();
