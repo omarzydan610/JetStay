@@ -15,7 +15,7 @@ import {
   Plane,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import bookingService from "../../../services/bookingService";
+import bookingService from "../../../services/bookingHistoryService";
 
 const BookingDetailPage = () => {
   const navigate = useNavigate();

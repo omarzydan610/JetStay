@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import bookingService from "../../../services/bookingService";
+import bookingService from "../../../services/bookingHistoryService";
 import BookingSearchFilters from "../../../components/HistoryComponents/UserHistory/BookingSearchFilters";
 import BookingCard from "../../../components/HistoryComponents/UserHistory/BookingCard";
 import EmptyBookingsState from "../../../components/HistoryComponents/UserHistory/EmptyBookingsState";

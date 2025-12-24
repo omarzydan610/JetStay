@@ -15,7 +15,7 @@ import {
   Plane,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import bookingService from "../../../services/bookingService";
+import bookingService from "../../../services/bookingHistoryService";
 import ConfirmationModal from "../../../components/ConfirmationModal";
 
 export default function UpcomingBookingsPage() {
