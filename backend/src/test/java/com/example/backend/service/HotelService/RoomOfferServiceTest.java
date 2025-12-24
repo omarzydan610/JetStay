@@ -6,6 +6,7 @@ import com.example.backend.entity.Hotel;
 import com.example.backend.entity.RoomOffer;
 import com.example.backend.entity.RoomType;
 import com.example.backend.entity.User;
+import com.example.backend.repository.AirportRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.RoomOfferRepository;
 import com.example.backend.repository.RoomTypeRepository;
@@ -43,6 +44,9 @@ public class RoomOfferServiceTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AirportRepository airportRepository;
+
     @MockBean
     private JwtAuthService jwtAuthService;
 
@@ -56,6 +60,7 @@ public class RoomOfferServiceTest {
         roomTypeRepository.deleteAll();
         hotelRepository.deleteAll();
         userRepository.deleteAll();
+        airportRepository.deleteAll();
 
         // Create admin user
         admin = new User();
