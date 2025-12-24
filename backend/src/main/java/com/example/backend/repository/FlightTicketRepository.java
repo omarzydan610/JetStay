@@ -119,5 +119,12 @@ public interface FlightTicketRepository extends JpaRepository<FlightTicket, Inte
 
        @Query("SELECT count(*) FROM FlightTicket ft WHERE ft.tripType.typeID = :tripTypeId AND ft.state != 'CANCELLED'")
        long getNoOFBookedTickets(Integer tripTypeId);
+       // Find upcoming flights for a user (future flight dates)
+       @Query("SELECT ft FROM FlightTicket ft WHERE ft.user.userID = :userId AND ft.flightDate >= CURRENT_DATE AND ft.isPaid = true ORDER BY ft.flightDate ASC")
+       List<FlightTicket> findUpcomingFlightsByUserId(@Param("userId") Integer userId);
+
+       // Find past flights for a user
+       @Query("SELECT ft FROM FlightTicket ft WHERE ft.user.userID = :userId AND ft.flightDate < CURRENT_DATE ORDER BY ft.createdAt DESC")
+       List<FlightTicket> findPastFlightsByUserId(@Param("userId") Integer userId);
 
 }
