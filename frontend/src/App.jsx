@@ -14,6 +14,7 @@ import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
 import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
 import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
 import RoomBookingPage from "./pages/BookingPage/RoomBookingPage";
+import TicketBookingPage from "./pages/BookingPage/TicketBookingPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import BookingHistoryPage from "./pages/HistoryPages/UserHistoryPages/BookingHistoryPage";
 import UpcomingBookingsPage from "./pages/HistoryPages/UserHistoryPages/UpcomingBookingsPage";
@@ -119,6 +120,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <RoomBookingPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/ticket-booking"
+            element={
+              <ProtectedRoute>
+                <TicketBookingPage />
               </ProtectedRoute>
             }
           />

@@ -27,7 +27,7 @@ public class TripType {
     private Integer quantity;
 
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private Float price;
 
     @Column(name = "type_name", nullable = false)
     private String typeName;

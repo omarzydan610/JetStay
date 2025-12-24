@@ -282,7 +282,7 @@ public class FlightServiceIntegrationTestComplete {
 
         flight = flightRepository.save(flight);
 
-        TripType economy = new TripType(null, flight, 100, 1500, "ECONOMY");
+        TripType economy = new TripType(null, flight, 100, 1500.0f, "ECONOMY");
         tripTypeRepository.save(economy);
 
         List<FlightDetailsDTO> details = flightService.getFlightDetails(flight.getFlightID());

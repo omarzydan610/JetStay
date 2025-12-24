@@ -55,8 +55,10 @@ export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
             airlineName
             airlineRate
             airlineNationality
+            logoUrl
           }
           tripsTypes {
+            typeID
             typeName
             price
           }

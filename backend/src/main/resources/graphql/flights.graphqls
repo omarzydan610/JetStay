@@ -20,6 +20,7 @@ type Airline {
     airlineName: String
     airlineRate: Float
     airlineNationality: String
+    logoUrl: String
 }
 
 type Airport {
@@ -29,6 +30,7 @@ type Airport {
 }
 
 type TripType {
+    typeID: ID
     typeName: String
     quantity: Int
     price: Float

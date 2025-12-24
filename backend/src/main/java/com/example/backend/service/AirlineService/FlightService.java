@@ -102,7 +102,7 @@ public class FlightService {
                 TripType tripType = new TripType();
                 tripType.setFlight(savedFlight);
                 tripType.setTypeName(ticketTypeDTO.getTypeName().toLowerCase());
-                tripType.setPrice(ticketTypeDTO.getPrice().intValue());
+                tripType.setPrice(ticketTypeDTO.getPrice());
                 tripType.setQuantity(ticketTypeDTO.getQuantity());
                 tripTypeRepository.save(tripType);
             }

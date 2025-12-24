@@ -63,6 +63,10 @@ public class FlightTicket {
     @Column(name = "is_paid")
     private Boolean isPaid;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "state")
+    private TicketState state;
+
     @Column(name = "created_at")
     private LocalDate createdAt;
 
@@ -73,5 +77,15 @@ public class FlightTicket {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDate.now();
+        this.state = TicketState.PENDING;
+        this.isPaid = false;
     }
+
+    public enum TicketState {
+
+        PENDING,
+        COMPLETED,
+        CANCELLED,
+    }
+
 }

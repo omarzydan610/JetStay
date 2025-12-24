@@ -121,7 +121,7 @@ class BookingHistoryServiceTest {
     testFlightTicket.setAirline(testAirline);
     testFlightTicket.setTripType(new TripType());
     testFlightTicket.getTripType().setTypeName("Economy");
-    testFlightTicket.getTripType().setPrice(350);
+    testFlightTicket.getTripType().setPrice(350.0f);
     testFlightTicket.setIsPaid(true);
     testFlightTicket.setCreatedAt(LocalDate.of(2025, 12, 15));
     testFlightTicket.setFlightDate(LocalDate.of(2025, 12, 26));
