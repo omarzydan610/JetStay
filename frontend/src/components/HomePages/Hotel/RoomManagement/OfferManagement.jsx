@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
 import { toast } from "react-toastify";
 import roomsService from "../../../../services/HotelServices/roomsService";
 import GlassCard from "../../Airline/GlassCard";
@@ -23,9 +24,10 @@ export default function OfferManagement() {
   useEffect(() => {
     loadOffers();
     loadRoomTypes();
-  }, []);
+  }, [loadOffers, loadRoomTypes]);
 
-  const loadOffers = async () => {
+
+  const loadOffers = useCallback(async () => {
     try {
       setLoading(true);
       const data = await roomsService.getRoomOffers();
@@ -36,16 +38,17 @@ export default function OfferManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadRoomTypes = async () => {
+  const loadRoomTypes = useCallback(async () => {
     try {
       const data = await roomsService.getAllRooms();
       setRoomTypes(data);
     } catch (error) {
       console.error("Error loading room types:", error);
     }
-  };
+  }, []);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

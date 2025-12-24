@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { addFlightOffer, getFlightOffers, deleteFlightOffer, getFlights } from "../../../../services/Airline/flightsService";
 import GlassCard from "../../Airline/GlassCard";
@@ -51,13 +51,13 @@ export default function FlightOfferManagement() {
     }
   };
 
-  const loadOffers = async () => {
+  const loadOffers = useCallback(async () => {
     if (!selectedFlightId) return;
 
     try {
       setLoading(true);
       const data = await getFlightOffers(selectedFlightId);
-      
+
       if (Array.isArray(data)) {
         setOffers(data);
       } else if (data && typeof data === 'object') {
@@ -78,7 +78,8 @@ export default function FlightOfferManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedFlightId]);
+
 
   useEffect(() => {
     if (selectedFlightId) {
@@ -86,7 +87,8 @@ export default function FlightOfferManagement() {
     } else {
       setOffers([]);
     }
-  }, [selectedFlightId]);
+  }, [selectedFlightId, loadOffers]);
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
