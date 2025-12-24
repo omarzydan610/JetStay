@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Calendar,
-  Hotel,
-  MapPin,
-  ChevronRight,
-  X,
-  Plane,
-} from "lucide-react";
+import { Calendar, Hotel, MapPin, ChevronRight, X, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import bookingService from "../../../services/bookingService";
 

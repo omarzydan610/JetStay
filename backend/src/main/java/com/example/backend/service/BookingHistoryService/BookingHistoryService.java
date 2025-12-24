@@ -26,15 +26,15 @@ public class BookingHistoryService {
     public List<BookingResponse> getBookingHistory(Integer userId) {
         List<BookingResponse> history = new ArrayList<>();
 
-        // Get hotel bookings history
-        List<RoomBooking> hotelBookings = roomBookingRepository.findByUserIdOrderByBookingDateDesc(userId);
+        // Get past hotel bookings history
+        List<RoomBooking> hotelBookings = roomBookingRepository.findPastBookingsByUserId(userId);
         List<BookingResponse> hotelResponses = hotelBookings.stream()
                 .map(BookingHistoryMapper::mapHotelBookingToResponse)
                 .collect(Collectors.toList());
         history.addAll(hotelResponses);
 
-        // Get flight bookings history
-        List<FlightTicket> flightBookings = flightTicketRepository.findByUserIdOrderByCreatedAtDesc(userId);
+        // Get past flight bookings history
+        List<FlightTicket> flightBookings = flightTicketRepository.findPastFlightsByUserId(userId);
         List<BookingResponse> flightResponses = flightBookings.stream()
                 .map(BookingHistoryMapper::mapFlightBookingToResponse)
                 .collect(Collectors.toList());
