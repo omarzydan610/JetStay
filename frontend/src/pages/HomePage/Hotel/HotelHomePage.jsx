@@ -2,11 +2,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import StatisticsSection from "../../../components/HomePages/Hotel/HomePage/StatisticsSection.jsx";
 import RoomListSection from "../../../components/HomePages/Hotel/HomePage/RoomListSection.jsx";
+import HotelReviewsList from "../../../components/HomePages/User/HotelReview/HotelReviewsList.jsx";
+import authService from "../../../services/AuthServices/authService.js";
 
 function HotelHomePage() {
   const [loading, setLoading] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const [error, setError] = useState("");
+  const clamis = authService.parseJwt();
 
   useEffect(() => {
     setLoading(false);
@@ -107,6 +110,11 @@ function HotelHomePage() {
         {/* Room List Section */}
         <motion.div variants={itemVariants}>
           <RoomListSection />
+        </motion.div>
+
+        {/* Reviews List Section */}
+        <motion.div variants={itemVariants}>
+          <HotelReviewsList hotelId={clamis.hotel_id} />
         </motion.div>
       </motion.div>
     </div>
