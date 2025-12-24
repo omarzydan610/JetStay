@@ -50,17 +50,51 @@ public class AirlineStatisticsServiceTest {
         @Autowired
         private RoomBookingRepository roomBookingRepository;
 
+        @Autowired
+        private RoomTypeRepository roomTypeRepository;
+
+        @Autowired
+        private RoomImageRepository roomImageRepository;
+
+        @Autowired
+        private HotelRepository hotelRepository;
+
+        @Autowired
+        private HotelReviewRepository hotelReviewRepository;
+
+        @Autowired
+        private HotelImageRepository hotelImageRepository;
+
+        @Autowired
+        private HotelAmenityRepository hotelAmenityRepository;
+
         @MockBean
         private JwtAuthService jwtAuthService;
 
         @BeforeEach
         void setupData() {
+                // Delete child entities first to respect Foreign Key constraints
                 roomBookingRepository.deleteAll();
+
+                // Hotel-related dependencies
+                hotelReviewRepository.deleteAll(); // User + Hotel + Booking dependent
+                roomImageRepository.deleteAll();
+                roomTypeRepository.deleteAll();
+                hotelImageRepository.deleteAll();
+                hotelAmenityRepository.deleteAll();
+                hotelRepository.deleteAll(); // Now safe to delete Hotel
+
                 bookingTransactionRepository.deleteAll();
+
                 flightReviewRepository.deleteAll();
                 flightTicketRepository.deleteAll();
                 tripTypeRepository.deleteAll();
                 flightRepository.deleteAll();
+
+                airlineRepository.deleteAll();
+                airportRepository.deleteAll();
+                userRepository.deleteAll();
+
                 airlineRepository.deleteAll();
                 airportRepository.deleteAll();
                 userRepository.deleteAll();
@@ -114,9 +148,12 @@ public class AirlineStatisticsServiceTest {
                                 null, qatarFlight, qatar, LocalDate.of(2025, 12, 2),
                                 passenger1, firstClass, 3000.0f, true));
 
-                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), emiratesFlight.getFlightID(), emiratesTicket1, 5, 4, 5, 4, 4.2f, "Smooth flight", LocalDateTime.now(), false));
-                flightReviewRepository.save(new FlightReview(null, passenger2.getUserID(), emiratesFlight.getFlightID(), emiratesTicket2, 4, 5, 4, 5, 4.5f, "Excellent service", LocalDateTime.now(), false));
-                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), qatarFlight.getFlightID(), qatarTicket, 3, 5, 4, 2, 4.8f, "Outstanding experience", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), emiratesFlight.getFlightID(),
+                                emiratesTicket1, 5, 4, 5, 4, 4.2f, "Smooth flight", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger2.getUserID(), emiratesFlight.getFlightID(),
+                                emiratesTicket2, 4, 5, 4, 5, 4.5f, "Excellent service", LocalDateTime.now(), false));
+                flightReviewRepository.save(new FlightReview(null, passenger1.getUserID(), qatarFlight.getFlightID(),
+                                qatarTicket, 3, 5, 4, 2, 4.8f, "Outstanding experience", LocalDateTime.now(), false));
         }
 
         @Test
