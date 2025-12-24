@@ -12,6 +12,7 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.BookingTransactionRepository;
 import com.example.backend.repository.HotelRepository;
 import com.example.backend.repository.HotelReviewRepository;
+import com.example.backend.service.CommentModerationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,9 @@ class HotelReviewServiceTest {
 
     @Mock
     private HotelRepository hotelRepository;
+
+    @Mock
+    private CommentModerationService moderationService;
 
     @InjectMocks
     private HotelReviewService hotelReviewService;
