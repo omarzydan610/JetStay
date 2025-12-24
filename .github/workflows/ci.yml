@@ -109,13 +109,20 @@ jobs:
           main_files = {}
           for f in Path("backend/src/main/java").rglob("*.java"):
               if not any(excluded in f.parts for excluded in excluded_dirs):
-                  # Extract route from java/com/example/backend/ onwards
-                  parts = f.parts
-                  backend_idx = next((i for i, p in enumerate(parts) if p == "backend"), -1)
-                  if backend_idx != -1:
-                      route = "/".join(parts[backend_idx+1:]).replace(".java", "").replace("/", "/").lstrip("/")
+                  # Extract route starting from the package after com/example/backend/
+                  parts = list(f.parts)
+                  # Find the index where "backend" appears in the package structure
+                  backend_pkg_idx = -1
+                  for i, part in enumerate(parts):
+                      if part == "backend" and i > 0 and parts[i-1] == "example" and parts[i-2] == "com":
+                          backend_pkg_idx = i
+                          break
+                  
+                  if backend_pkg_idx != -1:
+                      # Extract everything after com/example/backend
+                      route = "/".join(parts[backend_pkg_idx+1:])
                       main_files[f.stem] = route
-          
+
           tests = {f.stem.replace("Test", "") for f in Path("backend/src/test/java").rglob("*Test.java")}
           untested_names = sorted(set(main_files.keys()) - tests)
           untested = [main_files[name] for name in untested_names]
