@@ -13,8 +13,10 @@ import FlightManagementPage from "./pages/HomePage/Airline/FlightManagementPage"
 import HotelManagementPage from "./pages/HomePage/Hotel/HotelManagementPage";
 import BookingDetailsPage from "./pages/HomePage/Admin/BookingDetailsPage";
 import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
+import StripePaymentPage from "./pages/payment/stripePaymentPage";
 import RoomBookingPage from "./pages/BookingPage/RoomBookingPage";
 import TicketBookingPage from "./pages/BookingPage/TicketBookingPage";
+import TicketBookingConfirmationPage from "./pages/BookingPage/TicketBookingConfirmationPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import BookingHistoryPage from "./pages/HistoryPages/UserHistoryPages/BookingHistoryPage";
 import UpcomingBookingsPage from "./pages/HistoryPages/UserHistoryPages/UpcomingBookingsPage";
@@ -23,10 +25,46 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
+  const protectedRoutes = [
+    { path: "/", element: <BaseHomePage /> },
+    { path: "/profile", element: <BaseProfile /> },
+    { path: "/airline/manage-flights", element: <FlightManagementPage /> },
+    { path: "/hotel/manage-rooms", element: <HotelManagementPage /> },
+    { path: "/admin/booking-details", element: <BookingDetailsPage /> },
+    { path: "/admin/tickets-details", element: <TicketsDetailsPage /> },
+    { path: "/payment", element: <StripePaymentPage /> },
+    { path: "/payment/:bookingTransactionId", element: <PaymentPage /> },
+    { path: "/booking", element: <RoomBookingPage /> },
+    { path: "/booking/ticket/confirmation", element: <TicketBookingConfirmationPage /> },
+  ];
+
+  const publicRoutes = [
+    { path: "/auth", element: <AuthPage /> },
+    { path: "/partnership-request", element: <PartnerShipRequestPage /> },
+    { path: "/forgot-password", element: <ForgotPasswordPage /> },
+    { path: "/verify-otp", element: <VerifyOtpPage /> },
+    { path: "/reset-password", element: <ResetPasswordPage /> },
+  ];
+
   return (
     <AppProvider>
       <Router>
         <Routes>
+          {protectedRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<ProtectedRoute>{element}</ProtectedRoute>}
+            />
+          ))}
+
+          {publicRoutes.map(({ path, element }) => (
+            <Route
+              key={path}
+              path={path}
+              element={<PublicRoute>{element}</PublicRoute>}
+            />
+          ))}
           <Route
             path="/"
             element={

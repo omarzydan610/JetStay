@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Slide-in animation for elements */
 @keyframes slide-in {
   from {
     transform: translateX(100%);
@@ -14,5 +15,14 @@
 }
 
 .animate-slide-in {
-  animation: slide-in 0.3s ease-out;
+  animation: slide-in 2s ease-out;
+}
+.animated-gradient {
+  animation: slideGradient 2s ease infinite;
+}
+
+@keyframes slideGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }

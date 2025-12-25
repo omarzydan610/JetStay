@@ -19,6 +19,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
 
+
   // Reset selected trip type when flight changes
   useEffect(() => {
     setSelectedTripTypeIndex(null);
@@ -135,6 +136,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
           appliedOffer: bestOffer,
         },
       });
+
       let bookingMessage = `Booking ${selectedTripType.typeName || selectedTripType.name} on ${flight?.airline?.airlineName || "Flight"
         }`;
 

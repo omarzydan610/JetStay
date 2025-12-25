@@ -132,12 +132,33 @@ export default function TicketBookingPage() {
 
       toast.success("Tickets booked successfully!");
 
-      // Navigate to payment page with ticket IDs
-      // For now, using the first ticket ID as transaction reference
-      navigate(`/payment/${ticketIds[0]}`, {
+      // Prepare ticket data for payment page
+      const departureCode = getAirportCode(flight.departureAirport?.airportName);
+      const arrivalCode = getAirportCode(flight.arrivalAirport?.airportName);
+
+      const ticketData = {
+        ticketId: ticketIds[0], // Using first ticket ID for payment
+        ticketIds: ticketIds, // Store all ticket IDs
+        price: calculateTotalPrice(),
+        airline: {
+          name: flight.airline?.airlineName || "Airline",
+        },
+        flight: {
+          departure: `${departureCode} (${flight.departureAirport?.city || ""})`,
+          arrival: `${arrivalCode} (${flight.arrivalAirport?.city || ""})`,
+          departureTime: formatDate(flight.departureDate) + " at " + formatTime(flight.departureDate),
+          arrivalTime: formatDate(flight.arrivalDate) + " at " + formatTime(flight.arrivalDate),
+        },
+      };
+
+      // Navigate to booking confirmation page first
+      navigate("/booking/ticket/confirmation", {
         state: {
-          ticketIds: ticketIds,
-          type: "flight",
+          ticketData: ticketData,
+          flight: flight,
+          selectedTripType: selectedTripType,
+          appliedOffer: appliedOffer,
+          quantity: quantity,
         },
       });
     } catch (error) {
