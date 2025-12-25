@@ -22,7 +22,8 @@ class BookingService {
   async getUpcomingBookings() {
     try {
       const response = await apiClient.get("/api/bookings/upcoming");
-      return response.data;
+      // Normalize the data before returning to ensure frontend components work correctly
+      return response.data.map((booking) => this.normalizeBooking(booking));
     } catch (error) {
       console.error("Error fetching upcoming bookings:", error);
       throw this.handleError(error);
