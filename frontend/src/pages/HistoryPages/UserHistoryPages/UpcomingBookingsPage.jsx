@@ -11,7 +11,6 @@ import {
   CheckCircle,
   AlertCircle,
   Search,
-  X,
   Plane,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";

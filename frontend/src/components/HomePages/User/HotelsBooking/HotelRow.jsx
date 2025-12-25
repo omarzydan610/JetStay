@@ -19,9 +19,11 @@ export default function HotelRow({ hotel, onSelect, getHotelImage }) {
                 ? hotel.logoUrl
                 : "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI="
             }
+            alt={hotel.name || "Hotel image"}
             className="w-full h-full object-contain p-1"
             onError={(e) => {
-              e.target.src = "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI=";
+              e.target.src =
+                "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI=";
             }}
           />
         </div>
