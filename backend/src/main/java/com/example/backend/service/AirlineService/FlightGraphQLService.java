@@ -138,7 +138,7 @@ public class FlightGraphQLService {
         String pageKey = page + "_" + size;
 
         Pageable pageable = PageRequest.of(page, size);
-        List<Flight> pageFlights = flightRepository.findAll(pageable).getContent();
+        List<Flight> pageFlights = flightRepository.findAllAvailableFlight(pageable).getContent();
 
         for (Flight flight : pageFlights) {
             cacheManager.putFlightById(flight.getFlightID(), flight);

@@ -72,4 +72,7 @@ public interface FlightRepository extends JpaRepository<Flight, Integer>, JpaSpe
     // tripTypeID);
     Flight getByFlightID(Integer flightID);
 
+    @Query("SELECT f FROM Flight f WHERE f.departureDate > CURRENT_DATE ")
+    Page<Flight> findAllAvailableFlight(Pageable pageable);
+
 }
