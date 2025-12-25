@@ -27,7 +27,6 @@ public class BookingHistoryController {
     @GetMapping("/hotel/history")
     public ResponseEntity<?> getBookingHistory() {
         Integer userId = getCurrentUserId();
-        System.out.println(". a a a a a a a userId: " + userId);
         List<HotelBookingResponse> history = bookingService.getBookingHistory(userId);
         return ResponseEntity.ok(SuccessResponse.of("Booking history retrieved successfully", history));
     }
@@ -69,7 +68,7 @@ public class BookingHistoryController {
 
     private Integer getCurrentUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        Claims claims = (Claims) auth.getCredentials();         
+        Claims claims = (Claims) auth.getCredentials();
         return claims.get("user_id", Integer.class);
     }
 }

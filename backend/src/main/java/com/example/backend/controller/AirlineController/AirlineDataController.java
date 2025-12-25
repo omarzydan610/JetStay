@@ -18,7 +18,6 @@ public class AirlineDataController {
 
   @GetMapping("/data")
   public ResponseEntity<?> getData(@RequestHeader("Authorization") String token) {
-    System.out.println("Authorization Header: " + token);
     AirlineDataResponse data = airlineDataService.getData(token);
     return ResponseEntity.ok(SuccessResponse.of("Data retrieved successfully", data));
   }

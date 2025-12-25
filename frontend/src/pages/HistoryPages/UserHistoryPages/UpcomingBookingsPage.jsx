@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import bookingService from "../../../services/bookingHistoryService";
-import ConfirmationModal from "../../../components/ConfirmationModal";
 
 export default function UpcomingBookingsPage() {
   const navigate = useNavigate();
@@ -26,9 +25,6 @@ export default function UpcomingBookingsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date"); // 'date' or 'price'
   const [activeTab, setActiveTab] = useState("all"); // 'all', 'hotels', 'flights'
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [canceling, setCanceling] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -52,34 +48,15 @@ export default function UpcomingBookingsPage() {
 
   useEffect(() => {
     fetchUpcomingBookings();
-  }, [activeTab]); // Re-fetch when tab changes
+  }, []); // Fetch once on mount
 
   const fetchUpcomingBookings = async () => {
     setLoading(true);
     try {
-      let hotelData = [];
-      let flightData = [];
-
-      if (activeTab === "all" || activeTab === "hotels") {
-        const hotelResponse = await bookingService.getUpcomingHotelBookings();
-        hotelData = hotelResponse.data || [];
-      }
-
-      if (activeTab === "all" || activeTab === "flights") {
-        const flightResponse = await bookingService.getUpcomingFlightTickets();
-        flightData = flightResponse.data || [];
-      }
-
-      const allBookings = [...hotelData, ...flightData];
-      // Sort by date (check-in for hotels, flight date for flights)
-      allBookings.sort((a, b) => {
-        const dateA = new Date(a.checkInDate || a.flightDate);
-        const dateB = new Date(b.checkInDate || b.flightDate);
-        return dateA - dateB;
-      });
-
+      const response = await bookingService.getAllUpcomingBookings();
+      const allBookings = response.data || [];
       setBookings(allBookings);
-      setFilteredBookings(allBookings);
+      // Let the effect handle all filtering based on activeTab and other filters
     } catch (error) {
       console.error("Error fetching upcoming bookings:", error);
       setBookings([]);
@@ -93,23 +70,46 @@ export default function UpcomingBookingsPage() {
     const filterAndSortBookings = () => {
       let filtered = [...bookings];
 
-      // No need for tab filter anymore since we fetch based on tab
+      // Apply tab filter
+      if (activeTab === "hotels") {
+        filtered = filtered.filter((booking) => booking.type === "HOTEL");
+      } else if (activeTab === "flights") {
+        filtered = filtered.filter((booking) => booking.type === "FLIGHT");
+      }
+
       // Apply search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (booking) =>
-            booking.id?.toString().includes(query) ||
-            booking.room?.hotel?.name?.toLowerCase().includes(query) ||
-            booking.room?.hotel?.location?.toLowerCase().includes(query) ||
-            booking.ticket?.flight?.airline?.name?.toLowerCase().includes(query)
-        );
+
+        filtered = filtered.filter((booking) => {
+          if (booking.type === "HOTEL") {
+            const hotelName = booking.room?.hotel?.name?.toLowerCase() || "";
+            const hotelLocation =
+              booking.room?.hotel?.location?.toLowerCase() || "";
+            return hotelName.includes(query) || hotelLocation.includes(query);
+          } else if (booking.type === "FLIGHT") {
+            const airlineName =
+              booking.ticket?.flight?.airline?.name?.toLowerCase() || "";
+            const departureCity =
+              booking.ticket?.flight?.departureCity?.toLowerCase() || "";
+            const arrivalCity =
+              booking.ticket?.flight?.arrivalCity?.toLowerCase() || "";
+            return (
+              airlineName.includes(query) ||
+              departureCity.includes(query) ||
+              arrivalCity.includes(query)
+            );
+          }
+          return false;
+        });
       }
 
       // Apply sorting
       if (sortBy === "date") {
         filtered.sort(
-          (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
+          (a, b) =>
+            new Date(a.checkInDate || a.flightDate) -
+            new Date(b.checkInDate || b.flightDate)
         );
       } else if (sortBy === "price") {
         filtered.sort((a, b) => (b.totalPrice || 0) - (a.totalPrice || 0));
@@ -119,29 +119,7 @@ export default function UpcomingBookingsPage() {
     };
 
     filterAndSortBookings();
-  }, [searchQuery, sortBy, bookings]);
-
-  const handleCancelBooking = async () => {
-    if (!selectedBooking) return;
-
-    setCanceling(true);
-    try {
-      await bookingService.cancelBooking(selectedBooking.id);
-      setShowCancelModal(false);
-      setSelectedBooking(null);
-      // Refresh the bookings list
-      fetchUpcomingBookings();
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-    } finally {
-      setCanceling(false);
-    }
-  };
-
-  const openCancelModal = (booking) => {
-    setSelectedBooking(booking);
-    setShowCancelModal(true);
-  };
+  }, [searchQuery, sortBy, bookings, activeTab]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -257,29 +235,32 @@ export default function UpcomingBookingsPage() {
           <div className="flex gap-2 bg-white rounded-xl shadow-lg p-2">
             <button
               onClick={() => setActiveTab("all")}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === "all"
-                ? "bg-sky-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
-                }`}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
+                activeTab === "all"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               All Bookings ({bookings.length})
             </button>
             <button
               onClick={() => setActiveTab("hotels")}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "hotels"
-                ? "bg-sky-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
-                }`}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                activeTab === "hotels"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               <Hotel size={18} />
               Hotels ({bookings.filter((b) => b.type === "HOTEL").length})
             </button>
             <button
               onClick={() => setActiveTab("flights")}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "flights"
-                ? "bg-sky-600 text-white shadow-md"
-                : "text-gray-600 hover:bg-gray-100"
-                }`}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                activeTab === "flights"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
             >
               <Plane size={18} />
               Flights ({bookings.filter((b) => b.type === "FLIGHT").length})
@@ -350,7 +331,7 @@ export default function UpcomingBookingsPage() {
               const daysUntil = calculateDaysUntil(booking.checkInDate);
               return (
                 <motion.div
-                  key={booking.id}
+                  key={booking.compositeId || booking.id}
                   variants={itemVariants}
                   className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
                 >
@@ -376,8 +357,9 @@ export default function UpcomingBookingsPage() {
                             <MapPin size={14} />
                             {booking.type === "HOTEL"
                               ? booking.room?.hotel?.location || "N/A"
-                              : `${booking.ticket?.flight?.from || "N/A"} → ${booking.ticket?.flight?.to || "N/A"
-                              }`}
+                              : `${booking.ticket?.flight?.from || "N/A"} → ${
+                                  booking.ticket?.flight?.to || "N/A"
+                                }`}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 items-end">
@@ -392,7 +374,7 @@ export default function UpcomingBookingsPage() {
                             Booking ID
                           </p>
                           <p className="font-medium text-gray-900">
-                            #{booking.id}
+                            #{booking.compositeId || booking.id}
                           </p>
                         </div>
                         <div>
@@ -458,17 +440,14 @@ export default function UpcomingBookingsPage() {
                       </div>
                       <div className="flex gap-2">
                         <button
-                          onClick={() => navigate(`/bookings/${booking.id}`)}
+                          onClick={() =>
+                            navigate(`/bookings/${booking.id}`, {
+                              state: { type: booking.type },
+                            })
+                          }
                           className="px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
                         >
                           View Details
-                        </button>
-                        <button
-                          onClick={() => openCancelModal(booking)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors flex items-center gap-1"
-                        >
-                          <X size={16} />
-                          Cancel
                         </button>
                       </div>
                     </div>
@@ -500,23 +479,6 @@ export default function UpcomingBookingsPage() {
           </motion.div>
         )}
       </motion.div>
-
-      {/* Cancel Confirmation Modal */}
-      {showCancelModal && (
-        <ConfirmationModal
-          isOpen={showCancelModal}
-          onClose={() => {
-            setShowCancelModal(false);
-            setSelectedBooking(null);
-          }}
-          onConfirm={handleCancelBooking}
-          title="Cancel Booking"
-          message={`Are you sure you want to cancel your booking at ${selectedBooking?.room?.hotel?.name}? This action cannot be undone.`}
-          confirmText="Yes, Cancel Booking"
-          cancelText="Keep Booking"
-          isLoading={canceling}
-        />
-      )}
     </div>
   );
 }

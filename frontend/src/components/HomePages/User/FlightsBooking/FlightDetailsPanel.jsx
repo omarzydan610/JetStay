@@ -4,12 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AirlineReviews from "../FlightReview/AirlineReviewsList";
-import { getPublicFlightOffers } from "../../../../services/Airline/flightsService";
+import { getPublicFlightOffers } from "../../../../services/AirlineServices/flightsService";
 import {
   isOfferActive,
   calculateDiscountedPrice,
   formatPriceDisplay,
-  getOfferBadgeText
+  getOfferBadgeText,
 } from "../../../../utils/offerUtils";
 
 export default function FlightDetailsPanel({ flight, onClose }) {
@@ -18,7 +18,6 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   const [flightOffers, setFlightOffers] = useState([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
-
 
   // Reset selected trip type when flight changes
   useEffect(() => {
@@ -39,7 +38,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
           setFlightOffers(response.data);
         } else {
           // If response has unexpected structure, use empty array
-          console.warn('Unexpected API response structure:', response);
+          console.warn("Unexpected API response structure:", response);
           setFlightOffers([]);
         }
       } catch (error) {
@@ -95,9 +94,9 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   // Helper function to get active offers safely
   const getActiveOffers = useCallback(() => {
     if (!Array.isArray(flightOffers)) return [];
-    return flightOffers.filter(offer => {
+    return flightOffers.filter((offer) => {
       // Check if offer has required properties and is active
-      if (!offer || typeof offer !== 'object') return false;
+      if (!offer || typeof offer !== "object") return false;
 
       // Use isActive flag from API response
       if (offer.isActive !== undefined) {
@@ -109,14 +108,17 @@ export default function FlightDetailsPanel({ flight, onClose }) {
     });
   }, [flightOffers]);
 
-  const getBestOfferForPrice = useCallback((price) => {
-    const activeOffers = getActiveOffers();
-    if (activeOffers.length === 0) return null;
+  const getBestOfferForPrice = useCallback(
+    (price) => {
+      const activeOffers = getActiveOffers();
+      if (activeOffers.length === 0) return null;
 
-    // For simplicity, return the first active offer
-    // Could be improved to find the best discount or match criteria
-    return activeOffers[0];
-  }, [getActiveOffers]);
+      // For simplicity, return the first active offer
+      // Could be improved to find the best discount or match criteria
+      return activeOffers[0];
+    },
+    [getActiveOffers]
+  );
 
   const departureCode = getAirportCode(flight?.departureAirport?.airportName);
   const arrivalCode = getAirportCode(flight?.arrivalAirport?.airportName);
@@ -137,8 +139,9 @@ export default function FlightDetailsPanel({ flight, onClose }) {
         },
       });
 
-      let bookingMessage = `Booking ${selectedTripType.typeName || selectedTripType.name} on ${flight?.airline?.airlineName || "Flight"
-        }`;
+      let bookingMessage = `Booking ${
+        selectedTripType.typeName || selectedTripType.name
+      } on ${flight?.airline?.airlineName || "Flight"}`;
 
       if (bestOffer) {
         bookingMessage += ` with "${bestOffer.offerName}" offer (${bestOffer.discountValue}% off)`;
@@ -182,10 +185,11 @@ export default function FlightDetailsPanel({ flight, onClose }) {
                       className="w-full h-full object-contain p-1"
                       onError={(e) => {
                         e.target.style.display = "none";
-                        e.target.parentElement.innerHTML = `<span class="text-white text-xl font-bold">${flight?.airline?.airlineName
-                          ?.substring(0, 2)
-                          .toUpperCase() || "XX"
-                          }</span>`;
+                        e.target.parentElement.innerHTML = `<span class="text-white text-xl font-bold">${
+                          flight?.airline?.airlineName
+                            ?.substring(0, 2)
+                            .toUpperCase() || "XX"
+                        }</span>`;
                       }}
                     />
                   ) : (
@@ -255,7 +259,8 @@ export default function FlightDetailsPanel({ flight, onClose }) {
                     🎉 Special Offers Available!
                   </div>
                   <div className="text-green-700 text-sm">
-                    {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''} for this flight
+                    {activeOffersCount} active offer
+                    {activeOffersCount !== 1 ? "s" : ""} for this flight
                   </div>
                 </div>
                 {loadingOffers && (
@@ -303,7 +308,9 @@ export default function FlightDetailsPanel({ flight, onClose }) {
 
           {/* Aircraft Info */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-            <h3 className="font-bold text-gray-800 text-sm">Aircraft & Route</h3>
+            <h3 className="font-bold text-gray-800 text-sm">
+              Aircraft & Route
+            </h3>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Aircraft Type:</span>
@@ -334,7 +341,8 @@ export default function FlightDetailsPanel({ flight, onClose }) {
               </h2>
               {activeOffersCount > 0 && (
                 <div className="text-sm text-green-600 font-semibold">
-                  {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''}
+                  {activeOffersCount} active offer
+                  {activeOffersCount !== 1 ? "s" : ""}
                 </div>
               )}
             </div>
@@ -342,7 +350,9 @@ export default function FlightDetailsPanel({ flight, onClose }) {
             {loadingOffers ? (
               <div className="text-center py-6">
                 <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-sky-600"></div>
-                <div className="mt-2 text-gray-600 text-sm">Loading offers...</div>
+                <div className="mt-2 text-gray-600 text-sm">
+                  Loading offers...
+                </div>
               </div>
             ) : (
               <div className="space-y-3">
@@ -352,18 +362,27 @@ export default function FlightDetailsPanel({ flight, onClose }) {
                       const isSelected = selectedTripTypeIndex === index;
                       const originalPrice = tripType.price || 0;
                       const bestOffer = getBestOfferForPrice(originalPrice);
-                      const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
-                      const priceDisplay = formatPriceDisplay(originalPrice, bestOffer ? discountedPrice : null);
+                      const discountedPrice = bestOffer
+                        ? calculateDiscountedPrice(
+                            originalPrice,
+                            bestOffer.discountValue
+                          )
+                        : originalPrice;
+                      const priceDisplay = formatPriceDisplay(
+                        originalPrice,
+                        bestOffer ? discountedPrice : null
+                      );
 
                       return (
                         <motion.div
                           key={tripType.tripTypeID || index}
                           whileHover={{ scale: 1.02 }}
                           onClick={() => setSelectedTripTypeIndex(index)}
-                          className={`p-4 rounded-lg border-2 cursor-pointer transition relative ${isSelected
-                            ? "border-sky-600 bg-sky-50"
-                            : "border-gray-200 bg-white"
-                            }`}
+                          className={`p-4 rounded-lg border-2 cursor-pointer transition relative ${
+                            isSelected
+                              ? "border-sky-600 bg-sky-50"
+                              : "border-gray-200 bg-white"
+                          }`}
                         >
                           {bestOffer && (
                             <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
@@ -373,7 +392,9 @@ export default function FlightDetailsPanel({ flight, onClose }) {
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="font-bold text-gray-800 mb-1">
-                                {tripType.typeName || tripType.name || "Trip Type"}
+                                {tripType.typeName ||
+                                  tripType.name ||
+                                  "Trip Type"}
                               </div>
                               {tripType.description && (
                                 <div className="text-sm text-gray-600">
@@ -386,7 +407,8 @@ export default function FlightDetailsPanel({ flight, onClose }) {
                                     🎁 {bestOffer.offerName}
                                   </div>
                                   <div className="text-xs text-green-500">
-                                    Save ${priceDisplay.savings?.toFixed(2)} ({bestOffer.discountValue}% off)
+                                    Save ${priceDisplay.savings?.toFixed(2)} (
+                                    {bestOffer.discountValue}% off)
                                   </div>
                                 </div>
                               )}
@@ -434,12 +456,19 @@ export default function FlightDetailsPanel({ flight, onClose }) {
             <span className="text-2xl font-bold text-sky-600">
               {selectedTripTypeIndex !== null
                 ? (() => {
-                  const tripType = (flight?.tripTypes || flight?.tripsTypes || [])[selectedTripTypeIndex];
-                  const originalPrice = tripType?.price || 0;
-                  const bestOffer = getBestOfferForPrice(originalPrice);
-                  const finalPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : originalPrice;
-                  return `$${finalPrice.toFixed(2)}`;
-                })()
+                    const tripType = (flight?.tripTypes ||
+                      flight?.tripsTypes ||
+                      [])[selectedTripTypeIndex];
+                    const originalPrice = tripType?.price || 0;
+                    const bestOffer = getBestOfferForPrice(originalPrice);
+                    const finalPrice = bestOffer
+                      ? calculateDiscountedPrice(
+                          originalPrice,
+                          bestOffer.discountValue
+                        )
+                      : originalPrice;
+                    return `$${finalPrice.toFixed(2)}`;
+                  })()
                 : "$0.00"}
             </span>
           </div>
@@ -447,10 +476,11 @@ export default function FlightDetailsPanel({ flight, onClose }) {
           <button
             disabled={selectedTripTypeIndex === null}
             onClick={handleBooking}
-            className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedTripTypeIndex !== null
-              ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
+            className={`w-full py-3 rounded-lg font-bold text-lg transition ${
+              selectedTripTypeIndex !== null
+                ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
             {selectedTripTypeIndex !== null
               ? "Book Flight"

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
-import { updateFlight } from "../../../../services/Airline/flightsService";
+import { updateFlight } from "../../../../services/AirlineServices/flightsService";
 import FormField from "./FormField";
 import PrimaryButton from "../../PrimaryButton";
 

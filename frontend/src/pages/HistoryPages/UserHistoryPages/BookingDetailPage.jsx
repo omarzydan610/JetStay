@@ -14,12 +14,14 @@ import {
   Bed,
   Plane,
 } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import bookingService from "../../../services/bookingHistoryService";
 
 const BookingDetailPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { bookingId } = useParams();
+  const bookingType = location.state?.type;
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -47,27 +49,27 @@ const BookingDetailPage = () => {
     const fetchBookingDetails = async () => {
       setLoading(true);
       try {
-        const response = await bookingService.getBookingDetails(bookingId);
-        setBooking(response.data);
+        if (bookingType === "HOTEL") {
+          const response = await bookingService.getHotelBookingDetails(
+            bookingId
+          );
+          setBooking(response.data);
+        } else {
+          const response = await bookingService.getFlightTicketDetails(
+            bookingId
+          );
+          setBooking(response.data);
+        }
       } catch (error) {
         console.error("Error fetching booking details:", error);
-        navigate(-1);
+        navigate("/bookings/history");
       } finally {
         setLoading(false);
       }
     };
 
     fetchBookingDetails();
-  }, [bookingId, navigate]);
-
-  const handleCancelBooking = async () => {
-    try {
-      await bookingService.cancelBooking(bookingId);
-      navigate(-1);
-    } catch (error) {
-      console.error("Error cancelling booking:", error);
-    }
-  };
+  }, [bookingId, bookingType, navigate]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -134,6 +136,31 @@ const BookingDetailPage = () => {
     return nights > 0 ? nights : 0;
   };
 
+  const calculateTotalPrice = () => {
+    if (!booking) return 0;
+
+    // If totalPrice exists and is not zero, use it
+    if (booking.totalPrice && booking.totalPrice > 0) {
+      return booking.totalPrice;
+    }
+
+    // For hotels: calculate nights * price per night
+    if (booking.type === "HOTEL" && booking.room?.price) {
+      const nights = calculateNights(booking.checkInDate, booking.checkOutDate);
+      if (nights > 0) {
+        return nights * booking.room.price;
+      }
+      return booking.room.price;
+    }
+
+    // For flights: use ticket price
+    if (booking.type === "FLIGHT" && booking.ticket?.price) {
+      return booking.ticket.price;
+    }
+
+    return 0;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-cyan-50 p-8 flex items-center justify-center">
@@ -153,7 +180,7 @@ const BookingDetailPage = () => {
             Booking not found
           </h2>
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/bookings/history")}
             className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
           >
             Back to Bookings
@@ -403,14 +430,14 @@ const BookingDetailPage = () => {
             <div className="flex justify-between items-center pt-2">
               <span className="text-2xl font-bold">Total Amount</span>
               <span className="text-3xl font-bold">
-                ${booking.totalPrice?.toFixed(2) || "0.00"}
+                ${calculateTotalPrice()?.toFixed(2)}
               </span>
             </div>
           </div>
         </motion.div>
 
         {/* Action Buttons */}
-        {/* {booking.status === "CONFIRMED" && (
+        {booking.status === "CONFIRMED" && (
           <motion.div
             variants={itemVariants}
             className="flex gap-4 justify-end"
@@ -422,15 +449,8 @@ const BookingDetailPage = () => {
               <ArrowLeft size={20} />
               Back
             </button>
-            <button
-              onClick={handleCancelBooking}
-              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200 flex items-center gap-2"
-            >
-              <XCircle size={20} />
-              Cancel Booking
-            </button>
           </motion.div>
-        )} */}
+        )}
 
         {booking.status !== "CONFIRMED" && (
           <motion.div variants={itemVariants} className="flex justify-end">

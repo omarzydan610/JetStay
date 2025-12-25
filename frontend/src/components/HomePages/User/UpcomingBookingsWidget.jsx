@@ -17,10 +17,12 @@ export default function UpcomingBookingsWidget() {
   const fetchUpcomingBookings = async () => {
     setLoading(true);
     try {
-      const response = await bookingService.getUpcomingBookings();
+      const response = await bookingService.getAllUpcomingBookings();
       // Sort by check-in date (earliest first) and get only the first 3 upcoming bookings
       const sorted = (response.data || []).sort(
-        (a, b) => new Date(a.checkInDate) - new Date(b.checkInDate)
+        (a, b) =>
+          new Date(a.checkInDate || a.flightDate) -
+          new Date(b.checkInDate || b.flightDate)
       );
       setBookings(sorted.slice(0, 3));
     } catch (error) {
@@ -124,7 +126,11 @@ export default function UpcomingBookingsWidget() {
                     <div
                       key={booking.id}
                       className="px-6 py-4 hover:bg-gray-50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/bookings/${booking.id}`)}
+                      onClick={() =>
+                        navigate(`/bookings/${booking.id}`, {
+                          state: { type: booking.type },
+                        })
+                      }
                     >
                       <div className="flex items-center justify-between gap-4">
                         {/* Left Section */}

@@ -11,7 +11,11 @@ class BookingService {
     try {
       const response = await apiClient.get("/api/bookings/hotel/history");
       const bookingsData = response.data.data || response.data || [];
-      return { data: bookingsData.map((booking) => this.normalizeHotelBooking(booking)) };
+      return {
+        data: bookingsData.map((booking) =>
+          this.normalizeHotelBooking(booking)
+        ),
+      };
     } catch (error) {
       console.error("Error fetching hotel booking history:", error);
       throw this.handleError(error);
@@ -26,7 +30,11 @@ class BookingService {
     try {
       const response = await apiClient.get("/api/bookings/hotel/upcoming");
       const bookingsData = response.data.data || response.data || [];
-      return { data: bookingsData.map((booking) => this.normalizeHotelBooking(booking)) };
+      return {
+        data: bookingsData.map((booking) =>
+          this.normalizeHotelBooking(booking)
+        ),
+      };
     } catch (error) {
       console.error("Error fetching upcoming hotel bookings:", error);
       throw this.handleError(error);
@@ -40,7 +48,9 @@ class BookingService {
    */
   async getHotelBookingDetails(bookingTransactionId) {
     try {
-      const response = await apiClient.get(`/api/bookings/hotel/${bookingTransactionId}`);
+      const response = await apiClient.get(
+        `/api/bookings/hotel/${bookingTransactionId}`
+      );
       const bookingData = response.data.data || response.data;
       return { data: this.normalizeHotelBooking(bookingData) };
     } catch (error) {
@@ -59,7 +69,9 @@ class BookingService {
     try {
       const response = await apiClient.get("/api/bookings/flight/history");
       const ticketsData = response.data.data || response.data || [];
-      return { data: ticketsData.map((ticket) => this.normalizeFlightTicket(ticket)) };
+      return {
+        data: ticketsData.map((ticket) => this.normalizeFlightTicket(ticket)),
+      };
     } catch (error) {
       console.error("Error fetching flight ticket history:", error);
       throw this.handleError(error);
@@ -74,7 +86,9 @@ class BookingService {
     try {
       const response = await apiClient.get("/api/bookings/flight/upcoming");
       const ticketsData = response.data.data || response.data || [];
-      return { data: ticketsData.map((ticket) => this.normalizeFlightTicket(ticket)) };
+      return {
+        data: ticketsData.map((ticket) => this.normalizeFlightTicket(ticket)),
+      };
     } catch (error) {
       console.error("Error fetching upcoming flight tickets:", error);
       throw this.handleError(error);
@@ -97,49 +111,59 @@ class BookingService {
     }
   }
 
-  // ==================== Combined Methods (for backward compatibility) ====================
+  // ==================== Merged Methods ====================
 
   /**
-   * Get all booking history (both hotel and flight)
-   * @returns {Promise} Promise with all booking history data
+   * Get all booking history (both hotel and flight) merged into one array
+   * @returns {Promise} Promise with merged booking history data
    */
-  async getBookingHistory() {
+  async getAllBookingHistory() {
     try {
       const [hotelResponse, flightResponse] = await Promise.all([
         this.getHotelBookingHistory(),
-        this.getFlightTicketHistory()
+        this.getFlightTicketHistory(),
       ]);
 
       const allBookings = [
         ...(hotelResponse.data || []),
-        ...(flightResponse.data || [])
+        ...(flightResponse.data || []),
       ];
+
+      // Add composite ID to avoid conflicts in filtering/searching
+      allBookings.forEach((booking) => {
+        booking.compositeId = `${booking.type}-${booking.id}`;
+      });
 
       // Sort by creation date, most recent first
       allBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       return { data: allBookings };
     } catch (error) {
-      console.error("Error fetching booking history:", error);
+      console.error("Error fetching all booking history:", error);
       throw this.handleError(error);
     }
   }
 
   /**
-   * Get all upcoming bookings (both hotel and flight)
-   * @returns {Promise} Promise with all upcoming bookings data
+   * Get all upcoming bookings (both hotel and flight) merged into one array
+   * @returns {Promise} Promise with merged upcoming bookings data
    */
-  async getUpcomingBookings() {
+  async getAllUpcomingBookings() {
     try {
       const [hotelResponse, flightResponse] = await Promise.all([
         this.getUpcomingHotelBookings(),
-        this.getUpcomingFlightTickets()
+        this.getUpcomingFlightTickets(),
       ]);
 
       const allBookings = [
         ...(hotelResponse.data || []),
-        ...(flightResponse.data || [])
+        ...(flightResponse.data || []),
       ];
+
+      // Add composite ID to avoid conflicts in filtering/searching
+      allBookings.forEach((booking) => {
+        booking.compositeId = `${booking.type}-${booking.id}`;
+      });
 
       // Sort by date (check-in for hotels, flight date for flights)
       allBookings.sort((a, b) => {
@@ -150,41 +174,7 @@ class BookingService {
 
       return { data: allBookings };
     } catch (error) {
-      console.error("Error fetching upcoming bookings:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Get booking details by ID
-   * @param {number} bookingId - The booking ID
-   * @returns {Promise} Promise with booking details
-   */
-  async getBookingDetails(bookingId) {
-    try {
-      const response = await apiClient.get(`/api/bookings/${bookingId}`);
-      // Extract the booking data from the SuccessResponse wrapper
-      const bookingData = response.data.data || response.data;
-      // Normalize the booking data to match frontend expectations
-      return { data: this.normalizeBooking(bookingData) };
-    } catch (error) {
-      console.error("Error fetching booking details:", error);
-      throw this.handleError(error);
-    }
-  }
-
-  /**
-   * Cancel a booking
-   * Cancel a booking (placeholder - needs backend implementation)
-   * @param {number} bookingId - The booking ID to cancel
-   * @returns {Promise} Promise with cancellation result
-   */
-  async cancelBooking(bookingId) {
-    try {
-      const response = await apiClient.post(`/api/bookings/${bookingId}/cancel`);
-      return response.data;
-    } catch (error) {
-      console.error("Error canceling booking:", error);
+      console.error("Error fetching all upcoming bookings:", error);
       throw this.handleError(error);
     }
   }
@@ -220,13 +210,15 @@ class BookingService {
         type: firstRoom.roomType || "N/A",
         capacity: firstRoom.noOfRooms || 0,
         price: firstRoom.price || 0,
-        hotel: transaction.hotel ? {
-          id: transaction.hotel.hotelID,
-          name: transaction.hotel.hotelName,
-          city: transaction.hotel.city,
-          country: transaction.hotel.country,
-          location: `${transaction.hotel.city}, ${transaction.hotel.country}`,
-        } : null,
+        hotel: transaction.hotel
+          ? {
+              id: transaction.hotel.hotelID,
+              name: transaction.hotel.hotelName,
+              city: transaction.hotel.city,
+              country: transaction.hotel.country,
+              location: `${transaction.hotel.city}, ${transaction.hotel.country}`,
+            }
+          : null,
       },
       rooms: rooms, // All rooms for this transaction
       __raw: booking,
@@ -242,6 +234,9 @@ class BookingService {
       return null;
     }
 
+    // Use tripPrice as the primary price source, fallback to price
+    const ticketPrice = ticket.tripPrice || ticket.price || 0;
+
     return {
       id: ticket.ticketId,
       ticketId: ticket.ticketId,
@@ -251,13 +246,13 @@ class BookingService {
       flightDate: ticket.flightDate,
       checkInDate: ticket.flightDate, // For compatibility with UI components
       checkOutDate: ticket.flightDate,
-      totalPrice: ticket.price,
+      totalPrice: ticketPrice,
       createdAt: ticket.createdAt,
       isPaid: ticket.isPaid,
       ticket: {
         class: ticket.tripType,
         type: ticket.tripType,
-        price: ticket.tripPrice,
+        price: ticketPrice,
         flight: {
           id: ticket.flightId,
           airline: {

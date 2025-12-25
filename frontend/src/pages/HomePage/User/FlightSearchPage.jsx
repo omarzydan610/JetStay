@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getFlightsGraph } from "../../../services/Airline/flightsService";
+import { getFlightsGraph } from "../../../services/AirlineServices/flightsService";
 import FlightFilters from "../../../components/HomePages/User/FlightsBooking/FlightFilters";
 import FlightsList from "../../../components/HomePages/User/FlightsBooking/FlightsList";
 import FlightDetailsPanel from "../../../components/HomePages/User/FlightsBooking/FlightDetailsPanel";
