@@ -5,6 +5,7 @@ import com.example.backend.dto.AirlineDTO.FlightFilterDTO;
 import com.example.backend.entity.Flight;
 import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.FlightRepository;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -136,9 +138,11 @@ public class FlightGraphQLService {
 
     public List<Flight> getFlightsPaginated(FlightRepository flightRepository, int page, int size) {
         String pageKey = page + "_" + size;
-
         Pageable pageable = PageRequest.of(page, size);
-        List<Flight> pageFlights = flightRepository.findAllAvailableFlight(pageable).getContent();
+
+        // Defensive: default to empty page if repository returns null
+        Page<Flight> flightPage = flightRepository.findAllAvailableFlight(pageable);
+        List<Flight> pageFlights = flightPage != null ? flightPage.getContent() : Collections.emptyList();
 
         for (Flight flight : pageFlights) {
             cacheManager.putFlightById(flight.getFlightID(), flight);
