@@ -4,20 +4,17 @@ import com.example.backend.config.StripeResponseErrorHandler;
 import com.example.backend.dto.PaymentDTO.TicketPaymentDTO;
 import com.example.backend.entity.FlightTicket;
 import com.example.backend.entity.PaymentMethod;
-import com.example.backend.entity.TicketPayment;
 import com.example.backend.repository.FlightTicketRepository;
 import com.example.backend.repository.PaymentMethodRepository;
-import com.example.backend.repository.TicketPaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 @Service
 public class TicketPaymentService {
-
-    @Autowired
-    private TicketPaymentRepository ticketPaymentRepository;
 
     @Autowired
     private FlightTicketRepository flightTicketRepository;
@@ -26,8 +23,9 @@ public class TicketPaymentService {
     private PaymentMethodRepository paymentMethodRepository;
 
     private final RestTemplate restTemplate;
-    private final String STRIPE_URL = "http://localhost:8000/api/payment/pay/ticket";
-    private final String PAYPAL_URL = "http://localhost:8000/api/payment/paypal/ticket";
+
+    private static final String STRIPE_URL = "http://localhost:8000/api/payment/pay/ticket";
+    private static final String PAYPAL_URL = "http://localhost:8000/api/payment/paypal/ticket";
 
     public TicketPaymentService() {
         this.restTemplate = new RestTemplate();
@@ -43,56 +41,65 @@ public class TicketPaymentService {
     }
 
     private ResponseEntity<String> processPayment(TicketPaymentDTO dto, String apiUrl) {
-        // Validate ticket
-        FlightTicket ticket = flightTicketRepository.findById(dto.getTicketId()).orElse(null);
-        if (ticket == null) return badResponse("Flight ticket not found", HttpStatus.BAD_REQUEST);
 
-        if (Boolean.TRUE.equals(ticket.getIsPaid())) {
-            return badResponse("Flight ticket was just purchased moments before", HttpStatus.CONFLICT);
+        if (dto.getTicketIds() == null || dto.getTicketIds().isEmpty()) {
+            return badResponse("No ticket IDs provided", HttpStatus.BAD_REQUEST);
         }
 
         // Validate payment method
         PaymentMethod method = paymentMethodRepository.findById(dto.getMethodId()).orElse(null);
-        if (method == null) return badResponse("Payment method not found", HttpStatus.BAD_REQUEST);
+        if (method == null) {
+            return badResponse("Payment method not found", HttpStatus.BAD_REQUEST);
+        }
 
-        boolean success = false;
-        ResponseEntity<String> fastApiResponse;
+        // Validate tickets before payment
+        List<FlightTicket> tickets = flightTicketRepository.findAllById(dto.getTicketIds());
+
+        if (tickets.size() != dto.getTicketIds().size()) {
+            return badResponse("One or more tickets not found", HttpStatus.BAD_REQUEST);
+        }
+
+        for (FlightTicket ticket : tickets) {
+            if (Boolean.TRUE.equals(ticket.getIsPaid())) {
+                return badResponse(
+                        "Ticket ID " + ticket.getTicketId() + " is already paid",
+                        HttpStatus.CONFLICT
+                );
+            }
+        }
 
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
+
             HttpEntity<TicketPaymentDTO> request = new HttpEntity<>(dto, headers);
 
-            fastApiResponse = restTemplate.postForEntity(apiUrl, request, String.class);
+            ResponseEntity<String> fastApiResponse =
+                    restTemplate.postForEntity(apiUrl, request, String.class);
 
-            // Determine success by parsing JSON "status" field manually
-            success = fastApiResponse.getBody() != null && fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
+            boolean success =
+                    fastApiResponse.getBody() != null &&
+                            fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
 
-            if (success) {
-                ticket.setState(FlightTicket.TicketState.COMPLETED);
+            if (!success) {
+                return badResponse("Payment failed", HttpStatus.PAYMENT_REQUIRED);
+            }
+
+            // Mark all tickets as paid
+            for (FlightTicket ticket : tickets) {
                 ticket.setIsPaid(true);
+                ticket.setState(FlightTicket.TicketState.COMPLETED);
                 flightTicketRepository.save(ticket);
             }
 
+            return ResponseEntity.ok(fastApiResponse.getBody());
+
         } catch (Exception e) {
-            fastApiResponse = badResponse("Payment failed: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-            success = false;
+            return badResponse(
+                    "Payment service error: " + e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
-
-        // Optionally confirm payment in DB if paymentID exists
-        confirmPayment(null, success);
-
-        return fastApiResponse;
-    }
-
-    private void confirmPayment(Integer paymentID, boolean success) {
-        if (paymentID == null) return;
-
-        TicketPayment payment = ticketPaymentRepository.findById(paymentID).orElse(null);
-        if (payment == null) return;
-
-        payment.setStatus(success ? TicketPayment.Status.COMPLETED : TicketPayment.Status.FAILED);
-        ticketPaymentRepository.save(payment);
     }
 
     private ResponseEntity<String> badResponse(String message, HttpStatus status) {

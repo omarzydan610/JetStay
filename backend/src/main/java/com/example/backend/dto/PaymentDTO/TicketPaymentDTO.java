@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -19,7 +21,7 @@ public class TicketPaymentDTO {
     private String description;
 
     // Internal DB details
-    private Integer ticketId;
+    private List<Integer> ticketIds;
     private Integer methodId;
     private Integer userId;
 }

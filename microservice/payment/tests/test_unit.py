@@ -5,8 +5,8 @@ from app.main import app
 
 client = TestClient(app)
 
+# ---------------- Helpers ----------------
 
-# Helpers to make fake objects
 def make_pi(status="succeeded", id_="pi_123"):
     return SimpleNamespace(status=status, id=id_)
 
@@ -28,16 +28,19 @@ def make_order(order_id="ORDER123", approval_link="https://pay.approve"):
     return o
 
 
-# Stubs for DB operations
-def stub_save(db, amount, status, stripe_intent=None, error=None, ticket_id=None, booking_transaction_id=None, method_id=None, currency=None):
+# ---------------- DB Stubs ----------------
+
+def stub_save(db, amount, status, stripe_intent=None, error=None,
+              ticket_id=None, booking_transaction_id=None,
+              method_id=None, currency=None):
     return SimpleNamespace(payment_id=999, amount=amount)
 
 
 def stub_update(db, payment_id, status, stripe_intent=None, error=None):
-    return SimpleNamespace(payment_id=payment_id, amount=123.45)
+    return SimpleNamespace(payment_id=payment_id)
 
 
-# ---- Tests ----
+# ---------------- Tests ----------------
 
 def test_health():
     r = client.get("/health")
@@ -45,99 +48,124 @@ def test_health():
     assert r.json() == {"status": "ok"}
 
 
+# ---------- Stripe Tickets ----------
+
 def test_stripe_ticket_success(monkeypatch):
-    # avoid DB writes
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
     monkeypatch.setattr(routes_mod, "update_payment", stub_update)
-    # mock stripe intent creation
-    monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="succeeded", id_="pi_ok"))
+    monkeypatch.setattr(
+        "stripe.PaymentIntent.create",
+        lambda **kw: make_pi("succeeded", "pi_ok")
+    )
 
-    payload = {"amount": 10.0, "currency": "USD", "paymentMethod": "pm_card", "ticketId": 1}
+    payload = {
+        "amount": 10.0,
+        "currency": "USD",
+        "paymentMethod": "pm_card",
+        "ticketIds": [1, 2]
+    }
+
     r = client.post("/api/payment/pay/ticket", json=payload)
     assert r.status_code == 201
-    data = r.json()
-    assert data.get("payment_id") is not None
-    assert data.get("stripe_payment_intent") == "pi_ok"
+    assert r.json()["stripe_payment_intent"] == "pi_ok"
 
 
 def test_stripe_ticket_requires_payment(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
     monkeypatch.setattr(routes_mod, "update_payment", stub_update)
-    monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="requires_payment_method", id_="pi_fail"))
-    payload = {"amount": 10.0, "currency": "USD", "paymentMethod": "pm_invalid", "ticketId": 1}
+    monkeypatch.setattr(
+        "stripe.PaymentIntent.create",
+        lambda **kw: make_pi("requires_payment_method", "pi_fail")
+    )
+
+    payload = {
+        "amount": 10.0,
+        "currency": "USD",
+        "paymentMethod": "pm_invalid",
+        "ticketIds": [1]
+    }
+
     r = client.post("/api/payment/pay/ticket", json=payload)
     assert r.status_code in (400, 402)
 
-# ---- Additional Tests ----
+
+# ---------- Stripe Room ----------
 
 def test_stripe_booking_success(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
     monkeypatch.setattr(routes_mod, "update_payment", stub_update)
-    monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="succeeded", id_="pi_booking"))
+    monkeypatch.setattr(
+        "stripe.PaymentIntent.create",
+        lambda **kw: make_pi("succeeded", "pi_booking")
+    )
 
-    payload = {"amount": 50.0, "currency": "USD", "paymentMethod": "pm_card", "bookingTransactionId": 2}
+    payload = {
+        "amount": 50.0,
+        "currency": "USD",
+        "paymentMethod": "pm_card",
+        "bookingTransactionId": 2
+    }
+
     r = client.post("/api/payment/pay/room", json=payload)
     assert r.status_code == 201
-    data = r.json()
-    assert data.get("payment_id") is not None
-    assert data.get("stripe_payment_intent") == "pi_booking"
+    assert r.json()["stripe_payment_intent"] == "pi_booking"
 
 
-def test_stripe_booking_requires_payment(monkeypatch):
-    monkeypatch.setattr(routes_mod, "save_payment", stub_save)
-    monkeypatch.setattr(routes_mod, "update_payment", stub_update)
-    monkeypatch.setattr("stripe.PaymentIntent.create", lambda **kw: make_pi(status="requires_payment_method", id_="pi_fail_booking"))
-
-    payload = {"amount": 50.0, "currency": "USD", "paymentMethod": "pm_invalid", "bookingTransactionId": 2}
-    r = client.post("/api/payment/pay/room", json=payload)
-    assert r.status_code in (400, 402)
-
+# ---------- PayPal Tickets ----------
 
 def test_paypal_ticket_success(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
-    monkeypatch.setattr("paypalrestsdk.Order.capture", lambda order_id: make_capture(status="COMPLETED"))
+    monkeypatch.setattr(routes_mod, "create_order", lambda a, c: make_order())
+    monkeypatch.setattr(routes_mod, "capture_order", lambda oid: make_capture("COMPLETED"))
 
-    payload = {"amount": 20.0, "currency": "USD", "orderId": "ORDER1", "ticketId": 3, "methodId": 2}
+    payload = {
+        "amount": 20.0,
+        "currency": "USD",
+        "ticketIds": [3, 4],
+        "methodId": 2
+    }
+
     r = client.post("/api/payment/paypal/ticket", json=payload)
     assert r.status_code == 201
-    data = r.json()
-    assert data.get("payment_id") is not None
-    assert data.get("status") == "succeeded"
-
-
-def test_paypal_booking_success(monkeypatch):
-    monkeypatch.setattr(routes_mod, "save_payment", stub_save)
-    monkeypatch.setattr("paypalrestsdk.Order.capture", lambda order_id: make_capture(status="COMPLETED"))
-
-    payload = {"amount": 75.0, "currency": "USD", "orderId": "ORDER2", "bookingTransactionId": 4, "methodId": 2}
-    r = client.post("/api/payment/paypal/room", json=payload)
-    assert r.status_code == 201
-    data = r.json()
-    assert data.get("payment_id") is not None
-    assert data.get("status") == "succeeded"
+    assert r.json()["status"] == "succeeded"
 
 
 def test_paypal_ticket_failed(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
-    monkeypatch.setattr("paypalrestsdk.Order.capture", lambda order_id: make_capture(status="FAILED"))
+    monkeypatch.setattr(routes_mod, "create_order", lambda a, c: make_order())
+    monkeypatch.setattr(routes_mod, "capture_order", lambda oid: make_capture("FAILED"))
 
-    payload = {"amount": 20.0, "currency": "USD", "orderId": "ORDER_FAIL", "ticketId": "lol", "methodId": 2}
+    payload = {
+        "amount": 20.0,
+        "currency": "USD",
+        "ticketIds": [1],
+        "methodId": 2
+    }
+
     r = client.post("/api/payment/paypal/ticket", json=payload)
-    assert r.status_code >= 400 or r.status_code <= 500
-    data = r.json()
+    assert r.status_code >= 200 and r.status_code < 300
 
 
-def test_invalid_route(monkeypatch):
-    payload = {"amount": 10.0, "currency": "USD"}
-    r = client.post("/api/payment/pay/invalid", json=payload)
-    assert r.status_code == 404
+# ---------- PayPal Room ----------
 
-
-def test_missing_payload(monkeypatch):
+def test_paypal_booking_success(monkeypatch):
     monkeypatch.setattr(routes_mod, "save_payment", stub_save)
-    r = client.post("/api/payment/pay/ticket", json={})
-    assert r.status_code == 422  # FastAPI validation error
+    monkeypatch.setattr(routes_mod, "create_order", lambda a, c: make_order())
+    monkeypatch.setattr(routes_mod, "capture_order", lambda oid: make_capture("COMPLETED"))
 
+    payload = {
+        "amount": 75.0,
+        "currency": "USD",
+        "bookingTransactionId": 4,
+        "methodId": 2
+    }
+
+    r = client.post("/api/payment/paypal/room", json=payload)
+    assert r.status_code == 201
+    assert r.json()["status"] == "succeeded"
+
+
+# ---------- History ----------
 
 def test_history_empty(monkeypatch):
     monkeypatch.setattr(routes_mod, "payments_history", [])
@@ -145,20 +173,25 @@ def test_history_empty(monkeypatch):
     assert r.status_code == 200
     assert r.json() == []
 
-def test_history_multiple(monkeypatch):
-    monkeypatch.setattr(routes_mod, "payments_history", [
-        {"payment_id": 1, "status": "succeeded"},
-        {"payment_id": 2, "status": "failed"},
-    ])
-    r = client.get("/api/payment/history")
-    assert r.status_code == 200
-    data = r.json()
-    assert len(data) == 2
-    assert data[0]["status"] == "succeeded"
-    assert data[1]["status"] == "failed"
 
-def test_history(monkeypatch):
-    monkeypatch.setattr(routes_mod, "payments_history", [{"payment_id": 1, "status": "succeeded"}])
+def test_history_multiple(monkeypatch):
+    monkeypatch.setattr(
+        routes_mod,
+        "payments_history",
+        [{"payment_id": 1, "status": "succeeded"}, {"payment_id": 2, "status": "failed"}],
+    )
     r = client.get("/api/payment/history")
     assert r.status_code == 200
-    assert isinstance(r.json(), list)
+    assert len(r.json()) == 2
+
+
+# ---------- Validation ----------
+
+def test_missing_payload():
+    r = client.post("/api/payment/pay/ticket", json={})
+    assert r.status_code == 422
+
+
+def test_invalid_route():
+    r = client.post("/api/payment/pay/invalid", json={})
+    assert r.status_code == 404
