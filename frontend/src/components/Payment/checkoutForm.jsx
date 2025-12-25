@@ -99,8 +99,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
         ? {
             amount: amount,
             currency: "usd",
-            paymentMethodId: stripePaymentMethod.id,
-            email: email,
+            paymentMethod: stripePaymentMethod.id,
             description: "Flight ticket payment",
             ticketId: ticket.ticketId,
             methodId: 1,
@@ -108,8 +107,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
         : {
             amount: amount,
             currency: "usd",
-            paymentMethodId: stripePaymentMethod.id,
-            email: email,
+            paymentMethod: stripePaymentMethod.id,
             description: "Hotel booking payment",
             bookingTransactionId: bookingTransaction.bookingTransactionId,
             methodId: 1,
@@ -117,7 +115,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
 
       const routeSuffix = isTicketPayment ? "ticket" : "room";
       const response = await fetch(
-        `http://localhost:8080/api/payment/stripe/${routeSuffix}`,
+        `http://localhost:8080/api/payment/pay/${routeSuffix}`,
         {
           method: "POST",
           headers: {
@@ -476,6 +474,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
                       <div className="p-4 border-2 border-gray-200 rounded-xl focus-within:border-sky-500 transition-colors">
                         <CardElement
                           options={{
+                            hidePostalCode: true,
                             style: {
                               base: {
                                 fontSize: "16px",
