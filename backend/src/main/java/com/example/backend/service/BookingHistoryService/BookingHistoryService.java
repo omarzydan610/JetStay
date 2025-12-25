@@ -36,7 +36,7 @@ public class BookingHistoryService {
 
         // Get past booking transactions for the user
         List<BookingTransaction> transactions = bookingTransactionRepository.findPastBookingsByUserId(userId);
-
+        System.out.println(" abbbbdbdbdbdbd Transactions: " + transactions.size());
         // For each transaction, get associated room bookings and map to response
         for (BookingTransaction transaction : transactions) {
             List<RoomBooking> roomBookings = roomBookingRepository.findByBookingTransactionId(
@@ -53,9 +53,10 @@ public class BookingHistoryService {
 
     public List<HotelBookingResponse> getUpcomingBookings(Integer userId) {
         List<HotelBookingResponse> upcoming = new ArrayList<>();
-
+        
         // Get upcoming booking transactions for the user
         List<BookingTransaction> transactions = bookingTransactionRepository.findUpcomingBookingsByUserId(userId);
+        System.out.println(" abbbbdbdbdbdbd0000 Transactions: " + transactions.size()+ userId);
 
         // For each transaction, get associated room bookings and map to response
         for (BookingTransaction transaction : transactions) {

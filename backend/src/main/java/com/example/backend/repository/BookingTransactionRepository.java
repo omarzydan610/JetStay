@@ -3,7 +3,6 @@ package com.example.backend.repository;
 import com.example.backend.dto.AdminDTO.DatabaseDTO.CountByStateDTO;
 import com.example.backend.entity.BookingTransaction;
 
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -104,10 +103,10 @@ public interface BookingTransactionRepository extends JpaRepository<BookingTrans
         @Query("UPDATE BookingTransaction bt SET bt.status = 'CANCELLED' WHERE bt.status = 'PENDING' AND bt.checkIn < :nowDate + :days ")
         void updatePendingBookingThatCheckedInAfterDays(LocalDate nowDate, int days);
 
-        @Query("SELECT bt FROM BookingTransaction bt WHERE bt.user.userID = :userId AND bt.checkIn >= CURRENT_DATE AND bt.status != 'CANCELLED' ORDER BY bt.checkIn ASC")
+        @Query("SELECT bt FROM BookingTransaction bt WHERE bt.user.userID = :userId AND bt.checkIn >= CURRENT_DATE ORDER BY bt.checkIn ASC")
         List<BookingTransaction> findUpcomingBookingsByUserId(@Param("userId") Integer userId);
 
-        @Query("SELECT bt FROM BookingTransaction bt WHERE bt.user.userID = :userId AND bt.checkOut < CURRENT_DATE AND bt.status != 'CANCELLED' ORDER BY bt.checkOut ASC")
-        List<BookingTransaction> findPastBookingsByUserId(@Param("userId") Integer userId);     
+        @Query("SELECT bt FROM BookingTransaction bt WHERE bt.user.userID = :userId AND bt.checkOut < CURRENT_DATE ORDER BY bt.checkOut ASC")
+        List<BookingTransaction> findPastBookingsByUserId(@Param("userId") Integer userId);
 
 }
