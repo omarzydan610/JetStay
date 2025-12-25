@@ -52,14 +52,34 @@ export default function UpcomingBookingsPage() {
 
   useEffect(() => {
     fetchUpcomingBookings();
-  }, []);
+  }, [activeTab]); // Re-fetch when tab changes
 
   const fetchUpcomingBookings = async () => {
     setLoading(true);
     try {
-      const response = await bookingService.getUpcomingBookings();
-      setBookings(response.data || []);
-      setFilteredBookings(response.data || []);
+      let hotelData = [];
+      let flightData = [];
+
+      if (activeTab === "all" || activeTab === "hotels") {
+        const hotelResponse = await bookingService.getUpcomingHotelBookings();
+        hotelData = hotelResponse.data || [];
+      }
+
+      if (activeTab === "all" || activeTab === "flights") {
+        const flightResponse = await bookingService.getUpcomingFlightTickets();
+        flightData = flightResponse.data || [];
+      }
+
+      const allBookings = [...hotelData, ...flightData];
+      // Sort by date (check-in for hotels, flight date for flights)
+      allBookings.sort((a, b) => {
+        const dateA = new Date(a.checkInDate || a.flightDate);
+        const dateB = new Date(b.checkInDate || b.flightDate);
+        return dateA - dateB;
+      });
+
+      setBookings(allBookings);
+      setFilteredBookings(allBookings);
     } catch (error) {
       console.error("Error fetching upcoming bookings:", error);
       setBookings([]);
@@ -73,13 +93,7 @@ export default function UpcomingBookingsPage() {
     const filterAndSortBookings = () => {
       let filtered = [...bookings];
 
-      // Apply tab filter (hotel/flight)
-      if (activeTab === "hotels") {
-        filtered = filtered.filter((booking) => booking.type === "HOTEL");
-      } else if (activeTab === "flights") {
-        filtered = filtered.filter((booking) => booking.type === "FLIGHT");
-      }
-
+      // No need for tab filter anymore since we fetch based on tab
       // Apply search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
@@ -105,7 +119,7 @@ export default function UpcomingBookingsPage() {
     };
 
     filterAndSortBookings();
-  }, [searchQuery, sortBy, activeTab, bookings]);
+  }, [searchQuery, sortBy, bookings]);
 
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;
@@ -244,8 +258,8 @@ export default function UpcomingBookingsPage() {
             <button
               onClick={() => setActiveTab("all")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === "all"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               All Bookings ({bookings.length})
@@ -253,8 +267,8 @@ export default function UpcomingBookingsPage() {
             <button
               onClick={() => setActiveTab("hotels")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "hotels"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <Hotel size={18} />
@@ -263,8 +277,8 @@ export default function UpcomingBookingsPage() {
             <button
               onClick={() => setActiveTab("flights")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "flights"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <Plane size={18} />
