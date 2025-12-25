@@ -103,8 +103,6 @@ public class RoomGraphQLService {
 
     public List<RoomType> getRoomsPaginated(RoomTypeRepository roomRepository, int page, int size) {
         String pageKey = page + "_" + size;
-        List<RoomType> cachedPage = cacheManager.getRoomsPage(pageKey);
-        if (cachedPage != null) return cachedPage;
 
         Pageable pageable = PageRequest.of(page, size);
         List<RoomType> pageRooms = roomRepository.findAll(pageable).getContent();

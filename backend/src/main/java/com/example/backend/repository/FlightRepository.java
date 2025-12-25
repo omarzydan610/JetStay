@@ -72,4 +72,8 @@ public interface FlightRepository extends JpaRepository<Flight, Integer>, JpaSpe
     // tripTypeID);
     Flight getByFlightID(Integer flightID);
 
+    @EntityGraph(attributePaths = { "airline", "departureAirport", "arrivalAirport" })
+    @Query("SELECT f FROM Flight f WHERE f.departureDate > CURRENT_TIMESTAMP")
+    Page<Flight> findAllAvailableFlight(Pageable pageable);
+
 }

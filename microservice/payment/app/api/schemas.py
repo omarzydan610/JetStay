@@ -6,7 +6,7 @@ class PaymentIn(BaseModel):
     currency: Optional[str] = "USD"
     paymentMethod: Optional[str] = None
     description: Optional[str] = None
-    ticketId: Optional[int] = None
+    ticketIds: Optional[list[int]] = None
     methodId: Optional[int] = None
     bookingTransactionId: Optional[int] = None
 

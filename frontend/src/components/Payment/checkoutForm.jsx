@@ -101,7 +101,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
             currency: "usd",
             paymentMethod: stripePaymentMethod.id,
             description: "Flight ticket payment",
-            ticketId: ticket.ticketId,
+            ticketIds: ticket.ticketIds,
             methodId: 1,
           }
         : {
@@ -179,8 +179,8 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
             orderId: details.id,
             payer: details.payer,
             description: "Flight ticket payment (PayPal)",
-            ticketId: ticket.ticketId,
-            methodId: 2,
+            ticketIds: ticket.ticketIds,
+            methodId: 3,
           }
         : {
             amount,
@@ -189,7 +189,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
             payer: details.payer,
             description: "Hotel booking payment (PayPal)",
             bookingTransactionId: bookingTransaction.bookingTransactionId,
-            methodId: 2,
+            methodId: 3,
           };
 
       const routeSuffix = isTicketPayment ? "ticket" : "room";

@@ -72,6 +72,7 @@ public class HotelPaymentService {
             success = fastApiResponse.getStatusCode().is2xxSuccessful();
 
             if (success) {
+                booking.setStatus(BookingTransaction.Status.CONFIRMED);
                 booking.setIsPaid(true);
                 bookingTransactionRepository.save(booking);
             }
