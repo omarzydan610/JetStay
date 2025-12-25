@@ -136,8 +136,6 @@ public class FlightGraphQLService {
 
     public List<Flight> getFlightsPaginated(FlightRepository flightRepository, int page, int size) {
         String pageKey = page + "_" + size;
-        List<Flight> cachedPage = cacheManager.getFlightsPage(pageKey);
-        if (cachedPage != null) return cachedPage;
 
         Pageable pageable = PageRequest.of(page, size);
         List<Flight> pageFlights = flightRepository.findAll(pageable).getContent();
