@@ -143,7 +143,7 @@ public class RoomController {
         @GetMapping("/offers/public/{hotelId}")
         public ResponseEntity<SuccessResponse<List<RoomOfferResponse>>> getPublicRoomOffers(
                         @PathVariable Integer hotelId) {
-                List<RoomOfferResponse> offers = roomOfferService.getPublicRoomOffersByHotel(hotelId);
+                List<RoomOfferResponse> offers = roomOfferService.getRoomOffersByHotel(hotelId);
                 return ResponseEntity.ok(
                                 SuccessResponse.of("Room offers retrieved successfully", offers));
         }
