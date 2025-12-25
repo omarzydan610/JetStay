@@ -122,8 +122,12 @@ export default function RoomBookingPage() {
 
       toast.success("Booking created successfully!");
 
+      const bookingTransaction = { bookingTransactionId };
+      const bookingData = { ...formData };
       // Navigate to payment page with booking transaction ID
-      navigate(`/payment/${bookingTransactionId}`);
+      navigate(`/payment`, {
+        state: { bookingTransaction, type: "hotel", bookingData },
+      });
     } catch (error) {
       console.error("Booking error:", error);
       toast.error(

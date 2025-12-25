@@ -4,7 +4,7 @@ import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import { PayPalButtons } from "@paypal/react-paypal-js";
 import flightImage from "../../assets/logo.png";
 
-export default function CheckoutPage({ ticket, bookingTransaction }) {
+export default function CheckoutPage({ ticket, bookingTransaction, bookingData }) {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
@@ -65,7 +65,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
 
       const body = isTicketPayment
         ? {
-            amount: ticket.price,
+            amount: bookingData.price,
             currency: "usd",
             paymentMethod: stripePaymentMethod.id,
             description: "Flight ticket payment",
@@ -73,7 +73,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
             methodId: 1,
           }
         : {
-            amount: bookingTransaction.totalPrice,
+            amount: bookingData.price,
             currency: "usd",
             paymentMethod: stripePaymentMethod.id,
             description: "Hotel booking payment",
@@ -107,7 +107,7 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
     setLoading(false);
   };
 
-  const amount = isTicketPayment ? ticket.price : bookingTransaction?.totalPrice || 0;
+  const amount = bookingData.price * bookingData.quantity;
 
   const createPayPalOrder = (data, actions) => {
     return actions.order.create({
@@ -271,20 +271,14 @@ export default function CheckoutPage({ ticket, bookingTransaction }) {
 
             {isTicketPayment && (
               <>
-                <p className="font-bold text-xl text-gray-800">
-                  {ticket.airline.name}
+                <p className="font-bold text-xl mt-6 text-black-700">
+                  Price per Ticket: ${bookingData.price}
                 </p>
-                <p className="text-gray-600">
-                  {ticket.flight.departure} → {ticket.flight.arrival}
+                <p className="font-bold text-xl mt-6 text-black-700">
+                  No. of tickets: {bookingData.quantity}
                 </p>
-                <p className="text-gray-600">
-                  Departure: {ticket.flight.departureTime}
-                </p>
-                <p className="text-gray-600">
-                  Arrival: {ticket.flight.arrivalTime}
-                </p>
-                <p className="font-bold text-3xl mt-6 text-indigo-700">
-                  ${ticket.price}
+                <p className="font-bold text-xl mt-6 text-black-700">
+                  Total Price: ${bookingData.price * bookingData.quantity}
                 </p>
               </>
             )}

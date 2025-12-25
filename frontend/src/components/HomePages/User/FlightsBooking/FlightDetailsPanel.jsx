@@ -1,7 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Plane, MessageSquare } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AirlineReviews from "../FlightReview/AirlineReviewsList";
 import { getPublicFlightOffers } from "../../../../services/Airline/flightsService";
@@ -18,7 +17,6 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   const [flightOffers, setFlightOffers] = useState([]);
   const [loadingOffers, setLoadingOffers] = useState(false);
   const [showReviews, setShowReviews] = useState(false);
-
 
   // Reset selected trip type when flight changes
   useEffect(() => {
@@ -122,68 +120,45 @@ export default function FlightDetailsPanel({ flight, onClose }) {
   const arrivalCode = getAirportCode(flight?.arrivalAirport?.airportName);
   const duration = getDuration(flight?.departureDate, flight?.arrivalDate);
 
-  const handleBooking = useCallback(() => {
-    if (selectedTripTypeIndex !== null) {
-      const tripTypes = flight?.tripTypes || flight?.tripsTypes || [];
-      const selectedTripType = tripTypes[selectedTripTypeIndex];
-      const bestOffer = getBestOfferForPrice(selectedTripType?.price || 0);
+const handleBooking = useCallback(() => {
+  if (selectedTripTypeIndex !== null) {
+    const tripTypes = flight?.tripTypes || flight?.tripsTypes || [];
+    const selectedTripType = tripTypes[selectedTripTypeIndex];
+    const bestOffer = getBestOfferForPrice(selectedTripType?.price || 0);
 
-      // Navigate to ticket booking page with flight, trip type, and offer data
-      navigate("/ticket-booking", {
-        state: {
-          flight: flight,
-          selectedTripType: selectedTripType,
-          appliedOffer: bestOffer,
-        },
-      });
-      let bookingMessage = `Booking ${selectedTripType.typeName || selectedTripType.name} on ${flight?.airline?.airlineName || "Flight"
-        }`;
-
-      if (bestOffer) {
-        bookingMessage += ` with "${bestOffer.offerName}" offer (${bestOffer.discountValue}% off)`;
-      }
-
-      toast.success(bookingMessage);
-    }
-    //Should be modified with booking process before payment to send ticket data
-   // Example dummy ticket
+    // Prepare the dummy ticket object
     const dummyTicket = {
-      ticketId: 1,
+      ticketId: 1, // temporary ID for frontend
       flight: {
-        flightId: 101,
-        departure: "New York",
-        arrival: "London",
-        departureTime: "2025-12-25T10:00:00",
-        arrivalTime: "2025-12-25T20:00:00",
+        flightId: flight?.flightID,
+        airline: flight?.airline,
+        departure: flight?.departureAirport?.city,
+        arrival: flight?.arrivalAirport?.city,
+        departureTime: flight?.departureDate,
+        arrivalTime: flight?.arrivalDate,
       },
-      airline: {
-        airlineId: 5,
-        name: "EgyAir",
-        code: "EXA",
-      },
-      flightDate: "2025-12-25",
       user: {
         userId: 123,
         name: "John Doe",
         email: "john@example.com",
       },
       tripType: {
-        tripTypeId: selectedTripTypeIndex, // your selected trip type
-        name: selectedTripTypeIndex === 0 ? "One-way" : "Round-trip",
+        tripTypeId: selectedTripTypeIndex,
+        name: selectedTripType?.typeName || selectedTripType?.name || "Trip Type",
       },
-      price: 125300,
+      flightDate: "2025-12-25",
+      price: selectedTripType?.price || 0,
+      appliedOffer: bestOffer || null,
       isPaid: false,
-      createdAt: new Date().toISOString().split("T")[0], // YYYY-MM-DD
+      createdAt: new Date().toISOString().split("T")[0],
     };
 
-    // Log for debugging
     console.log("Proceeding to booking for flight:", dummyTicket);
 
-    // Navigate and pass the dummy ticket
+    // Navigate to payment page and pass the ticket
     navigate("/payment", { state: { ticket: dummyTicket } });
-
-  
-  }, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
+  }
+}, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
 
   // Calculate active offers count
   const activeOffers = getActiveOffers();

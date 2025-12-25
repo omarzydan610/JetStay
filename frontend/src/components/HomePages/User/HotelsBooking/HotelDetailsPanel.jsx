@@ -1,38 +1,29 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Star, MapPin as MapPinIcon, MessageSquare } from "lucide-react";
+import { X, Star, MapPin as MapPinIcon } from "lucide-react";
 import { RoomTypeItem } from "./RoomTypeItem";
 import HotelReviews from "../HotelReview/HotelReviewsList";
-import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useCallback, useNavigate } from "react";
 import roomsService from "../../../../services/HotelServices/roomsService";
 import { isOfferActive } from "../../../../utils/offerUtils";
 
-export default function HotelDetailsPanel({
-  hotel,
-  onClose,
-  getRoomImage,
-  placeholderImages,
-}) {
-  const navigate = useNavigate();
+export default function HotelDetailsPanel({ hotel, onClose, getRoomImage, placeholderImages }) {
   const [selectedRoomType, setSelectedRoomType] = useState(null);
 
   const [showReviews, setShowReviews] = useState(false);
   const [roomOffers, setRoomOffers] = useState([]);
+  const navigate = useNavigate();
 
   // Fetch room offers when hotel changes
   useEffect(() => {
     const fetchRoomOffers = async () => {
       if (!hotel?.hotelID) return;
-
       try {
         const offers = await roomsService.getPublicRoomOffers(hotel.hotelID);
         setRoomOffers(offers || []);
-      } catch (error) {
-        console.error("Error fetching room offers:", error);
+      } catch {
         setRoomOffers([]);
       }
     };
-
     fetchRoomOffers();
   }, [hotel?.hotelID]);
 
@@ -48,6 +39,7 @@ export default function HotelDetailsPanel({
 
   return (
     <>
+      {/* Sliding Panel */}
       <motion.div
         initial={{ opacity: 0, x: 300 }}
         animate={{ opacity: 1, x: 0 }}
@@ -75,10 +67,7 @@ export default function HotelDetailsPanel({
             />
           )}
           <div className="absolute inset-0 bg-black/30"></div>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 transition z-10"
-          >
+          <button onClick={onClose} className="absolute top-4 right-4 bg-white rounded-full p-2 hover:bg-gray-100 z-10">
             <X size={24} className="text-gray-800" />
           </button>
           <div className="relative z-10 p-6 text-white w-full">
@@ -90,53 +79,19 @@ export default function HotelDetailsPanel({
               </div>
               <div className="flex items-center gap-1">
                 <MapPinIcon size={20} />
-                <span>
-                  {hotel?.city || "Unknown City"}, {hotel?.country || "Unknown Country"}
-                </span>
+                <span>{hotel?.city || "Unknown City"}, {hotel?.country || "Unknown Country"}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Room Types */}
-        <div className="flex-1 overflow-y-auto p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Available Room Types
-            </h2>
-            <div className="flex items-center gap-3">
-              {activeOffersCount > 0 && (
-                <div className="text-sm text-green-600 font-semibold">
-                  {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''}
-                </div>
-              )}
-              <button
-                onClick={() => setShowReviews(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-              >
-                <MessageSquare size={20} />
-                <span className="hidden sm:inline">View Reviews</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Active Offers Banner */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {activeOffersCount > 0 && (
-            <div className="mb-6 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-green-800 font-bold mb-1">
-                    🎉 Special Offers Available!
-                  </div>
-                  <div className="text-green-700 text-sm">
-                    {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''} for rooms in this hotel
-                  </div>
-                </div>
-              </div>
-              {roomOffers.filter(offer => isOfferActive(offer)).slice(0, 2).map((offer, index) => (
-                <div key={index} className="mt-2 text-sm text-green-600">
-                  • {offer.offerName}: {offer.discountValue}% off
-                </div>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="text-green-800 font-bold">🎉 Special Offers Available!</div>
+              {roomOffers.filter(isOfferActive).slice(0, 2).map((offer, idx) => (
+                <div key={idx} className="text-green-600 text-sm">• {offer.offerName}: {offer.discountValue}% off</div>
               ))}
             </div>
           )}
@@ -231,7 +186,6 @@ export default function HotelDetailsPanel({
           </>
         )}
       </AnimatePresence>
-
     </>
   );
 }

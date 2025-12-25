@@ -11,17 +11,18 @@ const stripePromise = loadStripe(
 export default function StripePaymentPage() {
   const location = useLocation();
 
-  const { ticket } = location.state || {};
-  const { bookingTransaction } = location.state || {};
+  const { ticket, bookingTransaction, type, bookingData } = location.state || {};
   console.log("Payment Page - Ticket:", ticket);
   console.log("Payment Page - Booking Transaction:", bookingTransaction);
+  console.log("Payment Page - Type:", type);
+  console.log("Payment Page - Booking Data:", bookingData);
 
   return (
     <div className="min-h-screen flex flex-col">
       {/* Stripe Elements + PayPal provider (PayPal uses sandbox by default here) */}
       <PayPalScriptProvider options={{ "client-id": "sb", currency: "USD" }}>
         <Elements stripe={stripePromise}>
-          <CheckoutForm ticket={ticket} bookingTransaction={bookingTransaction} />
+          <CheckoutForm ticket={ticket} bookingTransaction={bookingTransaction} bookingData={bookingData} />
         </Elements>
       </PayPalScriptProvider>
     </div>

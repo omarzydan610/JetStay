@@ -101,6 +101,7 @@ export default function TicketBookingPage() {
         flightId: flight.flightID,
         tripTypeId: selectedTripType.typeID,
         quantity: quantity,
+        price:quantity * getPricePerTicket(),
       };
 
       // Debug: Log the booking data to check for missing values
@@ -134,11 +135,9 @@ export default function TicketBookingPage() {
 
       // Navigate to payment page with ticket IDs
       // For now, using the first ticket ID as transaction reference
-      navigate(`/payment/${ticketIds[0]}`, {
-        state: {
-          ticketIds: ticketIds,
-          type: "flight",
-        },
+      const ticket = { ticketId: ticketIds[0] };
+      navigate(`/payment`, {
+        state: { ticket, type: "flight", bookingData },
       });
     } catch (error) {
       console.error("Booking error:", error);
