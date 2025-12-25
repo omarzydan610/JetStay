@@ -69,15 +69,16 @@ export default function FlightSearchCard({ flight, onClick }) {
                   alt={flight?.airline?.airlineName || "Airline"}
                   className="w-full h-full object-contain p-1"
                   onError={(e) => {
-                    e.target.style.display = "none";
+                    e.target.src = "https://cdn.britannica.com/69/155469-050-B561639D/airplane-flight.jpg";
+                    e.target.style.display = "block";
                   }}
                 />
               ) : (
-                <div className="text-xs font-bold text-gray-600">
-                  {flight?.airline?.airlineName
-                    ?.substring(0, 2)
-                    .toUpperCase() || "XX"}
-                </div>
+                <img
+                  src="https://cdn.britannica.com/69/155469-050-B561639D/airplane-flight.jpg"
+                  alt="Airline"
+                  className="w-full h-full object-contain p-1"
+                />
               )}
             </div>
             <div className="text-sm font-semibold text-gray-700">
