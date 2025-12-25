@@ -410,7 +410,7 @@ const BookingDetailPage = () => {
         </motion.div>
 
         {/* Action Buttons */}
-        {booking.status === "CONFIRMED" && (
+        {/* {booking.status === "CONFIRMED" && (
           <motion.div
             variants={itemVariants}
             className="flex gap-4 justify-end"
@@ -430,7 +430,7 @@ const BookingDetailPage = () => {
               Cancel Booking
             </button>
           </motion.div>
-        )}
+        )} */}
 
         {booking.status !== "CONFIRMED" && (
           <motion.div variants={itemVariants} className="flex justify-end">
