@@ -16,6 +16,7 @@ import TicketsDetailsPage from "./pages/HomePage/Admin/TicketsDetailsPage";
 import StripePaymentPage from "./pages/payment/stripePaymentPage";
 import RoomBookingPage from "./pages/BookingPage/RoomBookingPage";
 import TicketBookingPage from "./pages/BookingPage/TicketBookingPage";
+import TicketBookingConfirmationPage from "./pages/BookingPage/TicketBookingConfirmationPage";
 import PaymentPage from "./pages/PaymentPage/PaymentPage";
 import BookingHistoryPage from "./pages/HistoryPages/UserHistoryPages/BookingHistoryPage";
 import UpcomingBookingsPage from "./pages/HistoryPages/UserHistoryPages/UpcomingBookingsPage";
@@ -34,6 +35,7 @@ function App() {
     { path: "/payment", element: <StripePaymentPage /> },
     { path: "/payment/:bookingTransactionId", element: <PaymentPage /> },
     { path: "/booking", element: <RoomBookingPage /> },
+    { path: "/booking/ticket/confirmation", element: <TicketBookingConfirmationPage /> },
   ];
 
   const publicRoutes = [

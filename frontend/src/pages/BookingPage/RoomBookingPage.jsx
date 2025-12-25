@@ -122,11 +122,44 @@ export default function RoomBookingPage() {
 
       toast.success("Booking created successfully!");
 
-      const bookingTransaction = { bookingTransactionId };
-      const bookingData = { ...formData };
-      // Navigate to payment page with booking transaction ID
-      navigate(`/payment`, {
-        state: { bookingTransaction, type: "hotel", bookingData },
+      // Calculate total price and number of rooms
+      const totalNumberOfRooms = formData.roomTypeBookingDTO.reduce(
+        (sum, rt) => sum + rt.noOfRooms,
+        0
+      );
+
+      // Calculate total price based on room types
+      const checkInDate = new Date(formData.checkIn);
+      const checkOutDate = new Date(formData.checkOut);
+      const numberOfNights = Math.ceil(
+        (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+      );
+
+      const totalPrice = formData.roomTypeBookingDTO.reduce((sum, rt) => {
+        const roomTypeDetails = getRoomTypeById(rt.roomTypeID);
+        const roomPrice = roomTypeDetails?.price || 0;
+        return sum + roomPrice * rt.noOfRooms * numberOfNights;
+      }, 0);
+
+      // Prepare booking transaction object for payment page
+      const bookingTransactionData = {
+        bookingTransactionId: bookingTransactionId,
+        totalPrice: totalPrice,
+        hotel: {
+          hotelName: hotel?.hotelName || "Hotel Booking",
+          city: hotel?.city || "",
+        },
+        numberOfGuests: formData.noOfGuests,
+        numberOfRooms: totalNumberOfRooms,
+        checkInDate: formData.checkIn,
+        checkOutDate: formData.checkOut,
+      };
+
+      // Navigate to Stripe payment page with booking transaction data
+      navigate("/payment", {
+        state: {
+          bookingTransaction: bookingTransactionData,
+        },
       });
     } catch (error) {
       console.error("Booking error:", error);

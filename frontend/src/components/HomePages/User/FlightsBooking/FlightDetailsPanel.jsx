@@ -126,39 +126,25 @@ const handleBooking = useCallback(() => {
     const selectedTripType = tripTypes[selectedTripTypeIndex];
     const bestOffer = getBestOfferForPrice(selectedTripType?.price || 0);
 
-    // Prepare the dummy ticket object
-    const dummyTicket = {
-      ticketId: 1, // temporary ID for frontend
-      flight: {
-        flightId: flight?.flightID,
-        airline: flight?.airline,
-        departure: flight?.departureAirport?.city,
-        arrival: flight?.arrivalAirport?.city,
-        departureTime: flight?.departureDate,
-        arrivalTime: flight?.arrivalDate,
-      },
-      user: {
-        userId: 123,
-        name: "John Doe",
-        email: "john@example.com",
-      },
-      tripType: {
-        tripTypeId: selectedTripTypeIndex,
-        name: selectedTripType?.typeName || selectedTripType?.name || "Trip Type",
-      },
-      flightDate: "2025-12-25",
-      price: selectedTripType?.price || 0,
-      appliedOffer: bestOffer || null,
-      isPaid: false,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
+      // Navigate to ticket booking page with flight, trip type, and offer data
+      navigate("/ticket-booking", {
+        state: {
+          flight: flight,
+          selectedTripType: selectedTripType,
+          appliedOffer: bestOffer,
+        },
+      });
 
-    console.log("Proceeding to booking for flight:", dummyTicket);
+      let bookingMessage = `Booking ${selectedTripType.typeName || selectedTripType.name} on ${flight?.airline?.airlineName || "Flight"
+        }`;
 
-    // Navigate to payment page and pass the ticket
-    navigate("/payment", { state: { ticket: dummyTicket } });
-  }
-}, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
+      if (bestOffer) {
+        bookingMessage += ` with "${bestOffer.offerName}" offer (${bestOffer.discountValue}% off)`;
+      }
+
+      toast.success(bookingMessage);
+    }
+  }, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
 
   // Calculate active offers count
   const activeOffers = getActiveOffers();
