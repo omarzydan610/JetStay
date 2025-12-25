@@ -31,7 +31,7 @@ def create_ticket_payment(payment: schemas.PaymentIn, db: Session = Depends(get_
         for ticket_id in payment.ticketIds:
             saved = save_payment(
                 db,
-                payment.amount,
+                payment.amount / len(payment.ticketIds),
                 StatusEnum.PENDING,
                 ticket_id=ticket_id,
                 method_id=payment.methodId or 2,
@@ -39,7 +39,7 @@ def create_ticket_payment(payment: schemas.PaymentIn, db: Session = Depends(get_
             )
             saved_payments.append(saved)
 
-        amount_cents = int(round(payment.amount * 100)) / len(payment.ticketIds)
+        amount_cents = int(round(payment.amount * 100))
         intent = stripe.PaymentIntent.create(
             amount=amount_cents,
             currency=payment.currency,
@@ -128,7 +128,7 @@ def paypal_ticket(payment: schemas.PaymentIn, db: Session = Depends(get_db)):
         for ticket_id in payment.ticketIds:
             saved = save_payment(
                 db,
-                payment.amount / len(payment.ticketIds),
+                payment.amount,
                 StatusEnum.COMPLETED,
                 stripe_intent=order_id,
                 ticket_id=ticket_id,
@@ -151,7 +151,7 @@ def paypal_ticket(payment: schemas.PaymentIn, db: Session = Depends(get_db)):
         for ticket_id in payment.ticketIds:
             save_payment(
                 db,
-                payment.amount,
+                payment.amount / len(payment.ticketIds),
                 StatusEnum.FAILED,
                 error=str(e),
                 ticket_id=ticket_id,
