@@ -137,6 +137,7 @@ export default function FlightDetailsPanel({ flight, onClose }) {
           appliedOffer: bestOffer,
         },
       });
+
       let bookingMessage = `Booking ${selectedTripType.typeName || selectedTripType.name} on ${flight?.airline?.airlineName || "Flight"
         }`;
 
@@ -146,44 +147,6 @@ export default function FlightDetailsPanel({ flight, onClose }) {
 
       toast.success(bookingMessage);
     }
-    //Should be modified with booking process before payment to send ticket data
-   // Example dummy ticket
-    const dummyTicket = {
-      ticketId: 1,
-      flight: {
-        flightId: 101,
-        departure: "New York",
-        arrival: "London",
-        departureTime: "2025-12-25T10:00:00",
-        arrivalTime: "2025-12-25T20:00:00",
-      },
-      airline: {
-        airlineId: 5,
-        name: "EgyAir",
-        code: "EXA",
-      },
-      flightDate: "2025-12-25",
-      user: {
-        userId: 123,
-        name: "John Doe",
-        email: "john@example.com",
-      },
-      tripType: {
-        tripTypeId: selectedTripTypeIndex, // your selected trip type
-        name: selectedTripTypeIndex === 0 ? "One-way" : "Round-trip",
-      },
-      price: 125300,
-      isPaid: false,
-      createdAt: new Date().toISOString().split("T")[0], // YYYY-MM-DD
-    };
-
-    // Log for debugging
-    console.log("Proceeding to booking for flight:", dummyTicket);
-
-    // Navigate and pass the dummy ticket
-    navigate("/payment", { state: { ticket: dummyTicket } });
-
-  
   }, [selectedTripTypeIndex, flight, getBestOfferForPrice, navigate]);
 
   // Calculate active offers count
