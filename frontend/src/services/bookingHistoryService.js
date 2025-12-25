@@ -39,7 +39,10 @@ class BookingService {
   async getBookingDetails(bookingId) {
     try {
       const response = await apiClient.get(`/api/bookings/${bookingId}`);
-      return response.data;
+      // Extract the booking data from the SuccessResponse wrapper
+      const bookingData = response.data.data || response.data;
+      // Normalize the booking data to match frontend expectations
+      return { data: this.normalizeBooking(bookingData) };
     } catch (error) {
       console.error("Error fetching booking details:", error);
       throw this.handleError(error);
