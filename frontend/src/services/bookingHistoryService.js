@@ -23,7 +23,8 @@ class BookingService {
     try {
       const response = await apiClient.get("/api/bookings/upcoming");
       // Normalize the data before returning to ensure frontend components work correctly
-      return response.data.map((booking) => this.normalizeBooking(booking));
+      const bookingsData = response.data.data || response.data || [];
+      return { data: bookingsData.map((booking) => this.normalizeBooking(booking)) };
     } catch (error) {
       console.error("Error fetching upcoming bookings:", error);
       throw this.handleError(error);
@@ -106,8 +107,6 @@ class BookingService {
             city: booking.hotelBooking.hotel.city,
             country: booking.hotelBooking.hotel.country,
             location: `${booking.hotelBooking.hotel.city}, ${booking.hotelBooking.hotel.country}`,
-            latitude: booking.hotelBooking.hotel.latitude,
-            longitude: booking.hotelBooking.hotel.longitude,
           },
         },
         // Raw backend data for reference

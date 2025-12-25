@@ -5,7 +5,6 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import AirlineReviews from "../FlightReview/AirlineReviewsList";
 import { getPublicFlightOffers } from "../../../../services/Airline/flightsService";
-import { toast } from "react-toastify";
 import {
   isOfferActive,
   calculateDiscountedPrice,
