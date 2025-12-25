@@ -25,6 +25,7 @@ export default function UpcomingBookingsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("date"); // 'date' or 'price'
+  const [activeTab, setActiveTab] = useState("all"); // 'all', 'hotels', 'flights'
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [canceling, setCanceling] = useState(false);
@@ -69,12 +70,15 @@ export default function UpcomingBookingsPage() {
   };
 
   useEffect(() => {
-    fetchUpcomingBookings();
-  }, []);
-
-  useEffect(() => {
     const filterAndSortBookings = () => {
       let filtered = [...bookings];
+
+      // Apply tab filter (hotel/flight)
+      if (activeTab === "hotels") {
+        filtered = filtered.filter((booking) => booking.type === "HOTEL");
+      } else if (activeTab === "flights") {
+        filtered = filtered.filter((booking) => booking.type === "FLIGHT");
+      }
 
       // Apply search query
       if (searchQuery.trim()) {
@@ -101,7 +105,7 @@ export default function UpcomingBookingsPage() {
     };
 
     filterAndSortBookings();
-  }, [searchQuery, sortBy, bookings]);
+  }, [searchQuery, sortBy, activeTab, bookings]);
 
   const handleCancelBooking = async () => {
     if (!selectedBooking) return;
@@ -234,6 +238,41 @@ export default function UpcomingBookingsPage() {
           </p>
         </motion.div>
 
+        {/* Tabs */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex gap-2 bg-white rounded-xl shadow-lg p-2">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === "all"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+              All Bookings ({bookings.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("hotels")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "hotels"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+              <Hotel size={18} />
+              Hotels ({bookings.filter((b) => b.type === "HOTEL").length})
+            </button>
+            <button
+              onClick={() => setActiveTab("flights")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "flights"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+                }`}
+            >
+              <Plane size={18} />
+              Flights ({bookings.filter((b) => b.type === "FLIGHT").length})
+            </button>
+          </div>
+        </motion.div>
+
         {/* Filters */}
         <motion.div
           variants={itemVariants}
@@ -323,9 +362,8 @@ export default function UpcomingBookingsPage() {
                             <MapPin size={14} />
                             {booking.type === "HOTEL"
                               ? booking.room?.hotel?.location || "N/A"
-                              : `${booking.ticket?.flight?.from || "N/A"} → ${
-                                  booking.ticket?.flight?.to || "N/A"
-                                }`}
+                              : `${booking.ticket?.flight?.from || "N/A"} → ${booking.ticket?.flight?.to || "N/A"
+                              }`}
                           </p>
                         </div>
                         <div className="flex flex-col gap-2 items-end">

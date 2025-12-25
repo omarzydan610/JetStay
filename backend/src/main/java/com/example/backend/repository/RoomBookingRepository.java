@@ -24,4 +24,8 @@ public interface RoomBookingRepository extends JpaRepository<RoomBooking, Intege
   // Find past bookings for a user
   @Query("SELECT rb FROM RoomBooking rb WHERE rb.user.userID = :userId AND (rb.checkOut < CURRENT_DATE OR rb.bookingTransaction.status = 'COMPLETED' OR rb.bookingTransaction.status = 'CANCELLED') ORDER BY rb.bookingTransaction.bookingDate DESC")
   List<RoomBooking> findPastBookingsByUserId(@Param("userId") Integer userId);
+
+  // Find room bookings by booking transaction ID
+  @Query("SELECT rb FROM RoomBooking rb WHERE rb.bookingTransaction.bookingTransactionId = :transactionId")
+  List<RoomBooking> findByBookingTransactionId(@Param("transactionId") Integer transactionId);
 }
