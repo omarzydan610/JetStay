@@ -69,6 +69,7 @@ public class TicketPaymentService {
             success = fastApiResponse.getBody() != null && fastApiResponse.getBody().contains("\"status\":\"succeeded\"");
 
             if (success) {
+                ticket.setState(FlightTicket.TicketState.COMPLETED);
                 ticket.setIsPaid(true);
                 flightTicketRepository.save(ticket);
             }
