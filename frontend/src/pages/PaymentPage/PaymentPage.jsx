@@ -1,19 +1,15 @@
-import React, { useEffect, useState } from "react";
+import  { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import {
   CreditCard,
   CheckCircle,
-  Shield,
   Lock,
-  Calendar,
   User,
-  MapPin,
   Plane,
-  ChevronRight,
   ArrowRight,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export default function PaymentPage() {
   const { bookingTransactionId } = useParams();
