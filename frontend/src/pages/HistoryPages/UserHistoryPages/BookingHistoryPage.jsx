@@ -38,16 +38,33 @@ export default function BookingHistoryPage() {
     },
   };
 
+
   useEffect(() => {
     fetchBookingHistory();
-  }, []);
+  }, [activeTab]); // Re-fetch when tab changes
 
   const fetchBookingHistory = async () => {
     setLoading(true);
     try {
-      const response = await bookingService.getBookingHistory();
-      setBookings(response.data || []);
-      setFilteredBookings(response.data || []);
+      let hotelData = [];
+      let flightData = [];
+
+      if (activeTab === "all" || activeTab === "hotels") {
+        const hotelResponse = await bookingService.getHotelBookingHistory();
+        hotelData = hotelResponse.data || [];
+      }
+
+      if (activeTab === "all" || activeTab === "flights") {
+        const flightResponse = await bookingService.getFlightTicketHistory();
+        flightData = flightResponse.data || [];
+      }
+
+      const allBookings = [...hotelData, ...flightData];
+      // Sort by creation date, most recent first
+      allBookings.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      setBookings(allBookings);
+      setFilteredBookings(allBookings);
     } catch (error) {
       console.error("Error fetching booking history:", error);
       setBookings([]);
@@ -61,13 +78,7 @@ export default function BookingHistoryPage() {
     const filterBookings = () => {
       let filtered = [...bookings];
 
-      // Apply tab filter (hotel/flight)
-      if (activeTab === "hotels") {
-        filtered = filtered.filter((booking) => booking.type === "HOTEL");
-      } else if (activeTab === "flights") {
-        filtered = filtered.filter((booking) => booking.type === "FLIGHT");
-      }
-
+      // No need for tab filter anymore since we fetch based on tab
       // Apply status filter
       if (statusFilter !== "all") {
         filtered = filtered.filter(
@@ -93,7 +104,7 @@ export default function BookingHistoryPage() {
     };
 
     filterBookings();
-  }, [searchQuery, statusFilter, activeTab, bookings]);
+  }, [searchQuery, statusFilter, bookings]);
 
   const hotelCount = bookings.filter((b) => b.type === "HOTEL").length;
   const flightCount = bookings.filter((b) => b.type === "FLIGHT").length;
@@ -127,8 +138,8 @@ export default function BookingHistoryPage() {
             <button
               onClick={() => setActiveTab("all")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${activeTab === "all"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               All Bookings ({bookings.length})
@@ -136,8 +147,8 @@ export default function BookingHistoryPage() {
             <button
               onClick={() => setActiveTab("hotels")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "hotels"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <Hotel size={18} />
@@ -146,8 +157,8 @@ export default function BookingHistoryPage() {
             <button
               onClick={() => setActiveTab("flights")}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${activeTab === "flights"
-                  ? "bg-sky-600 text-white shadow-md"
-                  : "text-gray-600 hover:bg-gray-100"
+                ? "bg-sky-600 text-white shadow-md"
+                : "text-gray-600 hover:bg-gray-100"
                 }`}
             >
               <Plane size={18} />

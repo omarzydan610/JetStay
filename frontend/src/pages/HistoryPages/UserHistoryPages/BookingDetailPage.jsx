@@ -51,7 +51,7 @@ const BookingDetailPage = () => {
         setBooking(response.data);
       } catch (error) {
         console.error("Error fetching booking details:", error);
-        navigate("/bookings/history");
+        navigate(-1);
       } finally {
         setLoading(false);
       }
@@ -63,7 +63,7 @@ const BookingDetailPage = () => {
   const handleCancelBooking = async () => {
     try {
       await bookingService.cancelBooking(bookingId);
-      navigate("/bookings/history");
+      navigate(-1);
     } catch (error) {
       console.error("Error cancelling booking:", error);
     }
@@ -153,7 +153,7 @@ const BookingDetailPage = () => {
             Booking not found
           </h2>
           <button
-            onClick={() => navigate("/bookings/history")}
+            onClick={() => navigate(-1)}
             className="px-6 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
           >
             Back to Bookings
