@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { getRoomsGraph } from "../../../services/HotelServices/hotelGraphService";
+import roomsService from "../../../services/HotelServices/roomsService";
 import UserRoomCard from "../../../components/HomePages/Hotel/UserRoomCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
 import { toast } from "react-toastify";
 
 export default function UserRoomPage() {
   const [rooms, setRooms] = useState([]);
+  const [offers, setOffers] = useState({});
   const [page, setPage] = useState(0);
   const size = 20;
   const [loading, setLoading] = useState(false);
@@ -49,7 +51,24 @@ export default function UserRoomPage() {
     try {
       setLoading(true);
       const res = await getRoomsGraph(page, size, filter);
-      setRooms(res?.data ?? []);
+      const roomsData = res?.data ?? [];
+      setRooms(roomsData);
+
+      // Fetch offers for each unique hotel
+      const hotelIds = [...new Set(roomsData.map(room => room.hotel?.hotelID).filter(id => id))];
+      const offersData = {};
+
+      for (const hotelId of hotelIds) {
+        try {
+          const hotelOffers = await roomsService.getPublicRoomOffers(hotelId);
+          offersData[hotelId] = hotelOffers;
+        } catch (error) {
+          console.error(`Error fetching offers for hotel ${hotelId}:`, error);
+          offersData[hotelId] = [];
+        }
+      }
+
+      setOffers(offersData);
     } catch (err) {
       console.error("Error loading rooms", err);
       toast.error("Failed to load rooms");
@@ -221,7 +240,11 @@ export default function UserRoomPage() {
             ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {rooms.map((room) => (
-                <UserRoomCard key={room.roomTypeID} room={room} />
+                <UserRoomCard 
+                  key={room.roomTypeID} 
+                  room={room} 
+                  offers={offers[room.hotel?.hotelID] || []} 
+                />
                 ))}
             </div>
             )}

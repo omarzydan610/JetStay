@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getFlightsGraph } from "../../../services/Airline/flightsService";
+import { getFlightsGraph, getPublicFlightOffers } from "../../../services/Airline/flightsService";
 import UserFlightCard from "../../../components/HomePages/UserFlightCard";
 import FlightDetailsCard from "../../../components/flights/FlightDetailsCard";
 import GlassCard from "../../../components/HomePages/Airline/GlassCard";
@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 export default function UserFlightPage() {
   const [flights, setFlights] = useState([]);
+  const [offers, setOffers] = useState({});
   const [page, setPage] = useState(0);
   const size = 20;
   const [totalPages, setTotalPages] = useState(0);
@@ -82,6 +83,19 @@ export default function UserFlightPage() {
 
       setFlights(flightsWithIDs);
       if (res.totalPages !== undefined) setTotalPages(res.totalPages);
+
+      // Fetch offers for each flight
+      const offersData = {};
+      for (const flight of flightsWithIDs) {
+        try {
+          const flightOffers = await getPublicFlightOffers(flight.flightID);
+          offersData[flight.flightID] = flightOffers?.data || [];
+        } catch (error) {
+          console.error(`Error fetching offers for flight ${flight.flightID}:`, error);
+          offersData[flight.flightID] = [];
+        }
+      }
+      setOffers(offersData);
 
       setLastFetchedPage(page);
       setLastFilterKey(filterKey);
@@ -425,7 +439,11 @@ export default function UserFlightPage() {
                     key={flight.flightID}
                     className="w-full transform transition hover:-translate-y-1 hover:shadow-lg"
                   >
-                    <UserFlightCard flight={flight} onClick={() => setSelectedFlightId(flight.flightID)}/>
+                    <UserFlightCard 
+                      flight={flight} 
+                      offers={offers[flight.flightID] || []}
+                      onClick={() => setSelectedFlightId(flight.flightID)}
+                    />
                   </div>
                 ))}
               </div>

@@ -51,11 +51,14 @@ export const getFlightsGraph = async (page = 0, size = 10, filter = {}) => {
             country
           }
           airline {
+            airlineID
             airlineName
             airlineRate
             airlineNationality
+            logoUrl
           }
           tripsTypes {
+            typeID
             typeName
             price
           }
@@ -210,6 +213,74 @@ export const getFlightDetails = async (id) => {
     return res.data;
   } catch (error) {
     toast.error("Failed to fetch flight details");
+    throw error;
+  }
+};
+
+/**
+ * Add flight offer
+ * POST /api/flight/{flightId}/offers/add
+ */
+export const addFlightOffer = async (flightId, offerData) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.post(`${API_URL}/${flightId}/offers/add`, offerData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to add flight offer");
+    throw error;
+  }
+};
+
+/**
+ * Get flight offers (public access)
+ * GET /api/flight/{flightId}/offers/public
+ */
+export const getPublicFlightOffers = async (flightId) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}/${flightId}/offers/public`,{
+      headers: { Authorization: `Bearer ${token}` }
+  });
+    return res.data;
+  } catch (error) {
+    console.error("Failed to fetch flight offers:", error);
+    return { data: [] };
+  }
+};
+
+/**
+ * Get flight offers
+ * GET /api/flight/{flightId}/offers
+ */
+export const getFlightOffers = async (flightId) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.get(`${API_URL}/${flightId}/offers`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to fetch flight offers");
+    throw error;
+  }
+};
+
+/**
+ * Delete flight offer
+ * DELETE /api/flight/offers/delete/{offerId}
+ */
+export const deleteFlightOffer = async (offerId) => {
+  try {
+    const token = authService.getToken();
+    const res = await apiClient.delete(`${API_URL}/offers/delete/${offerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
+  } catch (error) {
+    toast.error("Failed to delete flight offer");
     throw error;
   }
 };

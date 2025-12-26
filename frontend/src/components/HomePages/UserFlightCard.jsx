@@ -1,6 +1,13 @@
 import { motion } from "framer-motion";
+import {
+  isOfferActive,
+  calculateDiscountedPrice,
+  getBestActiveOffer,
+  formatPriceDisplay,
+  getOfferBadgeText
+} from "../../utils/offerUtils";
 
-export default function UserFlightCard({ flight, onClick }) {
+export default function UserFlightCard({ flight, offers = [], onClick }) {
   const formatDate = (iso) => {
     try {
       return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -86,12 +93,32 @@ export default function UserFlightCard({ flight, onClick }) {
               <div className="text-xs">-</div>
             ) : (
               <div className="flex flex-col gap-1">
-                {((flight.tripsTypes || flight.tripTypes) || []).slice(0, 3).map((t, i) => (
-                  <div key={i} className="text-xs">
-                    <span className="font-medium">{t.typeName || t.name}</span>:{" "}
-                    <span>${t.price?.toFixed ? t.price.toFixed(2) : t.price}</span>
+                {((flight.tripsTypes || flight.tripTypes) || []).slice(0, 3).map((t, i) => {
+                  const bestOffer = getBestActiveOffer(offers);
+                  const originalPrice = t.price;
+                  const discountedPrice = bestOffer ? calculateDiscountedPrice(originalPrice, bestOffer.discountValue) : null;
+                  
+                  return (
+                    <div key={i} className="text-xs">
+                      <span className="font-medium">{t.typeName || t.name}</span>:{" "}
+                      <span className={discountedPrice ? "text-red-300 line-through" : ""}>
+                        ${originalPrice?.toFixed ? originalPrice.toFixed(2) : originalPrice}
+                      </span>
+                      {discountedPrice && (
+                        <span className="text-green-300 font-bold ml-1">
+                          ${discountedPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+                {getBestActiveOffer(offers) && (
+                  <div className="mt-1">
+                    <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-semibold">
+                      {getOfferBadgeText(getBestActiveOffer(offers).discountValue)}
+                    </span>
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

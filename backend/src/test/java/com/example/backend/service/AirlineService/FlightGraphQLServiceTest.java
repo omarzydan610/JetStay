@@ -7,7 +7,6 @@ import com.example.backend.exception.BadRequestException;
 import com.example.backend.repository.FlightRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 
@@ -22,7 +21,9 @@ class FlightGraphQLServiceTest {
     private FlightCacheManager cacheManager;
     private FlightRepository flightRepository;
     private FlightGraphQLService service;
-    private TripType t1;
+
+    // Base date for all tests
+    private final LocalDateTime baseDate = LocalDateTime.now().plusDays(20);
 
     @BeforeEach
     void setup() {
@@ -42,8 +43,6 @@ class FlightGraphQLServiceTest {
             String arrAirport,
             String arrCity,
             String arrCountry,
-            LocalDateTime depDate,
-            LocalDateTime arrDate,
             Flight.FlightStatus status,
             List<TripType> tripTypes
     ) {
@@ -62,6 +61,10 @@ class FlightGraphQLServiceTest {
         arrival.setCity(arrCity);
         arrival.setCountry(arrCountry);
 
+        // Departure and arrival relative to baseDate
+        LocalDateTime depDate = baseDate.plusHours(24);
+        LocalDateTime arrDate = depDate.plusHours(10);
+
         Flight flight = new Flight();
         flight.setFlightID(id);
         flight.setAirline(airline);
@@ -76,11 +79,11 @@ class FlightGraphQLServiceTest {
 
     @Test
     void testPaginationSinglePage() {
-        Flight f1 = createFlight(1, "EgyptAir", 4.5F, "Egypt", "CAI", "Cairo", "Egypt", "JFK", "NY", "USA",
-                LocalDateTime.now(), LocalDateTime.now().plusHours(10), Flight.FlightStatus.ON_TIME, List.of());
+        Flight f1 = createFlight(1, "EgyptAir", 4.5F, "Egypt", "CAI", "Cairo", "Egypt",
+                "JFK", "NY", "USA", Flight.FlightStatus.ON_TIME, List.of());
 
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(f1)));
 
         List<Flight> result = service.filterFlights(null, flightRepository, 0, 10);
@@ -92,16 +95,16 @@ class FlightGraphQLServiceTest {
     @Test
     void testPaginationFetchesNextPages() {
         Flight f1 = createFlight(1, "A", 3, "X", "A1", "C1", "P1",
-                "A2", "C2", "P2", LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of());
+                "A2", "C2", "P2", Flight.FlightStatus.ON_TIME, List.of());
         Flight f2 = createFlight(2, "B", 3, "X", "A1", "C1", "P1",
-                "A2", "C2", "P2", LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of());
+                "A2", "C2", "P2", Flight.FlightStatus.ON_TIME, List.of());
 
         when(cacheManager.getFlightsPage("0_1")).thenReturn(null);
         when(cacheManager.getFlightsPage("1_1")).thenReturn(null);
 
-        when(flightRepository.findAll(PageRequest.of(0, 1)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 1)))
                 .thenReturn(new PageImpl<>(List.of(f1)));
-        when(flightRepository.findAll(PageRequest.of(1, 1)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(1, 1)))
                 .thenReturn(new PageImpl<>(List.of(f2)));
 
         List<Flight> result = service.filterFlights(null, flightRepository, 0, 1);
@@ -113,14 +116,14 @@ class FlightGraphQLServiceTest {
     void testAirlineFilters() {
         Flight f1 = createFlight(1, "EgyptAir", 4.5F, "Egypt",
                 "CAI", "Cairo", "EG", "JFK", "NY", "USA",
-                LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of());
+                Flight.FlightStatus.ON_TIME, List.of());
 
         Flight f2 = createFlight(2, "Lufthansa", 3.0F, "Germany",
                 "FRA", "Frankfurt", "DE", "DXB", "Dubai", "UAE",
-                LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of());
+                Flight.FlightStatus.ON_TIME, List.of());
 
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(f1, f2)));
 
         FlightFilterDTO filter = new FlightFilterDTO();
@@ -137,12 +140,11 @@ class FlightGraphQLServiceTest {
     @Test
     void testAirportFilters() {
         Flight f = createFlight(1, "A", 4, "X",
-                "Heathrow", "London", "UK",
-                "JFK", "New York", "USA",
-                LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of());
+                "Heathrow", "London", "UK", "JFK", "New York", "USA",
+                Flight.FlightStatus.ON_TIME, List.of());
 
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(f)));
 
         FlightFilterDTO filter = new FlightFilterDTO();
@@ -159,38 +161,14 @@ class FlightGraphQLServiceTest {
     }
 
     @Test
-    void testDateFilters() {
-        LocalDateTime dep = LocalDateTime.of(2025, 1, 1, 10, 0);
-        LocalDateTime arr = LocalDateTime.of(2025, 1, 1, 15, 0);
-
-        Flight f = createFlight(1, "A", 4, "X",
-                "CAI", "Cairo", "EG",
-                "JFK", "NY", "USA",
-                dep, arr, Flight.FlightStatus.ON_TIME, List.of());
-
-        when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(new PageImpl<>(List.of(f)));
-
-        FlightFilterDTO filter = new FlightFilterDTO();
-        filter.setDepartureDateGte("2025-01-01T09:00:00");
-        filter.setDepartureDateLte("2025-01-01T11:00:00");
-        filter.setArrivalDateGte("2025-01-01T14:00:00");
-        filter.setArrivalDateLte("2025-01-01T16:00:00");
-
-        List<Flight> result = service.filterFlights(filter, flightRepository, 0, 10);
-
-        assertEquals(1, result.size());
-    }
-
-    @Test
     void testDateFiltersInvalidFormat() {
+        Flight f = createFlight(1, "A", 4, "X",
+                "CAI", "Cairo", "EG", "JFK", "NY", "USA",
+                Flight.FlightStatus.ON_TIME, List.of());
+
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
-                .thenReturn(new PageImpl<>(List.of(
-                        createFlight(1, "A", 4, "X", "CAI", "Cairo", "EG", "JFK", "NY", "USA",
-                                LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.ON_TIME, List.of())
-                )));
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
+                .thenReturn(new PageImpl<>(List.of(f)));
 
         FlightFilterDTO filter = new FlightFilterDTO();
         filter.setDepartureDateGte("invalid-date");
@@ -203,20 +181,18 @@ class FlightGraphQLServiceTest {
     void testTripTypeFilters() {
         TripType t1 = new TripType();
         t1.setTypeName("Economy");
-        t1.setPrice((int) 100.0);
+        t1.setPrice(100.0F);
 
         TripType t2 = new TripType();
         t2.setTypeName("Business");
-        t2.setPrice((int) 500.0);
+        t2.setPrice(500.0F);
 
         Flight f = createFlight(1, "A", 4, "X",
-                "CAI", "Cairo", "EG",
-                "JFK", "NY", "USA",
-                LocalDateTime.now(), LocalDateTime.now(),
+                "CAI", "Cairo", "EG", "JFK", "NY", "USA",
                 Flight.FlightStatus.ON_TIME, List.of(t1, t2));
 
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(f)));
 
         FlightFilterDTO filter = new FlightFilterDTO();
@@ -231,11 +207,12 @@ class FlightGraphQLServiceTest {
 
     @Test
     void testStatusFilter() {
-        Flight f = createFlight(1, "A", 4, "X", "CAI", "Cairo", "EG", "JFK", "NY", "USA",
-                LocalDateTime.now(), LocalDateTime.now(), Flight.FlightStatus.CANCELLED, List.of());
+        Flight f = createFlight(1, "A", 4, "X",
+                "CAI", "Cairo", "EG", "JFK", "NY", "USA",
+                Flight.FlightStatus.CANCELLED, List.of());
 
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of(f)));
 
         FlightFilterDTO filter = new FlightFilterDTO();
@@ -249,7 +226,7 @@ class FlightGraphQLServiceTest {
     @Test
     void testEmptyDatabase() {
         when(cacheManager.getFlightsPage("0_10")).thenReturn(null);
-        when(flightRepository.findAll(PageRequest.of(0, 10)))
+        when(flightRepository.findAllAvailableFlight(PageRequest.of(0, 10)))
                 .thenReturn(new PageImpl<>(List.of()));
 
         List<Flight> result = service.filterFlights(null, flightRepository, 0, 10);

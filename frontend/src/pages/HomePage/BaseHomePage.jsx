@@ -5,7 +5,7 @@ import Navbar from "../../components/Navbar";
 import HotelHomePage from "./Hotel/HotelHomePage";
 import AirlineHomePage from "./Airline/AirlineHomePage";
 import BaseAdminHomePage from "./Admin/BaseAdminHomePage";
-import UserHomePage from "./UserHomePage";
+import UserHomePage from "./User/UserHomePage";
 import PendingStatusPage from "./PendingStatusPage";
 import InactiveStatusPage from "./InactiveStatusPage";
 

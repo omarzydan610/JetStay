@@ -5,7 +5,7 @@ import {
   getCountries,
   getCities,
   getAirports,
-} from "../../../../services/Airline/flightsService";
+} from "../../../../services/AirlineServices/flightsService";
 import FormField from "./FormField";
 import PrimaryButton from "../../PrimaryButton";
 import TicketTypeSelector from "./TicketTypeSelector";

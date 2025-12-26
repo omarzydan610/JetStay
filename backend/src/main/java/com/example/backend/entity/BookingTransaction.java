@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+
+
 @Entity
 @Table(name = "booking_transaction")
 @Data
@@ -59,6 +61,11 @@ public class BookingTransaction {
 
     @Column(name = "booking_date")
     private LocalDate bookingDate;
+
+    @ManyToOne
+    @JoinColumn(name = "applied_offer_id")
+    private RoomOffer appliedOffer;
+
 
     public enum Status {
         PENDING,

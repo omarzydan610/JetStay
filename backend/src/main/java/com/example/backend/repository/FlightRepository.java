@@ -1,6 +1,5 @@
 package com.example.backend.repository;
 
-
 import com.example.backend.dto.AirlineDTO.FlightDetailsDTO;
 import com.example.backend.entity.Flight;
 import org.springframework.data.domain.Page;
@@ -41,32 +40,40 @@ public interface FlightRepository extends JpaRepository<Flight, Integer>, JpaSpe
     boolean existsById(Integer flightID);
 
     @Query("""
-        SELECT new com.example.backend.dto.AirlineDTO.FlightDetailsDTO(
-            f.departureDate,
-            f.arrivalDate,
-            f.status,
-            dep.airportName,
-            dep.city,
-            arr.airportName,
-            arr.city,
-            f.planeType,
-            tt.typeName,
-            tt.price,
-            al.logoUrl,
-            al.airlineName
-        )
-        FROM Flight f
-        LEFT JOIN f.airline al
-        LEFT JOIN f.departureAirport dep
-        LEFT JOIN f.arrivalAirport arr
-        LEFT JOIN TripType tt ON tt.flight = f
-        WHERE f.flightID = :flightId
-    """)
+                SELECT new com.example.backend.dto.AirlineDTO.FlightDetailsDTO(
+                    f.departureDate,
+                    f.arrivalDate,
+                    f.status,
+                    dep.airportName,
+                    dep.city,
+                    arr.airportName,
+                    arr.city,
+                    f.planeType,
+                    tt.typeName,
+                    tt.price,
+                    al.logoUrl,
+                    al.airlineName
+                )
+                FROM Flight f
+                LEFT JOIN f.airline al
+                LEFT JOIN f.departureAirport dep
+                LEFT JOIN f.arrivalAirport arr
+                LEFT JOIN TripType tt ON tt.flight = f
+                WHERE f.flightID = :flightId
+            """)
     List<FlightDetailsDTO> getFlightDetails(@Param("flightId") Integer flightId);
 
-
-    @EntityGraph(attributePaths = {"airline", "departureAirport", "arrivalAirport"})
+    @EntityGraph(attributePaths = { "airline", "departureAirport", "arrivalAirport" })
     Page<Flight> findAll(Pageable pageable);
 
+    // @Query("SELECT f.tripsTypes.quantity - FROM Flight f WHERE f.flightID =
+    // :flightID AND f.tripsTypes.typeID = :tripTypeID")
+    // Integer findAvailableSeatsByFlightIDAndTripTypeID(Integer flightID, Integer
+    // tripTypeID);
+    Flight getByFlightID(Integer flightID);
+
+    @EntityGraph(attributePaths = { "airline", "departureAirport", "arrivalAirport" })
+    @Query("SELECT f FROM Flight f WHERE f.departureDate > CURRENT_TIMESTAMP")
+    Page<Flight> findAllAvailableFlight(Pageable pageable);
 
 }

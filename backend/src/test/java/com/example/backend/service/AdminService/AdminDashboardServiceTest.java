@@ -1,18 +1,17 @@
 package com.example.backend.service.AdminService;
 
 import com.example.backend.dto.AdminDashboard.*;
-import com.example.backend.entity.Airline;
-import com.example.backend.entity.Hotel;
-import com.example.backend.entity.User;
-import com.example.backend.repository.AirlineRepository;
-import com.example.backend.repository.HotelRepository;
-import com.example.backend.repository.UserRepository;
+import com.example.backend.entity.*;
+import com.example.backend.exception.BadRequestException;
+import com.example.backend.exception.ResourceNotFoundException;
+import com.example.backend.repository.*;
 import com.example.backend.service.SystemAdminService.AdminDashboardService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -24,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -41,6 +41,12 @@ class AdminDashboardServiceTest {
 
     @Mock
     private AirlineRepository airlineRepository;
+
+    @Mock
+    private FlightReviewRepository flightReviewRepository;
+
+    @Mock
+    private HotelReviewRepository hotelReviewRepository;
 
     @InjectMocks
     private AdminDashboardService adminDashboardService;
@@ -820,6 +826,582 @@ class AdminDashboardServiceTest {
                     any(),
                     any(Pageable.class)
             );
+        }
+    }
+
+    @Nested
+    class FlaggedReviewsTest {
+
+        private FlightReview testFlightReview;
+        private HotelReview testHotelReview;
+
+        @BeforeEach
+        void setUp() {
+            // Initialize test flight review
+            testFlightReview = new FlightReview();
+            testFlightReview.setId(1);
+            testFlightReview.setUserId(100);
+            testFlightReview.setFlightId(200);
+            testFlightReview.setComment("Toxic flight comment");
+            testFlightReview.setToxicFlag(true);
+            testFlightReview.setRating(3.5f);
+
+            // Initialize test hotel review
+            testHotelReview = new HotelReview();
+            testHotelReview.setReviewId(1);
+//            testHotelReview.setUser(100);
+//            testHotelReview.setHotel(300);
+            testHotelReview.setComment("Toxic hotel comment");
+            testHotelReview.setToxicFlag(true);
+            testHotelReview.setRating(2.5f);
+        }
+
+        // ==================== GET HOTEL FLAGGED REVIEWS TESTS ====================
+
+        @Test
+        @DisplayName("Get Hotel Flagged Reviews - Success with results")
+        void testGetHotelFlaggedReviews_Success() {
+            // Arrange
+            int page = 0;
+            int size = 10;
+
+            FlaggedReviewDTO review1 = new FlaggedReviewDTO();
+            FlaggedReviewDTO review2 = new FlaggedReviewDTO();
+            FlaggedReviewDTO review3 = new FlaggedReviewDTO();
+
+            Page<FlaggedReviewDTO> expectedPage = new PageImpl<>(
+                    Arrays.asList(review1, review2, review3),
+                    PageRequest.of(page, size),
+                    3
+            );
+
+            when(hotelReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(expectedPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getHotelFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(3, result.getContent().size());
+            assertEquals(3, result.getTotalElements());
+            assertEquals(page, result.getNumber());
+            assertEquals(size, result.getSize());
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(hotelReviewRepository).findFlaggedReviews(pageableCaptor.capture());
+
+            Pageable capturedPageable = pageableCaptor.getValue();
+            assertEquals(page, capturedPageable.getPageNumber());
+            assertEquals(size, capturedPageable.getPageSize());
+        }
+
+        @Test
+        @DisplayName("Get Hotel Flagged Reviews - Empty results")
+        void testGetHotelFlaggedReviews_EmptyResults() {
+            // Arrange
+            int page = 0;
+            int size = 10;
+
+            Page<FlaggedReviewDTO> emptyPage = new PageImpl<>(
+                    Collections.emptyList(),
+                    PageRequest.of(page, size),
+                    0
+            );
+
+            when(hotelReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(emptyPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getHotelFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.getContent().isEmpty());
+            assertEquals(0, result.getTotalElements());
+            verify(hotelReviewRepository).findFlaggedReviews(any(Pageable.class));
+        }
+
+        @Test
+        @DisplayName("Get Hotel Flagged Reviews - Different page and size")
+        void testGetHotelFlaggedReviews_DifferentPagination() {
+            // Arrange
+            int page = 2;
+            int size = 20;
+
+            Page<FlaggedReviewDTO> expectedPage = new PageImpl<>(
+                    Collections.emptyList(),
+                    PageRequest.of(page, size),
+                    0
+            );
+
+            when(hotelReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(expectedPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getHotelFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(hotelReviewRepository).findFlaggedReviews(pageableCaptor.capture());
+
+            Pageable capturedPageable = pageableCaptor.getValue();
+            assertEquals(page, capturedPageable.getPageNumber());
+            assertEquals(size, capturedPageable.getPageSize());
+        }
+
+        // ==================== GET AIRLINE FLAGGED REVIEWS TESTS ====================
+
+        @Test
+        @DisplayName("Get Airline Flagged Reviews - Success with results")
+        void testGetAirlineFlaggedReviews_Success() {
+            // Arrange
+            int page = 0;
+            int size = 10;
+
+            FlaggedReviewDTO review1 = new FlaggedReviewDTO();
+            FlaggedReviewDTO review2 = new FlaggedReviewDTO();
+
+            Page<FlaggedReviewDTO> expectedPage = new PageImpl<>(
+                    Arrays.asList(review1, review2),
+                    PageRequest.of(page, size),
+                    2
+            );
+
+            when(flightReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(expectedPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getAirlineFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            assertEquals(2, result.getContent().size());
+            assertEquals(2, result.getTotalElements());
+            assertEquals(page, result.getNumber());
+            assertEquals(size, result.getSize());
+
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(flightReviewRepository).findFlaggedReviews(pageableCaptor.capture());
+
+            Pageable capturedPageable = pageableCaptor.getValue();
+            assertEquals(page, capturedPageable.getPageNumber());
+            assertEquals(size, capturedPageable.getPageSize());
+        }
+
+        @Test
+        @DisplayName("Get Airline Flagged Reviews - Empty results")
+        void testGetAirlineFlaggedReviews_EmptyResults() {
+            // Arrange
+            int page = 0;
+            int size = 10;
+
+            Page<FlaggedReviewDTO> emptyPage = new PageImpl<>(
+                    Collections.emptyList(),
+                    PageRequest.of(page, size),
+                    0
+            );
+
+            when(flightReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(emptyPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getAirlineFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.getContent().isEmpty());
+            assertEquals(0, result.getTotalElements());
+            verify(flightReviewRepository).findFlaggedReviews(any(Pageable.class));
+        }
+
+        @Test
+        @DisplayName("Get Airline Flagged Reviews - Different page and size")
+        void testGetAirlineFlaggedReviews_DifferentPagination() {
+            // Arrange
+            int page = 3;
+            int size = 15;
+
+            Page<FlaggedReviewDTO> expectedPage = new PageImpl<>(
+                    Collections.emptyList(),
+                    PageRequest.of(page, size),
+                    0
+            );
+
+            when(flightReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(expectedPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getAirlineFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            verify(flightReviewRepository).findFlaggedReviews(pageableCaptor.capture());
+
+            Pageable capturedPageable = pageableCaptor.getValue();
+            assertEquals(page, capturedPageable.getPageNumber());
+            assertEquals(size, capturedPageable.getPageSize());
+        }
+
+        // ==================== DELETE FLIGHT FLAGGED REVIEW TESTS ====================
+
+        @Test
+        @DisplayName("Delete Flight Flagged Review - Success")
+        void testDeleteFlightFlaggedReview_Success() {
+            // Arrange
+            int reviewID = 1;
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.of(testFlightReview));
+
+            // Act
+            adminDashboardService.deleteFlightFlaggedReview(reviewID);
+
+            // Assert
+            verify(flightReviewRepository).findById(reviewID);
+            verify(flightReviewRepository).delete(testFlightReview);
+        }
+
+        @Test
+        @DisplayName("Delete Flight Flagged Review - Review not found")
+        void testDeleteFlightFlaggedReview_ReviewNotFound() {
+            // Arrange
+            int reviewID = 999;
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> adminDashboardService.deleteFlightFlaggedReview(reviewID)
+            );
+
+            assertEquals("Review not found", exception.getMessage());
+            verify(flightReviewRepository).findById(reviewID);
+            verify(flightReviewRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Delete Flight Flagged Review - Review not flagged as toxic")
+        void testDeleteFlightFlaggedReview_NotToxic() {
+            // Arrange
+            int reviewID = 1;
+            testFlightReview.setToxicFlag(false);
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.of(testFlightReview));
+
+            // Act & Assert
+            BadRequestException exception = assertThrows(
+                    BadRequestException.class,
+                    () -> adminDashboardService.deleteFlightFlaggedReview(reviewID)
+            );
+
+            assertEquals("Can't delete this review", exception.getMessage());
+            verify(flightReviewRepository).findById(reviewID);
+            verify(flightReviewRepository, never()).delete(any());
+        }
+
+        // ==================== DELETE HOTEL FLAGGED REVIEW TESTS ====================
+
+        @Test
+        @DisplayName("Delete Hotel Flagged Review - Success")
+        void testDeleteHotelFlaggedReview_Success() {
+            // Arrange
+            int reviewID = 1;
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act
+            adminDashboardService.deleteHotelFlaggedReview(reviewID);
+
+            // Assert
+            verify(hotelReviewRepository).findById(reviewID);
+            verify(hotelReviewRepository).delete(testHotelReview);
+        }
+
+        @Test
+        @DisplayName("Delete Hotel Flagged Review - Review not found")
+        void testDeleteHotelFlaggedReview_ReviewNotFound() {
+            // Arrange
+            int reviewID = 999;
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> adminDashboardService.deleteHotelFlaggedReview(reviewID)
+            );
+
+            assertEquals("Review not found", exception.getMessage());
+            verify(hotelReviewRepository).findById(reviewID);
+            verify(hotelReviewRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Delete Hotel Flagged Review - Review not flagged as toxic")
+        void testDeleteHotelFlaggedReview_NotToxic() {
+            // Arrange
+            int reviewID = 1;
+            testHotelReview.setToxicFlag(false);
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act & Assert
+            BadRequestException exception = assertThrows(
+                    BadRequestException.class,
+                    () -> adminDashboardService.deleteHotelFlaggedReview(reviewID)
+            );
+
+            assertEquals("Can't delete this review", exception.getMessage());
+            verify(hotelReviewRepository).findById(reviewID);
+            verify(hotelReviewRepository, never()).delete(any());
+        }
+
+        @Test
+        @DisplayName("Delete Hotel Flagged Review - Toxic flag is false explicitly")
+        void testDeleteHotelFlaggedReview_ExplicitlyFalse() {
+            // Arrange
+            int reviewID = 1;
+            testHotelReview.setToxicFlag(false);
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act & Assert
+            BadRequestException exception = assertThrows(
+                    BadRequestException.class,
+                    () -> adminDashboardService.deleteHotelFlaggedReview(reviewID)
+            );
+
+            assertEquals("Can't delete this review", exception.getMessage());
+            verify(hotelReviewRepository, never()).delete(any());
+        }
+
+        // ==================== APPROVE FLIGHT FLAGGED REVIEW TESTS ====================
+
+        @Test
+        @DisplayName("Approve Flight Flagged Review - Success")
+        void testApproveFlightFlaggedReview_Success() {
+            // Arrange
+            int reviewID = 1;
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.of(testFlightReview));
+
+            // Act
+            adminDashboardService.approveFlightFlaggedReview(reviewID);
+
+            // Assert
+            ArgumentCaptor<FlightReview> reviewCaptor = ArgumentCaptor.forClass(FlightReview.class);
+            verify(flightReviewRepository).findById(reviewID);
+            verify(flightReviewRepository).save(reviewCaptor.capture());
+
+            FlightReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.getToxicFlag());
+            assertEquals(testFlightReview.getId(), savedReview.getId());
+        }
+
+        @Test
+        @DisplayName("Approve Flight Flagged Review - Review not found")
+        void testApproveFlightFlaggedReview_ReviewNotFound() {
+            // Arrange
+            int reviewID = 999;
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> adminDashboardService.approveFlightFlaggedReview(reviewID)
+            );
+
+            assertEquals("Review not found", exception.getMessage());
+            verify(flightReviewRepository).findById(reviewID);
+            verify(flightReviewRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Approve Flight Flagged Review - Already approved review")
+        void testApproveFlightFlaggedReview_AlreadyApproved() {
+            // Arrange
+            int reviewID = 1;
+            testFlightReview.setToxicFlag(false);
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.of(testFlightReview));
+
+            // Act
+            adminDashboardService.approveFlightFlaggedReview(reviewID);
+
+            // Assert - Should still process (idempotent operation)
+            ArgumentCaptor<FlightReview> reviewCaptor = ArgumentCaptor.forClass(FlightReview.class);
+            verify(flightReviewRepository).save(reviewCaptor.capture());
+
+            FlightReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.getToxicFlag());
+        }
+
+        @Test
+        @DisplayName("Approve Flight Flagged Review - Changes flag from true to false")
+        void testApproveFlightFlaggedReview_ChangesFlagCorrectly() {
+            // Arrange
+            int reviewID = 1;
+            testFlightReview.setToxicFlag(true);
+            when(flightReviewRepository.findById(reviewID)).thenReturn(Optional.of(testFlightReview));
+
+            // Act
+            adminDashboardService.approveFlightFlaggedReview(reviewID);
+
+            // Assert
+            ArgumentCaptor<FlightReview> reviewCaptor = ArgumentCaptor.forClass(FlightReview.class);
+            verify(flightReviewRepository).save(reviewCaptor.capture());
+
+            FlightReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.getToxicFlag());
+            // Verify other fields remain unchanged
+            assertEquals(testFlightReview.getComment(), savedReview.getComment());
+            assertEquals(testFlightReview.getRating(), savedReview.getRating());
+        }
+
+        // ==================== APPROVE HOTEL FLAGGED REVIEW TESTS ====================
+
+        @Test
+        @DisplayName("Approve Hotel Flagged Review - Success")
+        void testApproveHotelFlaggedReview_Success() {
+            // Arrange
+            int reviewID = 1;
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act
+            adminDashboardService.approveHotelFlaggedReview(reviewID);
+
+            // Assert
+            ArgumentCaptor<HotelReview> reviewCaptor = ArgumentCaptor.forClass(HotelReview.class);
+            verify(hotelReviewRepository).findById(reviewID);
+            verify(hotelReviewRepository).save(reviewCaptor.capture());
+
+            HotelReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.isToxicFlag());
+            assertEquals(testHotelReview.getReviewId(), savedReview.getReviewId());
+        }
+
+        @Test
+        @DisplayName("Approve Hotel Flagged Review - Review not found")
+        void testApproveHotelFlaggedReview_ReviewNotFound() {
+            // Arrange
+            int reviewID = 999;
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.empty());
+
+            // Act & Assert
+            ResourceNotFoundException exception = assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> adminDashboardService.approveHotelFlaggedReview(reviewID)
+            );
+
+            assertEquals("Review not found", exception.getMessage());
+            verify(hotelReviewRepository).findById(reviewID);
+            verify(hotelReviewRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("Approve Hotel Flagged Review - Already approved review")
+        void testApproveHotelFlaggedReview_AlreadyApproved() {
+            // Arrange
+            int reviewID = 1;
+            testHotelReview.setToxicFlag(false);
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act
+            adminDashboardService.approveHotelFlaggedReview(reviewID);
+
+            // Assert - Should still process (idempotent operation)
+            ArgumentCaptor<HotelReview> reviewCaptor = ArgumentCaptor.forClass(HotelReview.class);
+            verify(hotelReviewRepository).save(reviewCaptor.capture());
+
+            HotelReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.isToxicFlag());
+        }
+
+        @Test
+        @DisplayName("Approve Hotel Flagged Review - Changes flag from true to false")
+        void testApproveHotelFlaggedReview_ChangesFlagCorrectly() {
+            // Arrange
+            int reviewID = 1;
+            testHotelReview.setToxicFlag(true);
+            when(hotelReviewRepository.findById(reviewID)).thenReturn(Optional.of(testHotelReview));
+
+            // Act
+            adminDashboardService.approveHotelFlaggedReview(reviewID);
+
+            // Assert
+            ArgumentCaptor<HotelReview> reviewCaptor = ArgumentCaptor.forClass(HotelReview.class);
+            verify(hotelReviewRepository).save(reviewCaptor.capture());
+
+            HotelReview savedReview = reviewCaptor.getValue();
+            assertFalse(savedReview.isToxicFlag());
+            // Verify other fields remain unchanged
+            assertEquals(testHotelReview.getComment(), savedReview.getComment());
+            assertEquals(testHotelReview.getRating(), savedReview.getRating());
+        }
+
+        @Test
+        @DisplayName("Get Airline Flagged Reviews - Large page number")
+        void testGetAirlineFlaggedReviews_LargePage() {
+            // Arrange
+            int page = 1000;
+            int size = 10;
+
+            Page<FlaggedReviewDTO> emptyPage = new PageImpl<>(
+                    Collections.emptyList(),
+                    PageRequest.of(page, size),
+                    0
+            );
+
+            when(flightReviewRepository.findFlaggedReviews(any(Pageable.class)))
+                    .thenReturn(emptyPage);
+
+            // Act
+            Page<FlaggedReviewDTO> result = adminDashboardService.getAirlineFlaggedReviews(page, size);
+
+            // Assert
+            assertNotNull(result);
+            assertTrue(result.getContent().isEmpty());
+        }
+
+        @Test
+        @DisplayName("Delete Flight Flagged Review - Multiple deletes of same review")
+        void testDeleteFlightFlaggedReview_MultipleDeletes() {
+            // Arrange
+            int reviewID = 1;
+            when(flightReviewRepository.findById(reviewID))
+                    .thenReturn(Optional.of(testFlightReview))
+                    .thenReturn(Optional.empty()); // Second call returns empty (review deleted)
+
+            // Act - First delete
+            adminDashboardService.deleteFlightFlaggedReview(reviewID);
+
+            // Assert - Second delete should throw exception
+            assertThrows(
+                    ResourceNotFoundException.class,
+                    () -> adminDashboardService.deleteFlightFlaggedReview(reviewID)
+            );
+
+            verify(flightReviewRepository, times(2)).findById(reviewID);
+            verify(flightReviewRepository, times(1)).delete(testFlightReview);
+        }
+
+        @Test
+        @DisplayName("Approve then Delete Flight Review - Workflow test")
+        void testFlightReview_ApproveFollowedByDeleteFails() {
+            // Arrange
+            int reviewID = 1;
+            testFlightReview.setToxicFlag(true);
+
+            when(flightReviewRepository.findById(reviewID))
+                    .thenReturn(Optional.of(testFlightReview));
+
+            // Act - Approve first
+            adminDashboardService.approveFlightFlaggedReview(reviewID);
+
+            // The review now has toxicFlag = false
+            // Trying to delete should fail
+
+            // Assert
+            BadRequestException exception = assertThrows(
+                    BadRequestException.class,
+                    () -> adminDashboardService.deleteFlightFlaggedReview(reviewID)
+            );
+
+            assertEquals("Can't delete this review", exception.getMessage());
         }
     }
 }
