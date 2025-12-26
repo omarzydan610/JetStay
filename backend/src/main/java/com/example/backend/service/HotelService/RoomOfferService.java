@@ -66,11 +66,6 @@ public class RoomOfferService {
         return offers.stream().map(RoomOfferMapper::mapToResponse).collect(Collectors.toList());
     }
 
-    public List<RoomOfferResponse> getPublicRoomOffersByHotel(Integer hotelId) {
-        List<RoomOffer> offers = roomOfferRepository.findByApplicableHotel_HotelID(hotelId);
-        return offers.stream().map(RoomOfferMapper::mapToResponse).collect(Collectors.toList());
-    }
-
     @Transactional
     public void deleteRoomOffer(Integer offerId, Integer hotelId) {
         RoomOffer offer = roomOfferRepository.findById(offerId)

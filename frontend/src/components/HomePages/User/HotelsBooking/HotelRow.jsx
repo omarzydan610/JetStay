@@ -11,27 +11,21 @@ export default function HotelRow({ hotel, onSelect, getHotelImage }) {
       className="w-full bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-sky-300 hover:shadow-lg transition text-left"
     >
       <div className="flex gap-6 items-center">
-        {/* Hotel Images */}
-        <div className="flex gap-2 flex-shrink-0">
-          {Array.isArray(getHotelImage(hotel)) ? (
-            getHotelImage(hotel).map((img, idx) => (
-              <div key={idx} className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200">
-                <img
-                  src={img}
-                  alt={`${hotel.hotelName} ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))
-          ) : (
-            <div className="w-32 h-32 rounded-lg overflow-hidden bg-gray-200">
-              <img
-                src={getHotelImage(hotel)}
-                alt={hotel.hotelName}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+        {/* Hotel Logo */}
+        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0 flex items-center justify-center">
+          <img
+            src={
+              hotel.logoUrl
+                ? hotel.logoUrl
+                : "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI="
+            }
+            alt={hotel.name || "Hotel image"}
+            className="w-full h-full object-contain p-1"
+            onError={(e) => {
+              e.target.src =
+                "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI=";
+            }}
+          />
         </div>
 
         {/* Hotel Info */}

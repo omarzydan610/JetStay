@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
-import { addFlightOffer, getFlightOffers, deleteFlightOffer, getFlights } from "../../../../services/Airline/flightsService";
+import {
+  addFlightOffer,
+  getFlightOffers,
+  deleteFlightOffer,
+  getFlights,
+} from "../../../../services/AirlineServices/flightsService";
 import GlassCard from "../../Airline/GlassCard";
 
 export default function FlightOfferManagement() {
@@ -15,7 +20,7 @@ export default function FlightOfferManagement() {
     startDate: "",
     endDate: "",
     maxUsage: "",
-    description: ""
+    description: "",
   });
 
   useEffect(() => {
@@ -25,11 +30,11 @@ export default function FlightOfferManagement() {
   const loadFlights = async () => {
     try {
       const data = await getFlights();
-      
+
       // Handle different response structures
       if (Array.isArray(data)) {
         setFlights(data);
-      } else if (data && typeof data === 'object') {
+      } else if (data && typeof data === "object") {
         if (Array.isArray(data.data)) {
           setFlights(data.data);
         } else if (Array.isArray(data.flights)) {
@@ -60,7 +65,7 @@ export default function FlightOfferManagement() {
 
       if (Array.isArray(data)) {
         setOffers(data);
-      } else if (data && typeof data === 'object') {
+      } else if (data && typeof data === "object") {
         if (Array.isArray(data.data)) {
           setOffers(data.data);
         } else if (Array.isArray(data.offers)) {
@@ -80,7 +85,6 @@ export default function FlightOfferManagement() {
     }
   }, [selectedFlightId]);
 
-
   useEffect(() => {
     if (selectedFlightId) {
       loadOffers();
@@ -89,39 +93,38 @@ export default function FlightOfferManagement() {
     }
   }, [selectedFlightId, loadOffers]);
 
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields
     if (!selectedFlightId) {
       toast.error("Please select a flight");
       return;
     }
-    
+
     if (!formData.offerName.trim()) {
       toast.error("Offer name is required");
       return;
     }
-    
+
     if (!formData.discountValue || parseFloat(formData.discountValue) <= 0) {
       toast.error("Discount value must be greater than 0");
       return;
     }
-    
+
     if (!formData.startDate || !formData.endDate) {
       toast.error("Start date and end date are required");
       return;
     }
-    
+
     if (new Date(formData.startDate) >= new Date(formData.endDate)) {
       toast.error("End date must be after start date");
       return;
@@ -152,12 +155,14 @@ export default function FlightOfferManagement() {
         startDate: "",
         endDate: "",
         maxUsage: "",
-        description: ""
+        description: "",
       });
       loadOffers();
     } catch (error) {
       console.error("Error adding flight offer:", error);
-      toast.error(error.response?.data?.message || "Failed to add flight offer");
+      toast.error(
+        error.response?.data?.message || "Failed to add flight offer"
+      );
     } finally {
       setLoading(false);
     }
@@ -181,12 +186,12 @@ export default function FlightOfferManagement() {
 
   const formatDate = (dateString) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      return new Date(dateString).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
     } catch (error) {
       return "Invalid Date";
@@ -194,8 +199,8 @@ export default function FlightOfferManagement() {
   };
 
   const getSelectedFlightInfo = () => {
-    return Array.isArray(flights) 
-      ? flights.find(flight => {
+    return Array.isArray(flights)
+      ? flights.find((flight) => {
           const flightId = flight.flightID || flight.id || flight.flightId;
           return String(flightId) === String(selectedFlightId);
         })
@@ -205,13 +210,15 @@ export default function FlightOfferManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Flight Offers Management</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          Flight Offers Management
+        </h2>
         <button
           onClick={() => setShowForm(!showForm)}
           disabled={!selectedFlightId}
           className={`px-4 py-2 rounded-lg transition ${
-            selectedFlightId 
-              ? "bg-blue-600 text-white hover:bg-blue-700" 
+            selectedFlightId
+              ? "bg-blue-600 text-white hover:bg-blue-700"
               : "bg-gray-300 text-gray-500 cursor-not-allowed"
           }`}
         >
@@ -222,24 +229,34 @@ export default function FlightOfferManagement() {
       {/* Flight Selection */}
       <GlassCard>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Select Flight</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Flight
+          </label>
           <select
             value={selectedFlightId}
             onChange={(e) => setSelectedFlightId(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">Choose a flight...</option>
-            {Array.isArray(flights) && flights.map(flight => {
-              const flightId = flight.flightID || flight.id || flight.flightId;
-              const departure = flight.departureAirport?.airportName || flight.departure || "Unknown";
-              const arrival = flight.arrivalAirport?.airportName || flight.arrival || "Unknown";
-              
-              return (
-                <option key={flightId} value={flightId}>
-                  Flight {flightId} - {departure} to {arrival}
-                </option>
-              );
-            })}
+            {Array.isArray(flights) &&
+              flights.map((flight) => {
+                const flightId =
+                  flight.flightID || flight.id || flight.flightId;
+                const departure =
+                  flight.departureAirport?.airportName ||
+                  flight.departure ||
+                  "Unknown";
+                const arrival =
+                  flight.arrivalAirport?.airportName ||
+                  flight.arrival ||
+                  "Unknown";
+
+                return (
+                  <option key={flightId} value={flightId}>
+                    Flight {flightId} - {departure} to {arrival}
+                  </option>
+                );
+              })}
           </select>
         </div>
       </GlassCard>
@@ -252,8 +269,11 @@ export default function FlightOfferManagement() {
             </h3>
             {getSelectedFlightInfo() && (
               <p className="text-sm text-gray-600 mt-1">
-                {getSelectedFlightInfo().departureAirport?.airportName || "Unknown"} → 
-                {getSelectedFlightInfo().arrivalAirport?.airportName || "Unknown"}
+                {getSelectedFlightInfo().departureAirport?.airportName ||
+                  "Unknown"}{" "}
+                →
+                {getSelectedFlightInfo().arrivalAirport?.airportName ||
+                  "Unknown"}
               </p>
             )}
           </div>
@@ -296,7 +316,9 @@ export default function FlightOfferManagement() {
                   />
                   <span className="absolute left-3 top-2 text-gray-500">%</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Enter discount percentage (0-100)</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Enter discount percentage (0-100)
+                </p>
               </div>
 
               {/* Max Usage (Optional) */}
@@ -313,7 +335,9 @@ export default function FlightOfferManagement() {
                   placeholder="Leave blank for unlimited"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">Leave empty for unlimited usage</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Leave empty for unlimited usage
+                </p>
               </div>
 
               {/* Start Date */}
@@ -375,7 +399,7 @@ export default function FlightOfferManagement() {
                     startDate: "",
                     endDate: "",
                     maxUsage: "",
-                    description: ""
+                    description: "",
                   });
                 }}
                 className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
@@ -389,9 +413,25 @@ export default function FlightOfferManagement() {
               >
                 {loading ? (
                   <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     Creating Offer...
                   </span>
@@ -414,7 +454,9 @@ export default function FlightOfferManagement() {
                   Offers for Flight {selectedFlightId}
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {Array.isArray(offers) ? `${offers.length} offer(s) found` : "Loading offers..."}
+                  {Array.isArray(offers)
+                    ? `${offers.length} offer(s) found`
+                    : "Loading offers..."}
                 </p>
               </div>
               <button
@@ -433,46 +475,67 @@ export default function FlightOfferManagement() {
               </div>
             ) : !Array.isArray(offers) || offers.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
                 <p className="mt-2">No offers found for this flight</p>
                 <p className="text-sm">Click "Add New Offer" to create one</p>
               </div>
             ) : (
               <div className="space-y-4">
-                {offers.map(offer => {
+                {offers.map((offer) => {
                   const offerId = offer.flightOfferId || offer.id;
                   const isActive = offer.isActive !== false;
                   const currentUsage = offer.currentUsage || 0;
                   const maxUsage = offer.maxUsage;
-                  
+
                   return (
-                    <div key={offerId} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div
+                      key={offerId}
+                      className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <h4 className="font-semibold text-gray-800">{offer.offerName}</h4>
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              isActive 
-                                ? "bg-green-100 text-green-800" 
-                                : "bg-red-100 text-red-800"
-                            }`}>
+                            <h4 className="font-semibold text-gray-800">
+                              {offer.offerName}
+                            </h4>
+                            <span
+                              className={`px-2 py-1 text-xs rounded-full ${
+                                isActive
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
                               {isActive ? "Active" : "Inactive"}
                             </span>
                             <span className="text-sm text-blue-600 font-medium">
                               {offer.discountValue}% OFF
                             </span>
                           </div>
-                          
+
                           <p className="text-sm text-gray-600 mb-2">
-                            <span className="font-medium">Valid:</span> {formatDate(offer.startDate)} - {formatDate(offer.endDate)}
+                            <span className="font-medium">Valid:</span>{" "}
+                            {formatDate(offer.startDate)} -{" "}
+                            {formatDate(offer.endDate)}
                           </p>
-                          
+
                           {offer.description && (
-                            <p className="text-sm text-gray-600 mb-2">{offer.description}</p>
+                            <p className="text-sm text-gray-600 mb-2">
+                              {offer.description}
+                            </p>
                           )}
-                          
+
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             {maxUsage && (
                               <span>
@@ -483,11 +546,14 @@ export default function FlightOfferManagement() {
                               <span>Used {currentUsage} times</span>
                             )}
                             <span>
-                              Created: {offer.createdAt ? formatDate(offer.createdAt) : "N/A"}
+                              Created:{" "}
+                              {offer.createdAt
+                                ? formatDate(offer.createdAt)
+                                : "N/A"}
                             </span>
                           </div>
                         </div>
-                        
+
                         <button
                           onClick={() => handleDelete(offerId)}
                           disabled={loading}

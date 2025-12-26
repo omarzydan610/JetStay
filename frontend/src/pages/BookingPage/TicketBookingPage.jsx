@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import ticketBookingService from "../../services/Airline/ticketBookingService";
+import ticketBookingService from "../../services/AirlineServices/ticketBookingService";
 import Navbar from "../../components/Navbar";
 import { calculateDiscountedPrice } from "../../utils/offerUtils";
 import {
@@ -76,7 +76,10 @@ export default function TicketBookingPage() {
   const getPricePerTicket = () => {
     if (!selectedTripType?.price) return 0;
     return appliedOffer
-      ? calculateDiscountedPrice(selectedTripType.price, appliedOffer.discountValue)
+      ? calculateDiscountedPrice(
+          selectedTripType.price,
+          appliedOffer.discountValue
+        )
       : selectedTripType.price;
   };
 
@@ -110,17 +113,23 @@ export default function TicketBookingPage() {
 
       // Validate that all required IDs are present
       if (!bookingData.airlineId) {
-        toast.error("Airline ID is missing. Please try selecting the flight again.");
+        toast.error(
+          "Airline ID is missing. Please try selecting the flight again."
+        );
         setLoading(false);
         return;
       }
       if (!bookingData.flightId) {
-        toast.error("Flight ID is missing. Please try selecting the flight again.");
+        toast.error(
+          "Flight ID is missing. Please try selecting the flight again."
+        );
         setLoading(false);
         return;
       }
       if (!bookingData.tripTypeId) {
-        toast.error("Trip Type ID is missing. Please try selecting the trip type again.");
+        toast.error(
+          "Trip Type ID is missing. Please try selecting the trip type again."
+        );
         setLoading(false);
         return;
       }
@@ -133,7 +142,9 @@ export default function TicketBookingPage() {
       toast.success("Tickets booked successfully!");
 
       // Prepare ticket data for payment page
-      const departureCode = getAirportCode(flight.departureAirport?.airportName);
+      const departureCode = getAirportCode(
+        flight.departureAirport?.airportName
+      );
       const arrivalCode = getAirportCode(flight.arrivalAirport?.airportName);
 
       const ticketData = {
@@ -144,10 +155,18 @@ export default function TicketBookingPage() {
           name: flight.airline?.airlineName || "Airline",
         },
         flight: {
-          departure: `${departureCode} (${flight.departureAirport?.city || ""})`,
+          departure: `${departureCode} (${
+            flight.departureAirport?.city || ""
+          })`,
           arrival: `${arrivalCode} (${flight.arrivalAirport?.city || ""})`,
-          departureTime: formatDate(flight.departureDate) + " at " + formatTime(flight.departureDate),
-          arrivalTime: formatDate(flight.arrivalDate) + " at " + formatTime(flight.arrivalDate),
+          departureTime:
+            formatDate(flight.departureDate) +
+            " at " +
+            formatTime(flight.departureDate),
+          arrivalTime:
+            formatDate(flight.arrivalDate) +
+            " at " +
+            formatTime(flight.arrivalDate),
         },
       };
 
@@ -272,18 +291,37 @@ export default function TicketBookingPage() {
 
                   {/* Selected Trip Type */}
                   {selectedTripType && (
-                    <div className={`mt-4 rounded-lg p-4 ${appliedOffer ? "bg-green-50 border border-green-200" : "bg-cyan-50 border border-cyan-200"}`}>
-                      <p className={`text-sm font-semibold mb-1 ${appliedOffer ? "text-green-900" : "text-cyan-900"}`}>
+                    <div
+                      className={`mt-4 rounded-lg p-4 ${
+                        appliedOffer
+                          ? "bg-green-50 border border-green-200"
+                          : "bg-cyan-50 border border-cyan-200"
+                      }`}
+                    >
+                      <p
+                        className={`text-sm font-semibold mb-1 ${
+                          appliedOffer ? "text-green-900" : "text-cyan-900"
+                        }`}
+                      >
                         Selected Class:
                       </p>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className={`font-bold text-lg ${appliedOffer ? "text-green-700" : "text-cyan-700"}`}>
-                            {selectedTripType.typeName ||
-                              selectedTripType.name}
+                          <p
+                            className={`font-bold text-lg ${
+                              appliedOffer ? "text-green-700" : "text-cyan-700"
+                            }`}
+                          >
+                            {selectedTripType.typeName || selectedTripType.name}
                           </p>
                           {selectedTripType.description && (
-                            <p className={`text-sm ${appliedOffer ? "text-green-600" : "text-cyan-600"}`}>
+                            <p
+                              className={`text-sm ${
+                                appliedOffer
+                                  ? "text-green-600"
+                                  : "text-cyan-600"
+                              }`}
+                            >
                               {selectedTripType.description}
                             </p>
                           )}
@@ -291,7 +329,8 @@ export default function TicketBookingPage() {
                             <div className="mt-2 flex items-center gap-1">
                               <Tag className="w-4 h-4 text-green-600" />
                               <p className="text-xs font-semibold text-green-600">
-                                {appliedOffer.offerName} ({appliedOffer.discountValue}% OFF)
+                                {appliedOffer.offerName} (
+                                {appliedOffer.discountValue}% OFF)
                               </p>
                             </div>
                           )}
@@ -430,7 +469,11 @@ export default function TicketBookingPage() {
                     <span className="text-lg font-bold text-gray-800">
                       Total:
                     </span>
-                    <span className={`text-2xl font-bold ${appliedOffer ? "text-green-600" : "text-sky-600"}`}>
+                    <span
+                      className={`text-2xl font-bold ${
+                        appliedOffer ? "text-green-600" : "text-sky-600"
+                      }`}
+                    >
                       ${calculateTotalPrice().toFixed(2)}
                     </span>
                   </div>

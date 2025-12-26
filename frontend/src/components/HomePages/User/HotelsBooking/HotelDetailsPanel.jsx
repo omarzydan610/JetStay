@@ -36,15 +36,20 @@ export default function HotelDetailsPanel({
     fetchRoomOffers();
   }, [hotel?.hotelID]);
 
-  const getBestOfferForPrice = useCallback((price) => {
-    const activeOffers = roomOffers.filter(offer => isOfferActive(offer));
-    if (activeOffers.length === 0) return null;
+  const getBestOfferForPrice = useCallback(
+    (price) => {
+      const activeOffers = roomOffers.filter((offer) => isOfferActive(offer));
+      if (activeOffers.length === 0) return null;
 
-    // For simplicity, return the first active offer (could be improved to find best)
-    return activeOffers[0];
-  }, [roomOffers]);
+      // For simplicity, return the first active offer (could be improved to find best)
+      return activeOffers[0];
+    },
+    [roomOffers]
+  );
 
-  const activeOffersCount = roomOffers.filter(offer => isOfferActive(offer)).length;
+  const activeOffersCount = roomOffers.filter((offer) =>
+    isOfferActive(offer)
+  ).length;
 
   return (
     <>
@@ -57,23 +62,19 @@ export default function HotelDetailsPanel({
       >
         {/* Header */}
         <div className="relative h-64 bg-gradient-to-br from-sky-400 to-cyan-400 flex items-end">
-          {hotel?.image ? (
-            <img
-              src={hotel.image}
-              alt={hotel?.hotelName}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          ) : (
-            <img
-              src={
-                placeholderImages?.[
-                parseInt(hotel?.hotelID || "0", 10) % (placeholderImages?.length || 1)
-                ]
-              }
-              alt={hotel?.hotelName}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          )}
+          <img
+            src={
+              hotel?.logoUrl
+                ? hotel.logoUrl
+                : "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI="
+            }
+            alt={`${hotel?.hotelName} background`}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => {
+              e.target.src =
+                "https://media.istockphoto.com/id/104731717/photo/luxury-resort.jpg?s=612x612&w=0&k=20&c=cODMSPbYyrn1FHake1xYz9M8r15iOfGz9Aosy9Db7mI=";
+            }}
+          />
           <div className="absolute inset-0 bg-black/30"></div>
           <button
             onClick={onClose}
@@ -82,16 +83,21 @@ export default function HotelDetailsPanel({
             <X size={24} className="text-gray-800" />
           </button>
           <div className="relative z-10 p-6 text-white w-full">
-            <h1 className="text-4xl font-bold mb-2">{hotel?.hotelName || "Hotel"}</h1>
+            <h1 className="text-4xl font-bold mb-2">
+              {hotel?.hotelName || "Hotel"}
+            </h1>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1">
                 <Star size={20} fill="currentColor" />
-                <span className="text-lg font-semibold">{hotel?.hotelRate || "N/A"}</span>
+                <span className="text-lg font-semibold">
+                  {hotel?.hotelRate || "N/A"}
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <MapPinIcon size={20} />
                 <span>
-                  {hotel?.city || "Unknown City"}, {hotel?.country || "Unknown Country"}
+                  {hotel?.city || "Unknown City"},{" "}
+                  {hotel?.country || "Unknown Country"}
                 </span>
               </div>
             </div>
@@ -107,7 +113,8 @@ export default function HotelDetailsPanel({
             <div className="flex items-center gap-3">
               {activeOffersCount > 0 && (
                 <div className="text-sm text-green-600 font-semibold">
-                  {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''}
+                  {activeOffersCount} active offer
+                  {activeOffersCount !== 1 ? "s" : ""}
                 </div>
               )}
               <button
@@ -129,15 +136,19 @@ export default function HotelDetailsPanel({
                     🎉 Special Offers Available!
                   </div>
                   <div className="text-green-700 text-sm">
-                    {activeOffersCount} active offer{activeOffersCount !== 1 ? 's' : ''} for rooms in this hotel
+                    {activeOffersCount} active offer
+                    {activeOffersCount !== 1 ? "s" : ""} for rooms in this hotel
                   </div>
                 </div>
               </div>
-              {roomOffers.filter(offer => isOfferActive(offer)).slice(0, 2).map((offer, index) => (
-                <div key={index} className="mt-2 text-sm text-green-600">
-                  • {offer.offerName}: {offer.discountValue}% off
-                </div>
-              ))}
+              {roomOffers
+                .filter((offer) => isOfferActive(offer))
+                .slice(0, 2)
+                .map((offer, index) => (
+                  <div key={index} className="mt-2 text-sm text-green-600">
+                    • {offer.offerName}: {offer.discountValue}% off
+                  </div>
+                ))}
             </div>
           )}
 
@@ -147,7 +158,9 @@ export default function HotelDetailsPanel({
                 <RoomTypeItem
                   key={roomType.roomTypeID}
                   roomType={roomType}
-                  isSelected={selectedRoomType?.roomTypeID === roomType.roomTypeID}
+                  isSelected={
+                    selectedRoomType?.roomTypeID === roomType.roomTypeID
+                  }
                   onSelect={setSelectedRoomType}
                   getRoomImage={getRoomImage}
                   getBestOffer={getBestOfferForPrice}
@@ -174,17 +187,16 @@ export default function HotelDetailsPanel({
                   });
                 }
               }}
-              className={`w-full py-3 rounded-lg font-bold text-lg transition ${selectedRoomType
-                ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
+              className={`w-full py-3 rounded-lg font-bold text-lg transition ${
+                selectedRoomType
+                  ? "bg-gradient-to-r from-sky-600 to-cyan-600 text-white hover:from-sky-700 hover:to-cyan-700 cursor-pointer"
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
             >
               {selectedRoomType ? "Book Now" : "Select a Room Type"}
             </button>
           </div>
         </div>
-
-
       </motion.div>
       {/* Reviews Modal */}
       <AnimatePresence>
@@ -231,7 +243,6 @@ export default function HotelDetailsPanel({
           </>
         )}
       </AnimatePresence>
-
     </>
   );
 }

@@ -1,87 +1,52 @@
 package com.example.backend.mapper;
 
-import com.example.backend.dto.BookingDTO.BookingResponse;
 import com.example.backend.entity.RoomBooking;
-import com.example.backend.entity.FlightTicket;
+import com.example.backend.entity.BookingTransaction;
+import com.example.backend.dto.BookingDTOs.HotelBookingResponse;
+import com.example.backend.dto.BookingDTOs.HotelBookingResponse.RoomBookingResponse;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BookingHistoryMapper {
 
     /**
-     * Map RoomBooking entity to BookingResponse for hotel bookings
+     * Map BookingTransaction with associated RoomBookings to HotelBookingResponse
+     * 
+     * @param bookingTransaction The booking transaction entity
+     * @param roomBookings       List of room bookings associated with this
+     *                           transaction
+     * @return HotelBookingResponse with transaction details and room booking
+     *         details
      */
-    public static BookingResponse mapHotelBookingToResponse(RoomBooking roomBooking) {
-        BookingResponse response = new BookingResponse();
-        response.setType("HOTEL");
+    public static HotelBookingResponse mapToHotelBookingResponse(
+            BookingTransaction bookingTransaction,
+            List<RoomBooking> roomBookings) {
 
-        // Hotel booking details
-        BookingResponse.HotelBooking hotelBooking = new BookingResponse.HotelBooking();
-        hotelBooking.setBookingId(roomBooking.getBookingId());
-        hotelBooking.setStatus(roomBooking.getBookingTransaction().getStatus().name());
-        hotelBooking.setTotalPrice(roomBooking.getBookingTransaction().getTotalPrice());
-        hotelBooking.setCreatedAt(roomBooking.getBookingTransaction().getBookingDate());
-        hotelBooking.setCheckInDate(roomBooking.getCheckIn());
-        hotelBooking.setCheckOutDate(roomBooking.getCheckOut());
-        hotelBooking.setNumberOfGuests(roomBooking.getBookingTransaction().getNumberOfGuests());
+        if (bookingTransaction == null) {
+            return null;
+        }
 
-        // Room info
-        BookingResponse.RoomInfo roomInfo = new BookingResponse.RoomInfo();
-        roomInfo.setType(roomBooking.getRoomType().getRoomTypeName());
-        roomInfo.setCapacity(roomBooking.getRoomType().getNumberOfGuests());
-        roomInfo.setPrice(roomBooking.getRoomType().getPrice());
-        hotelBooking.setRoom(roomInfo);
+        HotelBookingResponse response = new HotelBookingResponse();
+        response.setBookingTransaction(bookingTransaction);
 
-        // Hotel info
-        BookingResponse.HotelInfo hotelInfo = new BookingResponse.HotelInfo();
-        hotelInfo.setId(roomBooking.getHotel().getHotelID());
-        hotelInfo.setName(roomBooking.getHotel().getHotelName());
-        hotelInfo.setCity(roomBooking.getHotel().getCity());
-        hotelInfo.setCountry(roomBooking.getHotel().getCountry());
-        hotelBooking.setHotel(hotelInfo);
+        // Map room bookings to RoomBookingResponse
+        if (roomBookings != null && !roomBookings.isEmpty()) {
+            List<RoomBookingResponse> roomBookingResponses = roomBookings.stream()
+                    .map(rb -> {
+                        RoomBookingResponse rbResponse = response.new RoomBookingResponse();
+                        if (rb.getRoomType() != null) {
+                            rbResponse.setRoomType(rb.getRoomType().getRoomTypeName());
+                            rbResponse.setPrice(rb.getRoomType().getPrice());
+                        }
+                        rbResponse.setNoOfRooms(rb.getNoOfRooms());
+                        return rbResponse;
+                    })
+                    .collect(Collectors.toList());
 
-        response.setHotelBooking(hotelBooking);
-        return response;
-    }
+            response.setRoomBooking(roomBookingResponses);
+        }
 
-    /**
-     * Map FlightTicket entity to BookingResponse for flight bookings
-     */
-    public static BookingResponse mapFlightBookingToResponse(FlightTicket flightTicket) {
-        BookingResponse response = new BookingResponse();
-        response.setType("FLIGHT");
-
-        // Flight booking details
-        BookingResponse.FlightBooking flightBooking = new BookingResponse.FlightBooking();
-        flightBooking.setTicketId(flightTicket.getTicketId());
-        flightBooking.setIsPaid(flightTicket.getIsPaid());
-        flightBooking.setCreatedAt(flightTicket.getCreatedAt());
-        flightBooking.setFlightDate(flightTicket.getFlightDate());
-        flightBooking.setTotalPrice(flightTicket.getPrice());
-
-        // Trip info
-        BookingResponse.TripInfo tripInfo = new BookingResponse.TripInfo();
-        tripInfo.setType(flightTicket.getTripType().getTypeName());
-        tripInfo.setPrice(flightTicket.getTripType().getPrice().floatValue());
-        flightBooking.setTrip(tripInfo);
-
-        // Flight info
-        BookingResponse.FlightInfo flightInfo = new BookingResponse.FlightInfo();
-        flightInfo.setId(flightTicket.getFlight().getFlightID());
-        flightInfo.setDepartureAirport(flightTicket.getFlight().getDepartureAirport().getAirportName());
-        flightInfo.setArrivalAirport(flightTicket.getFlight().getArrivalAirport().getAirportName());
-        flightInfo.setDepartureCity(flightTicket.getFlight().getDepartureAirport().getCity());
-        flightInfo.setArrivalCity(flightTicket.getFlight().getArrivalAirport().getCity());
-        flightInfo.setDepartureDate(flightTicket.getFlight().getDepartureDate());
-        flightInfo.setArrivalDate(flightTicket.getFlight().getArrivalDate());
-        flightBooking.setFlight(flightInfo);
-
-        // Airline info
-        BookingResponse.AirlineInfo airlineInfo = new BookingResponse.AirlineInfo();
-        airlineInfo.setId(flightTicket.getFlight().getAirline().getAirlineID());
-        airlineInfo.setName(flightTicket.getFlight().getAirline().getAirlineName());
-        airlineInfo.setNationality(flightTicket.getFlight().getAirline().getAirlineNationality());
-        flightBooking.setAirline(airlineInfo);
-
-        response.setFlightBooking(flightBooking);
         return response;
     }
 }

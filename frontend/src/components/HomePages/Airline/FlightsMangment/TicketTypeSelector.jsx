@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { getTicketTypes } from "../../../../services/Airline/flightsService";
+import { getTicketTypes } from "../../../../services/AirlineServices/flightsService";
 
 // Convert lowercase string to Pascal Case (e.g., "first_class" -> "First Class")
 const toPascalCase = (str) => {

@@ -71,7 +71,9 @@ const BookingCard = ({ booking, itemVariants }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
             <div>
               <p className="text-xs text-gray-500 mb-1">Booking ID</p>
-              <p className="font-medium text-gray-900">#{booking.id}</p>
+              <p className="font-medium text-gray-900">
+                #{booking.compositeId || booking.id}
+              </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 mb-1">
@@ -111,7 +113,11 @@ const BookingCard = ({ booking, itemVariants }) => {
               </span>
               <span className="flex items-center gap-1">
                 <Clock size={16} />
-                {calculateNights(booking.checkInDate, booking.checkOutDate)} Night(s)
+                {calculateNights(
+                  booking.checkInDate,
+                  booking.checkOutDate
+                )}{" "}
+                Night(s)
               </span>
             </div>
           )}
@@ -127,7 +133,11 @@ const BookingCard = ({ booking, itemVariants }) => {
             </p>
           </div>
           <button
-            onClick={() => navigate(`/bookings/${booking.id}`)}
+            onClick={() =>
+              navigate(`/bookings/${booking.id}`, {
+                state: { type: booking.type },
+              })
+            }
             className="mt-4 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors"
           >
             View Details

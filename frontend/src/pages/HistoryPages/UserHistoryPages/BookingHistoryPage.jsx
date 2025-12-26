@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Hotel, Plane } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import bookingService from "../../../services/bookingHistoryService";
 import BookingSearchFilters from "../../../components/HistoryComponents/UserHistory/BookingSearchFilters";
@@ -16,6 +16,7 @@ export default function BookingHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("all"); // 'all', 'hotels', 'flights'
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -39,14 +40,16 @@ export default function BookingHistoryPage() {
 
   useEffect(() => {
     fetchBookingHistory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchBookingHistory = async () => {
     setLoading(true);
     try {
-      const response = await bookingService.getBookingHistory();
-      setBookings(response.data || []);
-      setFilteredBookings(response.data || []);
+      const response = await bookingService.getAllBookingHistory();
+      const allBookings = response.data || [];
+      setBookings(allBookings);
+      // Let the effect handle all filtering based on activeTab and other filters
     } catch (error) {
       console.error("Error fetching booking history:", error);
       setBookings([]);
@@ -57,12 +60,15 @@ export default function BookingHistoryPage() {
   };
 
   useEffect(() => {
-    fetchBookingHistory();
-  }, []);
-
-  useEffect(() => {
     const filterBookings = () => {
       let filtered = [...bookings];
+
+      // Apply tab filter
+      if (activeTab === "hotels") {
+        filtered = filtered.filter((booking) => booking.type === "HOTEL");
+      } else if (activeTab === "flights") {
+        filtered = filtered.filter((booking) => booking.type === "FLIGHT");
+      }
 
       // Apply status filter
       if (statusFilter !== "all") {
@@ -75,20 +81,38 @@ export default function BookingHistoryPage() {
       // Apply search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase();
-        filtered = filtered.filter(
-          (booking) =>
-            booking.id?.toString().includes(query) ||
-            booking.room?.hotel?.name?.toLowerCase().includes(query) ||
-            booking.room?.roomNumber?.toLowerCase().includes(query) ||
-            booking.room?.hotel?.location?.toLowerCase().includes(query)
-        );
+
+        filtered = filtered.filter((booking) => {
+          if (booking.type === "HOTEL") {
+            const hotelName = booking.room?.hotel?.name?.toLowerCase() || "";
+            const hotelLocation =
+              booking.room?.hotel?.location?.toLowerCase() || "";
+            return hotelName.includes(query) || hotelLocation.includes(query);
+          } else if (booking.type === "FLIGHT") {
+            const airlineName =
+              booking.ticket?.flight?.airline?.name?.toLowerCase() || "";
+            const departureCity =
+              booking.ticket?.flight?.departureCity?.toLowerCase() || "";
+            const arrivalCity =
+              booking.ticket?.flight?.arrivalCity?.toLowerCase() || "";
+            return (
+              airlineName.includes(query) ||
+              departureCity.includes(query) ||
+              arrivalCity.includes(query)
+            );
+          }
+          return false;
+        });
       }
 
       setFilteredBookings(filtered);
     };
 
     filterBookings();
-  }, [searchQuery, statusFilter, bookings]);
+  }, [searchQuery, statusFilter, bookings, activeTab]);
+
+  const hotelCount = bookings.filter((b) => b.type === "HOTEL").length;
+  const flightCount = bookings.filter((b) => b.type === "FLIGHT").length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-white to-cyan-50 p-8">
@@ -111,6 +135,44 @@ export default function BookingHistoryPage() {
           <p className="text-gray-600 mt-2">
             View all your past bookings and reservations
           </p>
+        </motion.div>
+
+        {/* Tabs */}
+        <motion.div variants={itemVariants} className="mb-6">
+          <div className="flex gap-2 bg-white rounded-xl shadow-lg p-2">
+            <button
+              onClick={() => setActiveTab("all")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
+                activeTab === "all"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              All Bookings ({bookings.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("hotels")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                activeTab === "hotels"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Hotel size={18} />
+              Hotels ({hotelCount})
+            </button>
+            <button
+              onClick={() => setActiveTab("flights")}
+              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all flex items-center justify-center gap-2 ${
+                activeTab === "flights"
+                  ? "bg-sky-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              <Plane size={18} />
+              Flights ({flightCount})
+            </button>
+          </div>
         </motion.div>
 
         {/* Filters */}
@@ -137,13 +199,16 @@ export default function BookingHistoryPage() {
           />
         ) : (
           <div className="space-y-4">
-            {filteredBookings.map((booking) => (
-              <BookingCard
-                key={booking.id}
-                booking={booking}
-                itemVariants={itemVariants}
-              />
-            ))}
+            {filteredBookings.map((booking) => {
+              // Safety check: ensure booking type matches active tab
+              return (
+                <BookingCard
+                  key={booking.compositeId || booking.id}
+                  booking={booking}
+                  itemVariants={itemVariants}
+                />
+              );
+            })}
           </div>
         )}
 

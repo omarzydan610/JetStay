@@ -22,9 +22,9 @@ export default function TicketBookingConfirmationPage() {
     location.state || {};
 
   useEffect(() => {
-    // Redirect to home if no booking data
+    // Redirect back if no booking data
     if (!ticketData || !flight) {
-      navigate("/");
+      navigate(-1);
     }
   }, [ticketData, flight, navigate]);
 
@@ -278,10 +278,10 @@ export default function TicketBookingConfirmationPage() {
           {/* Action Buttons */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate(-1)}
               className="py-3 bg-white border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center justify-center font-semibold"
             >
-              Back to Home
+              Go Back
             </button>
             <button
               onClick={handleProceedToPayment}

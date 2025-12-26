@@ -31,24 +31,10 @@ public class HotelImageService {
                 .orElseThrow(() -> new RuntimeException("No Hotel found for admin: " + adminEmail));
 
         Integer hotelId = hotel.getHotelID();
-        System.out.println("Newwwwww");
-        System.out.println("Newwwwww");
-        System.out.println("Newwwwww");
-        System.out.println("Newwwwww");
-        System.out.println("Newwwwww");
-        System.out.println("Newwwwww");
-
-
 
         String folderPath = BASE_FOLDER + "/hotels/hotel_" + hotelId + "/photos";
 
         String imageUrl = hotelImagesUploader.uploadToCloudinary(file, folderPath);
-        System.out.println(imageUrl + " ..............................." + imageUrl.length());
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
-        System.out.println();
 
         HotelImage hotelImage = new HotelImage();
         hotelImage.setHotel(hotel);

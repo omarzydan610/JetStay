@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import {
   getFlights,
   deleteFlight,
-} from "../../../../services/Airline/flightsService";
+} from "../../../../services/AirlineServices/flightsService";
 import EditableFlightCard from "./EditableFlightCard";
 import SectionHeader from "../HomePage/SectionHeader";
 import GlassCard from "../GlassCard";

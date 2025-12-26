@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import airlineStatService from "../../../services/Airline/airlineStatestics";
+import airlineStatService from "../../../services/AirlineServices/airlineStatestics";
 import { useAppContext } from "../../../contexts/AppContext";
 import Navbar from "../../../components/Navbar";
 import AddFlightSection from "../../../components/HomePages/Airline/FlightsMangment/AddFlightSection";
